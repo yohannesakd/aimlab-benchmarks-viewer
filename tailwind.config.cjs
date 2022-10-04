@@ -8,6 +8,9 @@ module.exports = {
         alBlue: "263258",
         alDarkBlue: "202151",
       },
+      fontFamily: {
+        poppins: ["Poppins", "sans-serif"],
+      },
     },
   },
   plugins: [],

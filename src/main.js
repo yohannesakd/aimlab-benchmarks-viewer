@@ -6,9 +6,11 @@ import App from "./App.vue";
 
 //components
 import BaseCard from "./components/UI/BaseCard.vue";
+import LoadingSpinner from "./components/LoadingSpinner.vue";
 
 createApp(App)
   .component("base-card", BaseCard)
+  .component("loading-spinner", LoadingSpinner)
   .use(router)
   .use(store)
   .mount("#app");

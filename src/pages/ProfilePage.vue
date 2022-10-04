@@ -1,35 +1,43 @@
 <template>
-  <base-card class="mt-10">
-    <form class="flex flex-col gap-2 items-center">
+  <base-card class="mt-10 mx-auto">
+    <form class="flex flex-col gap-3 items-center py-2">
       <input
-        class="border-2 block rounded py-1 px-2 w-3/4"
+        class="
+          border-2
+          block
+          rounded
+          py-1
+          px-2
+          w-3/4
+          text-black
+          focus:ring-2 focus:ring-blue-500
+        "
         type="text"
         id="username"
         autocomplete="off"
         v-model="usernameInput"
+        @input="searchUser"
       />
       <label class="block" for="username"
         >Enter your Aimlab Username (<span class="italic">Case Sensitive</span
         >)</label
       >
     </form>
-    <button
-      @click="searchUser"
-      class="border border-gray-400 p-2"
-      type="button"
-    >
-      Search
-    </button>
   </base-card>
-  <base-card>
+  <base-card class="mx-auto mt-4" v-if="usernameInput">
     <p v-if="isLoading">Searching...</p>
-    <p v-else-if="!playerInfo">User not found</p>
+    <p v-else-if="!playerInfo.username">User not found</p>
     <div class="flex justify-between" v-else>
       <div>
-        <h2>{{ playerInfo.username }}</h2>
-        <p>{{ playerInfo.rank }}</p>
+        <h2 class="text-slate-300 text-center">Profile Found</h2>
+        <h2>
+          <span class="text-slate-300">Username :</span>
+          {{ playerInfo.username }}
+        </h2>
+        <p><span class="text-slate-300">Rank :</span> {{ playerInfo.rank }}</p>
       </div>
-      <a
+      <router-link
+        :to="playerProfileLink"
         class="
           self-center
           border-2 border-gray-500
@@ -38,7 +46,7 @@
           transition
           hover:bg-gray-800 hover:text-gray-200
         "
-        >Go to Profile</a
+        >Go to Profile</router-link
       >
     </div>
   </base-card>
@@ -46,7 +54,7 @@
 
 <script>
 import * as queries from "../helpers/queries.js";
-import axios from "axios";
+import debounce from "lodash/debounce";
 export default {
   data() {
     return {
@@ -61,28 +69,23 @@ export default {
     },
   },
   methods: {
-    async searchUser() {
+    searchUser: debounce(async function () {
       this.playerInfo = {};
-      try {
-        this.isLoading = true;
-        let aimlabProfile = await axios({
-          url: queries.API_ENDPOINT,
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          data: {
-            query: queries.GET_USER_INFO,
-            variables: {
-              username: this.usernameInput,
-            },
-          },
-        });
-        this.isLoading = false;
-        this.playerInfo = aimlabProfile.data.data.aimlabProfile;
-        console.log(this.playerInfo);
-      } catch (error) {
-        console.log(error);
+      this.isLoading = true;
+      let aimlabProfile = await queries.APIFetch(queries.GET_USER_INFO, {
+        username: this.usernameInput,
+      });
+      this.isLoading = false;
+      // Assigning the fetched data to our component
+      if (aimlabProfile?.aimlabProfile) {
+        this.playerInfo = {
+          username: aimlabProfile.aimlabProfile.username,
+          id: aimlabProfile.aimlabProfile.user.id,
+          rank: aimlabProfile.aimlabProfile.ranking.rank.displayName,
+          skill: aimlabProfile.aimlabProfile.ranking.skill,
+        };
       }
-    },
+    }, 500),
   },
 };
 </script>
