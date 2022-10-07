@@ -142,7 +142,7 @@ export default {
         "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg
       );
-      this.$store.dispatch("setPlayerVTBenchmarks");
+      this.$store.dispatch("setPlayerVTAdvanced");
     }
   },
 };

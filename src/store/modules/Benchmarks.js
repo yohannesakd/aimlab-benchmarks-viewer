@@ -5,7 +5,7 @@ import _ from "lodash";
 export default {
   state() {
     return {
-      playerVTBenchmarks: [],
+      playerVTAdvanced: [],
       overallEnergy: 0,
       overallRank: "Unranked",
       subCategoryEnergy: [],
@@ -18,8 +18,8 @@ export default {
     };
   },
   getters: {
-    playerVTBenchmarks(state) {
-      return state.playerVTBenchmarks;
+    playerVTAdvanced(state) {
+      return state.playerVTAdvanced;
     },
     subCategoryEnergy(state) {
       return state.subCategoryEnergy;
@@ -32,8 +32,8 @@ export default {
     },
   },
   mutations: {
-    setPlayerVTBenchmarks(state, payload) {
-      state.playerVTBenchmarks = payload;
+    setPlayerVTAdvanced(state, payload) {
+      state.playerVTAdvanced = payload;
     },
     setSubCategoryEnergy(state, payload) {
       state.subCategoryEnergy = payload;
@@ -46,42 +46,30 @@ export default {
     },
   },
   actions: {
-    setPlayerVTBenchmarks(context, payload) {
+    setPlayerVTAdvanced(context, payload) {
       let currentPlayerTasks = context.rootGetters.currentPlayerTasks;
-      let playerVTBenchmarks = [...advancedBench];
-      playerVTBenchmarks.forEach((bench) => {
-        bench.avgAcc = 0;
-        bench.count = 0;
-        bench.maxScore = 0;
-        bench.avgScore = 0;
-        bench.energy = 0;
-        bench.rank = "Unranked";
+      //fetching benchmark data
+      let playerVTAdvanced = [...advancedBench].map((bench) => {
+        return { ...bench, energy: 0, rank: "Unranked" };
       });
-
-      for (let i = 0; i < currentPlayerTasks.length; i++) {
-        for (let j = 0; j < playerVTBenchmarks.length; j++) {
-          if (currentPlayerTasks[i].id == playerVTBenchmarks[j].id) {
-            let rankData = [0, "Unranked"];
-            if (currentPlayerTasks[i].count > 0) {
-              rankData = calculateEnergyAdv(
-                advancedBench[j],
-                currentPlayerTasks[i],
-                advancedEnergy,
-                advancedRanks
-              );
-            }
-            playerVTBenchmarks[j].avgAcc = currentPlayerTasks[i].avgAcc;
-            playerVTBenchmarks[j].count = currentPlayerTasks[i].count;
-            playerVTBenchmarks[j].maxScore = currentPlayerTasks[i].maxScore;
-            playerVTBenchmarks[j].avgScore = currentPlayerTasks[i].avgScore;
-            playerVTBenchmarks[j].energy = rankData[0] || 0;
-            playerVTBenchmarks[j].rank = rankData[1] || "Unranked";
-          }
+      //filter user played benchmarks
+      let userPlayedBenches = currentPlayerTasks.filter((task) => {
+        return playerVTAdvanced.some((bench) => task.id == bench.id);
+      });
+      //group benchmark data and user played benchmarks by id
+      let groupById = _.groupBy(
+        [...userPlayedBenches, ...playerVTAdvanced],
+        "id"
+      );
+      //merge the created groups
+      playerVTAdvanced = Object.entries(groupById).map((task) => {
+        if (task[1].length > 1) {
+          return { ...task[1][0], ...task[1][1] };
         }
-      }
-      playerVTBenchmarks.sort((a, b) => a.scenarioID - b.scenarioID);
+      });
+      //
       // calculating category energy
-      const grouped = _.groupBy(playerVTBenchmarks, "categoryID");
+      const grouped = _.groupBy(playerVTAdvanced, "categoryID");
       const energyList = Object.entries(grouped).map(([_, group]) => {
         return Math.max(...group.map(({ energy }) => energy));
       });
@@ -91,7 +79,7 @@ export default {
       const floorEnergy = Math.floor(harmonicMean / 100) * 100;
       const overallRank = advancedRanks[floorEnergy] || "Unranked";
 
-      context.commit("setPlayerVTBenchmarks", playerVTBenchmarks);
+      context.commit("setPlayerVTAdvanced", playerVTAdvanced);
       context.commit("setSubCategoryEnergy", energyList);
       context.commit("setOverallEnergy", harmonicMean);
       context.commit("setOverallRank", overallRank);

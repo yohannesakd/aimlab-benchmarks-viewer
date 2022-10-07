@@ -41,7 +41,7 @@
           <p>Energy</p>
         </header>
         <div
-          v-for="(bench, index) in playerVTBenchmarks"
+          v-for="(bench, index) in playerVTAdvanced"
           :key="index"
           class="
             bg-slate-800
@@ -134,7 +134,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      "playerVTBenchmarks",
+      "playerVTAdvanced",
       "subCategoryEnergy",
       "overallEnergy",
       "overallRank",
