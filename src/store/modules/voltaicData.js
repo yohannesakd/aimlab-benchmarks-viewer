@@ -200,7 +200,7 @@ export const advancedRanks = {
 
 export const advancedEnergy = [800, 900, 1000, 1100, 1200];
 
-export const IntermediateBench = [
+export const intermediateBench = [
   {
     id: "CsLevel.VT Empyrean.VT Angle.R8S2XN",
     weapon: "Custom_VTnoADS",
@@ -209,7 +209,7 @@ export const IntermediateBench = [
     subCategory: "Dynamic",
     categoryID: 1,
     scenarioID: 1,
-    scores: [660, 720, 800, 900],
+    scores: [600, 660, 720, 800, 900],
   },
   {
     id: "CsLevel.VT Empyrean.VT Waves.R8S37J",
@@ -219,7 +219,7 @@ export const IntermediateBench = [
     subCategory: "Dynamic",
     categoryID: 1,
     scenarioID: 2,
-    scores: [580, 620, 700, 780],
+    scores: [540, 580, 620, 700, 780],
   },
   {
     id: "CsLevel.VT Empyrean.VT Fives.R8YV6C",
@@ -229,7 +229,7 @@ export const IntermediateBench = [
     subCategory: "Static",
     categoryID: 2,
     scenarioID: 3,
-    scores: [1020, 1120, 1220, 1320],
+    scores: [920, 1020, 1120, 1220, 1320],
   },
   {
     id: "CsLevel.VT Empyrean.VT Multi.R8S3PL",
@@ -239,7 +239,7 @@ export const IntermediateBench = [
     subCategory: "Static",
     categoryID: 2,
     scenarioID: 4,
-    scores: [1200, 1300, 1400, 1520],
+    scores: [1100, 1200, 1300, 1400, 1520],
   },
   {
     id: "CsLevel.canner.VT Suave.R8I6RC",
@@ -249,7 +249,7 @@ export const IntermediateBench = [
     subCategory: "Precise",
     categoryID: 3,
     scenarioID: 5,
-    scores: [2600, 2900, 3200, 3500],
+    scores: [2300, 2600, 2900, 3200, 3500],
   },
   {
     id: "CsLevel.VT Empyrean.VT Stead.R8S43X",
@@ -259,7 +259,7 @@ export const IntermediateBench = [
     subCategory: "Precise",
     categoryID: 3,
     scenarioID: 6,
-    scores: [2100, 2400, 2700, 3000],
+    scores: [1800, 2100, 2400, 2700, 3000],
   },
   {
     id: "CsLevel.zcr.VT Pillt.R8KMKK",
@@ -269,7 +269,7 @@ export const IntermediateBench = [
     subCategory: "Reactive",
     categoryID: 4,
     scenarioID: 7,
-    scores: [2200, 2600, 3000, 3400],
+    scores: [1800, 2200, 2600, 3000, 3400],
   },
   {
     id: "CsLevel.zcr.VT Spher.R8KNUU",
@@ -279,7 +279,7 @@ export const IntermediateBench = [
     subCategory: "Reactive",
     categoryID: 4,
     scenarioID: 8,
-    scores: [3600, 4000, 4400, 4800],
+    scores: [3200, 3600, 4000, 4400, 4800],
   },
   {
     id: "CsLevel.VT Empyrean.VT Spher.R8S4B3",
@@ -289,7 +289,7 @@ export const IntermediateBench = [
     subCategory: "Speed",
     categoryID: 5,
     scenarioID: 9,
-    scores: [1800, 2000, 2150, 2300],
+    scores: [1600, 1800, 2000, 2150, 2300],
   },
   {
     id: "CsLevel.VT Empyrean.VT Skysw.R8S4IF",
@@ -299,7 +299,7 @@ export const IntermediateBench = [
     subCategory: "Speed",
     categoryID: 5,
     scenarioID: 10,
-    scores: [2450, 2650, 2800, 3000],
+    scores: [2250, 2450, 2650, 2800, 3000],
   },
   {
     id: "CsLevel.VT Empyrean.VT Dodge.R8S4N1",
@@ -309,7 +309,7 @@ export const IntermediateBench = [
     subCategory: "Evasive",
     categoryID: 6,
     scenarioID: 11,
-    scores: [2300, 2450, 2600, 2720],
+    scores: [2150, 2300, 2450, 2600, 2720],
   },
   {
     id: "CsLevel.VT Empyrean.VT Arcsw.R8S4QI",
@@ -319,7 +319,7 @@ export const IntermediateBench = [
     subCategory: "Evasive",
     categoryID: 6,
     scenarioID: 12,
-    scores: [1730, 1870, 1970, 2050],
+    scores: [1590, 1730, 1870, 1970, 2050],
   },
 ];
 

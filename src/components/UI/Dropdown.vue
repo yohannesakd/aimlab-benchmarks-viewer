@@ -13,22 +13,15 @@
         transition
         hover:bg-slate-600
       "
-      @click="isOpen = !isOpen"
+      @click="dropdownIsOpen = !dropdownIsOpen"
     >
-      <span class="inline px-2">{{ selectedItem }}</span>
+      <span class="inline px-2">{{ selectedTab.label }}</span>
       <chevron-down
         class="h-5 w-5 inline absolute right-2 top-1/2 -translate-y-1/2"
       ></chevron-down>
     </div>
-    <ul class="absolute z-10 bg-slate-800 w-full" v-show="isOpen">
-      <li
-        class="px-2 py-1 hover:bg-slate-600 transition"
-        v-for="value in values"
-        :key="value"
-        @click="handleDropdownSelect($event)"
-      >
-        {{ value }}
-      </li>
+    <ul class="absolute z-10 bg-slate-800 w-full" v-show="dropdownIsOpen">
+      <slot></slot>
     </ul>
   </div>
 </template>
@@ -36,24 +29,16 @@
  <script>
 export default {
   props: {
-    default: {
-      type: String,
+    dropdownIsOpen: {
+      type: Boolean,
     },
-    values: {
-      type: Array,
+    selectedTab: {
+      type: Object,
     },
   },
   data() {
-    return {
-      selectedItem: this.default,
-      isOpen: false,
-    };
+    return {};
   },
-  methods: {
-    handleDropdownSelect(event) {
-      this.selectedItem = event.target.textContent;
-      this.isOpen = false;
-    },
-  },
+  methods: {},
 };
 </script>

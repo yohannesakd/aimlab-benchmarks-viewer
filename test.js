@@ -24,7 +24,7 @@ const advancedEnergy = [800, 900, 1000, 1100, 1200];
 //   name: "VT Angleshot Advanced",
 // };
 
-// let myEnergy = calculateEnergyAdv(
+// let myEnergy = calculateRank(
 //   angleshot,
 //   user,
 //   advancedEnergy,

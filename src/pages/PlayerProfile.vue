@@ -90,7 +90,7 @@ export default {
   },
   computed: {
     overallRank() {
-      return this.$store.getters.overallRank;
+      return this.$store.getters.VTAdvanced.overallRank;
     },
     playerSkill() {
       if (this.playerInfo.skill) {
@@ -116,6 +116,7 @@ export default {
       username: this.username,
     });
     this.isLoading = false;
+
     if (aimlabProfile != null) {
       this.playerInfo = {
         username: aimlabProfile.aimlabProfile.username,
@@ -137,12 +138,16 @@ export default {
           },
         },
       });
+      if (!plays_agg) {
+        this.$router.go();
+      }
       this.$store.dispatch("updateCurrentPlayerInfo", this.playerInfo);
       this.$store.dispatch(
         "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg
       );
-      this.$store.dispatch("setPlayerVTAdvanced");
+      this.$store.dispatch("setVTAdvanced");
+      this.$store.dispatch("setVTIntermediate");
     }
   },
 };
