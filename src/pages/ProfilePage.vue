@@ -1,5 +1,5 @@
 <template>
-  <base-card class="mt-10 mx-auto">
+  <base-card class="mt-10 mx-auto max-w-md">
     <form class="flex flex-col gap-3 items-center py-2">
       <input
         class="
@@ -24,7 +24,7 @@
       >
     </form>
   </base-card>
-  <base-card class="mx-auto mt-4" v-if="usernameInput">
+  <base-card class="mx-auto mt-4 max-w-md" v-if="usernameInput">
     <p v-if="isLoading">Searching...</p>
     <p v-else-if="!playerInfo.username">User not found</p>
     <div class="flex justify-between" v-else>

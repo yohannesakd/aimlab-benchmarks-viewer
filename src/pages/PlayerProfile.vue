@@ -1,22 +1,20 @@
 <template>
-  <div class="px-32">
+  <div class="px-32 relative">
     <section class="py-8">
-      <base-card v-if="isLoading" class="grid place-items-center">
+      <base-card v-if="isLoading" class="grid place-items-center max-w-md">
         <loading-spinner></loading-spinner>
       </base-card>
       <base-card
         v-else
         class="
-          bg-zinc-200
+          bg-slate-700
           text-gray-900
-          max-w-max
           tracking-wide
           p-8
           flex
           gap-10
-          max-w
+          max-w-lg
         "
-        size="lg"
       >
         <div class="flex flex-col gap-4">
           <span class="block text-2xl font-semibold">{{
@@ -25,22 +23,28 @@
           <span class="block"
             >{{ playerInfo.rank }} - {{ playerInfo.skill }}</span
           >
-          <progress
-            id="skill"
-            max="100"
-            class="bg-zinc-100"
+
+          <progress-bar
+            class="w-40 h-5 bg-zinc-200"
             :value="playerSkill"
-          ></progress>
+            :color="'bg-mainCyan'"
+          ></progress-bar>
         </div>
         <div class="flex flex-col text-lg">
           <span>Unique Tasks Played - {{ tasksPlayed }}</span>
           <span>Total Play Count - {{ totalPlays }}</span>
-          <span>VT Rank</span>
-          <span>rA Rank</span>
+          <span
+            >VT Rank - {{ overallRank }}
+            <img
+              :src="`../../public/rank-img/${overallRank.toLowerCase()}_badge.png`"
+              class="h-5 inline"
+              alt=""
+          /></span>
+          <span>rA Rank -</span>
         </div>
       </base-card>
     </section>
-    <div class="mx-auto" id="profile-nav">
+    <div class="mx-auto relative z-10" id="profile-nav">
       <ul class="flex">
         <li v-for="(tab, key) in tabs" :key="tab">
           <router-link
@@ -60,7 +64,8 @@
       </ul>
     </div>
     <router-view
-      class="border border-slate-500 border-t-transparent"
+      :isLoading="isLoading"
+      class="border border-slate-600 bg-slate-900 rounded-sm"
     ></router-view>
   </div>
 </template>
@@ -84,6 +89,9 @@ export default {
     };
   },
   computed: {
+    overallRank() {
+      return this.$store.getters.overallRank;
+    },
     playerSkill() {
       if (this.playerInfo.skill) {
         return this.playerInfo.skill % 100;
@@ -129,11 +137,12 @@ export default {
           },
         },
       });
-      this.$store.dispatch("updateCurrentUserInfo", this.playerInfo);
+      this.$store.dispatch("updateCurrentPlayerInfo", this.playerInfo);
       this.$store.dispatch(
-        "updateCurrentUserTasks",
+        "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg
       );
+      this.$store.dispatch("setPlayerVTBenchmarks");
     }
   },
 };
@@ -141,6 +150,9 @@ export default {
 
 <style scoped>
 #profile-nav .router-link-active {
-  @apply bg-transparent border-b-transparent;
+  @apply bg-slate-900 border-b-transparent;
+}
+#profile-nav {
+  top: 1px;
 }
 </style>

@@ -1,34 +1,37 @@
 export default {
   state() {
     return {
-      currentUserInfo: {},
-      currentUserTasks: [],
+      currentPlayerInfo: {},
+      currentPlayerTasks: [],
     };
   },
   getters: {
     tasksPlayed(state) {
-      return state.currentUserTasks.length;
+      return state.currentPlayerTasks.length;
     },
     totalPlays(state) {
-      return state.currentUserTasks.reduce((accumulator, current) => {
+      return state.currentPlayerTasks.reduce((accumulator, current) => {
         return accumulator + current.count;
       }, 0);
     },
+    currentPlayerTasks(state) {
+      return state.currentPlayerTasks;
+    },
   },
   mutations: {
-    updateCurrentUserInfo(state, payload) {
-      state.currentUserInfo = payload;
+    updateCurrentPlayerInfo(state, payload) {
+      state.currentPlayerInfo = payload;
     },
-    updateCurrentUserTasks(state, payload) {
-      state.currentUserTasks = payload;
+    updateCurrentPlayerTasks(state, payload) {
+      state.currentPlayerTasks = payload;
     },
   },
   actions: {
-    updateCurrentUserInfo(context, payload) {
-      context.commit("updateCurrentUserInfo", payload);
+    updateCurrentPlayerInfo(context, payload) {
+      context.commit("updateCurrentPlayerInfo", payload);
     },
-    updateCurrentUserTasks(context, payload) {
-      const plays = payload.map((task) => {
+    updateCurrentPlayerTasks(context, payload) {
+      let plays = payload.map((task) => {
         return {
           name: task.group_by.task_name,
           id: task.group_by.task_id,
@@ -38,7 +41,21 @@ export default {
           maxScore: task.aggregate.max.score,
         };
       });
-      context.commit("updateCurrentUserTasks", plays);
+      plays = plays
+        .filter((task) => {
+          if (task.name) return true;
+          if (!task.id.includes(".")) return true;
+        })
+        .map((task) => {
+          if (!task.name) {
+            task.name = task.id;
+          }
+          return task;
+        });
+      plays = plays.sort((a, b) =>
+        a.count > b.count ? -1 : b.count > a.count ? 1 : 0
+      );
+      context.commit("updateCurrentPlayerTasks", plays);
     },
   },
 };

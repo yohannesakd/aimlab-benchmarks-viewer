@@ -30,6 +30,9 @@
               hover:bg-slate-500 hover:text-white
               transition
             "
+            :class="
+              $route.path.includes(link) ? 'router-link-exact-active' : ''
+            "
             :to="'/' + link"
           >
             {{ link }}
@@ -54,6 +57,6 @@ export default {
 <style scoped>
 nav .router-link-active,
 nav .router-link-exact-active {
-  @apply bg-gray-500 text-white;
+  @apply bg-slate-500 text-white;
 }
 </style>
