@@ -1,7 +1,9 @@
 <template>
-  <the-header></the-header>
-  <router-view></router-view>
-  <the-footer></the-footer>
+  <div class="flex flex-col min-h-screen">
+    <the-header class="shrink-0"></the-header>
+    <router-view class="flex-1"></router-view>
+    <the-footer class="shrink-0"></the-footer>
+  </div>
 </template>
 <script>
 import TheHeader from "./components/Layout/TheHeader.vue";

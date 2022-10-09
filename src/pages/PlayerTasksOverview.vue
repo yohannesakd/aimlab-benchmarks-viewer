@@ -56,13 +56,13 @@
         </p>
       </div>
     </div>
-    <div class="bg-slate-500 max-w-max mx-auto flex items-center mb-4">
+    <div class="max-w-max mx-auto flex gap-1 items-center mb-4">
       <button
         type="button"
-        class="px-3 py-1"
+        class="px-3 py-2.5 h-full inline-block bg-slate-700"
         @click="currentPage--"
         :class="
-          currentPage > 0 ? '' : 'disabled text-slate-300 pointer-events-none'
+          currentPage > 0 ? '' : 'disabled text-slate-500 pointer-events-none'
         "
       >
         <chevron-icon
@@ -72,56 +72,69 @@
       </button>
 
       <!-- Center Buttons -->
-      <div class="space-x-0.5">
-        <p class="py-2 px-2 inline-block" :value="0" v-if="currentPage > 2">
-          1
-        </p>
-        <p class="py-2 px-2 inline-block" v-if="currentPage > 3">...</p>
-
+      <div class="flex gap-1">
         <p
-          class="py-2 px-2 inline-block"
-          :value="page - 1"
-          v-for="page in prevPages"
+          class="py-2 px-4 bg-slate-700"
+          v-for="page in pageNumbers"
           :key="page"
+          :class="{
+            'bg-slate-500 pointer-events-none': this.currentPage == page - 1,
+            ' hover:bg-slate-600': !!parseInt(page),
+          }"
+          @click="handlePageSelect($event)"
         >
           {{ page }}
-        </p>
-        <p class="bg-slate-700 py-2 px-2 inline-block">{{ currentPage + 1 }}</p>
-        <p
-          class="py-2 px-2 inline-block"
-          :value="page - 1"
-          v-for="page in nextPages"
-          :key="page"
-        >
-          {{ page }}
-        </p>
-        <p
-          class="py-2 px-2 inline-block"
-          v-if="currentPage < paginatedTaskList.pageCount - 3"
-        >
-          ...
-        </p>
-        <p
-          class="py-2 px-2 inline-block"
-          :value="this.paginatedTaskList.pageCount + 1"
-          v-if="currentPage < paginatedTaskList.pageCount - 2"
-        >
-          {{ paginatedTaskList.pageCount + 1 }}
         </p>
       </div>
       <!-- Center Buttons -->
 
       <button
         type="button"
-        class="px-3 py-1"
+        class="
+          px-3
+          py-2.5
+          inline-block
+          bg-slate-700
+          transition
+          hover:bg-slate-600
+        "
         @click="currentPage++"
         :class="
           currentPage < paginatedTaskList.pageCount
             ? ''
-            : 'disabled text-slate-300 pointer-events-none'
+            : 'disabled text-slate-500 pointer-events-none'
         "
       >
         <chevron-icon class="h-5 w-5" direction="right"></chevron-icon>
+      </button>
+      <input
+        type="text"
+        v-model.number="goToPageInput"
+        class="
+          bg-slate-600
+          text-center
+          w-10
+          py-2
+          outline-none
+          ml-2
+          transition
+          focus:ring-2
+          ring-inset ring-slate-300
+        "
+      />
+      <button
+        class="
+          text-center
+          bg-slate-600
+          w-10
+          py-2
+          outline-none
+          transition
+          hover:bg-slate-500
+        "
+        @click="goToPage"
+      >
+        Go
       </button>
     </div>
   </section>
@@ -134,7 +147,27 @@ export default {
     return {
       searchQuery: "",
       currentPage: 0,
+      goToPageInput: null,
     };
+  },
+  methods: {
+    handlePageSelect(event) {
+      let value = parseInt(event.target.textContent);
+      if (value) {
+        this.currentPage = value - 1;
+      }
+    },
+    goToPage() {
+      if (this.goToPageInput) {
+        if (this.goToPageInput > this.paginatedTaskList.pageCount + 1) {
+          this.currentPage = this.paginatedTaskList.pageCount;
+        } else if (this.goToPageInput < 1) {
+          this.currentPage = 0;
+        } else {
+          this.currentPage = this.goToPageInput - 1;
+        }
+      }
+    },
   },
   computed: {
     currentPlayerTasks() {
@@ -161,22 +194,23 @@ export default {
         pageCount: pageCount,
       };
     },
-    prevPages() {
+
+    pageNumbers() {
       let pages = [];
-      for (let i = this.currentPage; i > this.currentPage - 2 && i > 0; i--) {
-        pages.unshift(i);
-      }
-      return pages;
-    },
-    nextPages() {
-      let pages = [];
+
+      if (this.currentPage > 1) pages.push(1);
+      if (this.currentPage > 2) pages.push("...");
       for (
-        let i = this.currentPage + 2;
-        i < this.currentPage + 4 && i < this.paginatedTaskList.pageCount + 2;
+        let i = this.currentPage;
+        i < this.currentPage + 3 && i < this.paginatedTaskList.pageCount + 2;
         i++
       ) {
-        pages.push(i);
+        if (i > 0) pages.push(i);
       }
+      if (this.currentPage < this.paginatedTaskList.pageCount - 2)
+        pages.push("...");
+      if (this.currentPage < this.paginatedTaskList.pageCount - 1)
+        pages.push(this.paginatedTaskList.pageCount + 1);
       return pages;
     },
   },
