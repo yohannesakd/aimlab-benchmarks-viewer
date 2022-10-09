@@ -13,7 +13,7 @@
           p-8
           flex
           gap-10
-          max-w-lg
+          max-w-xl
         "
       >
         <div class="flex flex-col gap-4">
@@ -21,7 +21,7 @@
             playerInfo.username
           }}</span>
           <span class="block"
-            >{{ playerInfo.rank }} - {{ playerInfo.skill }}</span
+            >{{ playerInfo.rank }} - {{ Math.floor(playerInfo.skill) }}</span
           >
 
           <progress-bar
@@ -36,7 +36,7 @@
           <span
             >VT Rank - {{ overallRank }}
             <img
-              :src="`../../public/rank-img/${overallRank.toLowerCase()}_badge.png`"
+              :src="`../../public/rank-img/${imagePath(overallRank)}_badge.png`"
               class="h-5 inline"
               alt=""
           /></span>
@@ -72,6 +72,7 @@
 
 <script>
 // import axios from "axios";
+import { mapGetters } from "vuex";
 import * as queries from "../helpers/queries.js";
 export default {
   props: {
@@ -89,8 +90,13 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["VTAdvanced", "VTIntermediate", "VTNovice"]),
     overallRank() {
-      return this.$store.getters.VTAdvanced.overallRank;
+      return this.VTAdvanced.overallRank != "Unranked"
+        ? this.VTAdvanced.overallRank
+        : this.VTIntermediate.overallRank != "Unranked"
+        ? this.VTIntermediate.overallRank
+        : this.VTNovice.overallRank;
     },
     playerSkill() {
       if (this.playerInfo.skill) {
@@ -104,6 +110,11 @@ export default {
     },
     totalPlays() {
       return this.$store.getters.totalPlays;
+    },
+  },
+  methods: {
+    imagePath(rank) {
+      return rank.replace(/ /g, "").toLowerCase();
     },
   },
   //Fetching the Player ID and Username again
@@ -148,6 +159,7 @@ export default {
       );
       this.$store.dispatch("setVTAdvanced");
       this.$store.dispatch("setVTIntermediate");
+      this.$store.dispatch("setVTNovice");
     }
   },
 };

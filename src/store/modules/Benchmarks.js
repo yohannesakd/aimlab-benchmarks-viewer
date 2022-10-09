@@ -35,6 +35,13 @@ export default {
     VTNovice(state) {
       return state.VTNovice;
     },
+    allRanks(state) {
+      return [
+        state.VTAdvanced.overallRank,
+        state.VTIntermediate.overallRank,
+        state.VTNovice.overallRank,
+      ];
+    },
   },
   mutations: {
     setVTAdvanced(state, payload) {
@@ -63,6 +70,14 @@ export default {
         "intermediate"
       );
       context.commit("setVTIntermediate", benchData);
+    },
+    setVTNovice(context) {
+      let benchData = caclulateAll(
+        context.rootGetters.currentPlayerTasks,
+        [...noviceBench],
+        "novice"
+      );
+      context.commit("setVTNovice", benchData);
     },
   },
 };

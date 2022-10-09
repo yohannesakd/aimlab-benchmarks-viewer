@@ -8,6 +8,7 @@ import {
 } from "../store/modules/voltaicData";
 import _ from "lodash";
 
+//Take player full task list and the benchmark data
 export function caclulateAll(playerTasks, playerBench, mode) {
   playerBench.forEach((bench) => {
     bench.avgAcc = 0;
@@ -17,11 +18,13 @@ export function caclulateAll(playerTasks, playerBench, mode) {
     bench.energy = 0;
     bench.rank = "Unranked";
   });
+  // find the benchmark scenario within the player task list by matching IDs
   for (let i = 0; i < playerTasks.length; i++) {
     for (let j = 0; j < playerBench.length; j++) {
       if (playerTasks[i].id == playerBench[j].id) {
         let rankData = [0, "Unranked"];
         if (playerTasks[i].count > 0) {
+          //calculate rank and energy for different modes
           switch (mode) {
             case "advanced":
               rankData = calculateRankAdv(playerBench[j], playerTasks[i]);
@@ -49,19 +52,19 @@ export function caclulateAll(playerTasks, playerBench, mode) {
   playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
   // calculating category energy
   const grouped = _.groupBy(playerBench, "categoryID");
-  const energyList = Object.entries(grouped).map(([_, group]) => {
+  const allEnergyList = playerBench.map((bench) => bench.energy);
+  const categoryEnergyList = Object.entries(grouped).map(([_, group]) => {
     return Math.max(...group.map(({ energy }) => energy));
   });
   const harmonicMean = Math.floor(
-    6 / energyList.reduce((acc, curr) => acc + 1 / curr, 0)
+    6 / categoryEnergyList.reduce((acc, curr) => acc + 1 / curr, 0)
   );
+  //Calculating Overall rank
   const floorEnergy = Math.floor(harmonicMean / 100) * 100;
-  //switch mode
   let overallRank = null;
   switch (mode) {
     case "advanced":
       overallRank = advancedRanks[floorEnergy] || "Unranked";
-      checkComplete(overallRank, energyList, "advanced");
       break;
     case "intermediate":
       overallRank = intermediateRanks[floorEnergy] || "Unranked";
@@ -70,32 +73,43 @@ export function caclulateAll(playerTasks, playerBench, mode) {
       overallRank = noviceRanks[floorEnergy] || "Unranked";
       break;
     default:
-      overallRank = advancedRanks[floorEnergy] || "Unranked";
+      overallRank = "Unranked";
       break;
   }
-  if (mode == "intermediate") {
-    console.log(energyList);
+  // Check complete rank scenario
+  if (checkComplete(overallRank, allEnergyList, mode))
+    overallRank += " Complete";
 
-    // console.log({
-    //   overallEnergy: harmonicMean,
-    //   overallRank: overallRank,
-    //   subCategoryEnergy: energyList,
-    //   benchmarks: playerBench,
-    // });
-  }
   return {
     overallEnergy: harmonicMean,
     overallRank: overallRank,
-    subCategoryEnergy: energyList,
+    subCategoryEnergy: categoryEnergyList,
     benchmarks: playerBench,
   };
+}
+function checkComplete(rank, energyList, mode) {
+  let minEnergy = Math.floor(Math.min(...energyList) / 100) * 100;
+  let complete =
+    energyList.filter((energy) => energy >= minEnergy).length ==
+    energyList.length;
+
+  switch (mode) {
+    case "intermediate":
+      return complete && intermediateRanks[minEnergy] == rank;
+    case "advanced":
+      return complete && advancedRanks[minEnergy] == rank;
+    case "novice":
+      return complete && noviceRanks[minEnergy] == rank;
+  }
 }
 
 function calculateRankAdv(bench, userTask) {
   //lower scorelimit is 800
   let energy = 0;
   if (userTask.maxScore <= bench.scores[0]) {
-    energy = Math.floor((userTask.maxScore / bench.scores[0]) * 800);
+    energy = Math.floor(
+      (userTask.maxScore / bench.scores[0]) * advancedEnergy[0]
+    );
   } else if (userTask.maxScore >= bench.scores[4]) {
     energy = advancedEnergy[4];
   } else {
@@ -115,13 +129,13 @@ function calculateRankAdv(bench, userTask) {
   return [energy, rank];
 }
 
-function checkComplete(rank, energyList, mode) {}
-
 function calculateRankInt(bench, userTask) {
   //lower score limit is 300
   let energy = 0;
   if (userTask.maxScore <= bench.scores[0]) {
-    energy = Math.floor((userTask.maxScore / bench.scores[0]) * 300);
+    energy = Math.floor(
+      (userTask.maxScore / bench.scores[0]) * intermediateEnergy[0]
+    );
   } else if (userTask.maxScore >= bench.scores[4]) {
     let userDiff = userTask.maxScore - bench.scores[4];
     let rankDiff = bench.scores[4] - bench.scores[3];
@@ -145,15 +159,27 @@ function calculateRankInt(bench, userTask) {
   }
   let rank = intermediateRanks[Math.floor(energy / 100) * 100] || "Unranked";
   // console.log([energy, rank]);
+  if (energy === 900) rank = intermediateRanks[800];
   return [energy, rank];
 }
+
+//Calculate Rank and Energy for a Scenario from the Novice Benches
+//Check scenarios if score is greater than the upper requirement or lower than the lower requirement and apply energy accordingly
+
 function calculateRankNov(bench, userTask) {
+  // lower limit is 0
   let energy = 0;
-  if (userTask.maxScore <= bench.scores[0]) {
-    energy = Math.floor((userTask.maxScore / bench.scores[0]) * 800);
-  } else if (userTask.maxScore >= bench.scores[4]) {
-    energy = noviceEnergy[4];
+  if (userTask.maxScore >= bench.scores[4]) {
+    //calculating additional energy beyond the max requirement
+    let userDiff = userTask.maxScore - bench.scores[4];
+    let rankDiff = bench.scores[4] - bench.scores[3];
+    let energyGain = Math.floor((userDiff / rankDiff) * 100);
+    if (energyGain > 100) {
+      energyGain = 100;
+    }
+    energy = noviceEnergy[4] + energyGain;
   } else {
+    //calculating for energy between ranks
     let i = 0;
     bench.scores.forEach((score, index) => {
       if (userTask.maxScore > score) {
@@ -166,6 +192,9 @@ function calculateRankNov(bench, userTask) {
         (bench.scores[i + 1] - bench.scores[i])
     );
   }
+  //Finding rank through rounding by 100 and looking up
   let rank = noviceRanks[Math.floor(energy / 100) * 100] || "Unranked";
+  //When user has max energy
+  if (energy === 500) rank = noviceRanks[400];
   return [energy, rank];
 }

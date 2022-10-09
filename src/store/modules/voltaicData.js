@@ -328,30 +328,31 @@ export const intermediateRanks = {
   600: "Diamond",
   700: "Jade",
   800: "Master",
+  900: "Master",
 };
 
 export const intermediateEnergy = [300, 500, 600, 700, 800];
 
 export const noviceBench = [
   {
-    id: "CsLevel.VT Empyrean.VT Sixsh.R8TGD3",
+    id: "CsLevel.VT Empyrean.VT Angle.RB668Z",
     weapon: "9mm",
     name: "VT Angleshot Novice",
     category: "Clicking",
     subCategory: "Dynamic",
     categoryID: 1,
     scenarioID: 1,
-    scores: [400, 460, 520, 650],
+    scores: [0, 400, 460, 520, 650],
   },
   {
-    id: "CsLevel.VT Empyrean.VT Multi.RB6AAB",
+    id: "CsLevel.VT Empyrean.VT Waves.R8TGLS",
     weapon: "9mm",
     name: "VT Waveshot Novice",
     category: "Clicking",
     subCategory: "Dynamic",
     categoryID: 1,
     scenarioID: 2,
-    scores: [300, 370, 440, 560],
+    scores: [0, 300, 370, 440, 560],
   },
   {
     id: "CsLevel.VT Empyrean.VT Sixsh.R8TGD3",
@@ -361,7 +362,7 @@ export const noviceBench = [
     subCategory: "Static",
     categoryID: 2,
     scenarioID: 3,
-    scores: [450, 600, 700, 1020],
+    scores: [0, 450, 600, 700, 1020],
   },
   {
     id: "CsLevel.VT Empyrean.VT Multi.RB6AAB",
@@ -371,7 +372,7 @@ export const noviceBench = [
     subCategory: "Static",
     categoryID: 2,
     scenarioID: 4,
-    scores: [750, 850, 950, 1200],
+    scores: [0, 750, 850, 950, 1200],
   },
   {
     id: "CsLevel.canner.VT Suave.R8I6UD",
@@ -381,7 +382,7 @@ export const noviceBench = [
     subCategory: "Precise",
     categoryID: 3,
     scenarioID: 5,
-    scores: [1300, 1700, 2100, 2500],
+    scores: [0, 1300, 1700, 2100, 2500],
   },
   {
     id: "CsLevel.VT Empyrean.VT Stead.RB67MZ",
@@ -391,7 +392,7 @@ export const noviceBench = [
     subCategory: "Precise",
     categoryID: 3,
     scenarioID: 6,
-    scores: [1100, 1400, 1700, 2000],
+    scores: [0, 1100, 1400, 1700, 2000],
   },
   {
     id: "CsLevel.zcr.VT Pillt.R8KMR0",
@@ -401,7 +402,7 @@ export const noviceBench = [
     subCategory: "Reactive",
     categoryID: 4,
     scenarioID: 7,
-    scores: [1400, 1800, 2200, 2600],
+    scores: [0, 1400, 1800, 2200, 2600],
   },
   {
     id: "CsLevel.zcr.VT Spher.R8KK4M",
@@ -411,7 +412,7 @@ export const noviceBench = [
     subCategory: "Reactive",
     categoryID: 4,
     scenarioID: 8,
-    scores: [2000, 2300, 2600, , 3200],
+    scores: [0, 2000, 2300, 2600, 3200],
   },
   {
     id: "CsLevel.VT Empyrean.VT Spher.RB69A4",
@@ -421,7 +422,7 @@ export const noviceBench = [
     subCategory: "Speed",
     categoryID: 5,
     scenarioID: 9,
-    scores: [1500, 1600, 1700, 2000],
+    scores: [0, 1500, 1600, 1700, 2000],
   },
   {
     id: "CsLevel.VT Empyrean.VT Skysw.R8TH9B",
@@ -431,7 +432,7 @@ export const noviceBench = [
     subCategory: "Speed",
     categoryID: 5,
     scenarioID: 10,
-    scores: [1800, 2000, 2150, 2500],
+    scores: [0, 1800, 2000, 2150, 2500],
   },
   {
     id: "CsLevel.VT Empyrean.VT Angle.R8X0YY",
@@ -441,7 +442,7 @@ export const noviceBench = [
     subCategory: "Evasive",
     categoryID: 6,
     scenarioID: 11,
-    scores: [1000, 1200, 1500, 1700],
+    scores: [0, 1000, 1200, 1500, 1700],
   },
   {
     id: "CsLevel.VT Empyrean.VT Arcsw.RB6A0U",
@@ -449,7 +450,7 @@ export const noviceBench = [
     name: "VT Arcswitch Novice",
     category: "Switching",
     subCategory: "Evasive",
-    scores: [900, 1000, 1100, 1400],
+    scores: [0, 900, 1000, 1100, 1400],
     categoryID: 6,
     scenarioID: 12,
   },
@@ -460,6 +461,7 @@ export const noviceRanks = {
   200: "Bronze",
   300: "Silver",
   400: "Gold",
+  500: "Gold",
 };
 
-export const noviceEnergy = [100, 200, 300, 400];
+export const noviceEnergy = [0, 100, 200, 300, 400];

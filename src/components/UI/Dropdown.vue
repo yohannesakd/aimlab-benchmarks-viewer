@@ -1,5 +1,5 @@
 <template>
-  <div class="dropdown w-40">
+  <div class="dropdown w-40" ref="wrapper">
     <div
       id="selected"
       class="
@@ -13,14 +13,14 @@
         transition
         hover:bg-slate-600
       "
-      @click="dropdownIsOpen = !dropdownIsOpen"
+      @click="isOpen = !isOpen"
     >
       <span class="inline px-2">{{ selectedTab.label }}</span>
       <chevron-down
         class="h-5 w-5 inline absolute right-2 top-1/2 -translate-y-1/2"
       ></chevron-down>
     </div>
-    <ul class="absolute z-10 bg-slate-800 w-full" v-show="dropdownIsOpen">
+    <ul class="absolute z-10 bg-slate-800 w-full" v-show="isOpen">
       <slot></slot>
     </ul>
   </div>
@@ -29,16 +29,31 @@
  <script>
 export default {
   props: {
-    dropdownIsOpen: {
-      type: Boolean,
-    },
     selectedTab: {
       type: Object,
     },
   },
   data() {
-    return {};
+    return {
+      isOpen: false,
+    };
   },
-  methods: {},
+  watch: {
+    isOpen(newValue) {
+      if (newValue) {
+        document.addEventListener("click", this.handleClickAway);
+        return;
+      }
+      document.removeEventListener("click", this.handleClickAway);
+    },
+  },
+  methods: {
+    handleClickAway(event) {
+      if (this.$refs.wrapper.contains(event.target)) {
+        return;
+      }
+      this.$emit("close");
+    },
+  },
 };
 </script>

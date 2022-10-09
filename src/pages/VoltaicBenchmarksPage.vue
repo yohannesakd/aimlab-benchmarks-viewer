@@ -1,15 +1,11 @@
 <template>
   <div class="relative min-h-screen">
-    <dropdown
-      class="ml-4 absolute top-4"
-      :selected-tab="currentTab"
-      :dropdownIsOpen="dropdownIsOpen"
-    >
+    <dropdown class="ml-4 absolute top-4" :selected-tab="currentTab">
       <li
         class="px-4 py-1 hover:bg-slate-600 transition"
-        v-for="element in dropdownElements"
-        :key="element"
-        @click="handleDropdownSelect($event)"
+        v-for="(element, index) in dropdownElements"
+        :key="index"
+        @click="handleDropdownSelect(index)"
       >
         {{ element }}
       </li>
@@ -91,9 +87,8 @@
             >
             <progress-bar
               class="bg-slate-600 w-full h-5"
-              :value="rankProgress(bench.energy)"
-              :energy="bench.energy"
-              :max="bench.energy < 900 ? 900 : 100"
+              :value="energyBar(bench.energy).value"
+              :max="energyBar(bench.energy).max"
               color="bg-blue-500"
             ></progress-bar>
             <!-- colors: bg-grandmaster bg-nova bg-celestial bg-astra bg-iron bg-bronze bg-silver bg-gold bg-platinum bg-diamond bg-jade bg-master -->
@@ -127,13 +122,21 @@
   </div>
 </template>
 <script>
-import { advancedRanks, categories } from "../store/modules/voltaicData";
+import {
+  advancedRanks,
+  intermediateRanks,
+  noviceRanks,
+  categories,
+  advancedEnergy,
+  intermediateEnergy,
+  noviceEnergy,
+} from "../store/modules/voltaicData";
 
 export default {
   data() {
     return {
       dropdownIsOpen: false,
-      currentTab: { value: "advanced", label: "Advanced" },
+      currentTabIndex: 2,
       categories: ["Clicking", "Tracking", "Switching"],
       subCategories: [
         "Dynamic",
@@ -147,6 +150,12 @@ export default {
     };
   },
   computed: {
+    currentTab() {
+      return {
+        value: this.dropdownElements[this.currentTabIndex].toLowerCase(),
+        label: this.dropdownElements[this.currentTabIndex],
+      };
+    },
     VTBenchmarks() {
       switch (this.currentTab.value) {
         case "advanced":
@@ -159,51 +168,92 @@ export default {
           return this.$store.getters.VTAdvanced;
       }
     },
-    mappedEnergy() {
-      return this.VTBenchmarks.subCategoryEnergy.map((energy, index) => {
-        return {
-          rank:
-            energy < 900
-              ? "Unranked"
-              : advancedRanks[Math.floor(energy / 100) * 100],
-          energy,
-          category: categories[index],
-        };
-      });
-    },
+
     colorLookup() {
       return {
+        Iron: "text-iron",
+        Bronze: "text-bronze",
+        Silver: "text-silver",
+        Gold: "text-gold",
+        Platinum: "text-platinum",
+        Diamond: "text-diamond",
+        Jade: "text-jade",
+        Master: "text-master",
         Grandmaster: "text-grandmaster",
         Nova: "text-nova",
         Astra: "text-astra",
         Celestial: "text-celestial",
       };
     },
+    mappedEnergy() {
+      let energyList;
+      let rankList;
+      switch (this.currentTab.value) {
+        case "advanced":
+          energyList = advancedEnergy;
+          rankList = advancedRanks;
+          break;
+        case "intermediate":
+          energyList = intermediateEnergy;
+          rankList = intermediateRanks;
+          break;
+        case "novice":
+          energyList = noviceEnergy;
+          rankList = noviceRanks;
+          break;
+        default:
+          break;
+      }
+      return this.VTBenchmarks.subCategoryEnergy.map((energy, index) => {
+        return {
+          rank:
+            energy < energyList[1]
+              ? "Unranked"
+              : rankList[Math.floor(energy / 100) * 100],
+          energy,
+          category: categories[index],
+        };
+      });
+    },
   },
   methods: {
     getImagePath(rank, option) {
+      let rankType = rank.replace(/ /g, "");
       if (!rank) return "";
       if (option == "badge") {
-        return `../../public/rank-img/${rank.toLowerCase()}_badge.png`;
+        return `../../public/rank-img/${rankType.toLowerCase()}_badge.png`;
       } else if (option == "medal") {
-        return `../../public/rank-img/${rank.toLowerCase()}.png`;
+        return `../../public/rank-img/${rankType.toLowerCase()}.png`;
       }
     },
-    rankProgress(energy) {
-      if (energy == 1200) return 100;
-      else if (energy < 900) return energy;
-      return energy % 100;
-    },
-    energyMax(energy) {
-      if (energy < 900) return 900;
-      return 100;
-    },
-    handleDropdownSelect(event) {
-      this.currentTab = {
-        label: event.target.textContent,
-        value: event.target.textContent.toLowerCase(),
+    energyBar(energy) {
+      let energyList = null;
+      let value = 0;
+      let max = 0;
+      switch (this.currentTab.value) {
+        case "advanced":
+          energyList = advancedEnergy;
+          max = energy < 900 ? 900 : 100;
+          break;
+        case "intermediate":
+          energyList = intermediateEnergy;
+          max = energy < 500 ? 500 : 100;
+          break;
+        case "novice":
+          energyList = noviceEnergy;
+          max = 100;
+          break;
+      }
+      if (energy >= energyList[4]) value = 100;
+      else if (energy < energyList[1]) value = energy;
+      else value = energy % 100;
+      return {
+        value,
+        max,
       };
-      this.dropdownIsOpen = false;
+    },
+    handleDropdownSelect(index) {
+      this.currentTabIndex = index;
     },
   },
 };
