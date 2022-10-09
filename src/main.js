@@ -7,7 +7,7 @@ import App from "./App.vue";
 //components
 import BaseCard from "./components/UI/BaseCard.vue";
 import ProgressBar from "./components/UI/ProgressBar.vue";
-import ChevronDown from "./components/UI/ChevronDown.vue";
+import ChevronIcon from "./components/UI/ChevronIcon.vue";
 import Dropdown from "./components/UI/Dropdown.vue";
 import LoadingSpinner from "./components/LoadingSpinner.vue";
 
@@ -16,7 +16,7 @@ createApp(App)
   .component("loading-spinner", LoadingSpinner)
   .component("progress-bar", ProgressBar)
   .component("dropdown", Dropdown)
-  .component("chevron-down", ChevronDown)
+  .component("chevron-icon", ChevronIcon)
   .use(router)
   .use(store)
   .mount("#app");

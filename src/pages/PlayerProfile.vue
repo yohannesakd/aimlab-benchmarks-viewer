@@ -100,6 +100,7 @@ export default {
     },
     playerSkill() {
       if (this.playerInfo.skill) {
+        if (this.playerInfo.skill == 1000) return 100;
         return this.playerInfo.skill % 100;
       } else {
         return 0;

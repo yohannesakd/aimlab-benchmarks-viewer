@@ -16,9 +16,9 @@
       @click="isOpen = !isOpen"
     >
       <span class="inline px-2">{{ selectedTab.label }}</span>
-      <chevron-down
+      <chevron-icon
         class="h-5 w-5 inline absolute right-2 top-1/2 -translate-y-1/2"
-      ></chevron-down>
+      ></chevron-icon>
     </div>
     <ul class="absolute z-10 bg-slate-800 w-full" v-show="isOpen">
       <slot></slot>
