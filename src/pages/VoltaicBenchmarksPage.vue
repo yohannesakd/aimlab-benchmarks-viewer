@@ -275,9 +275,9 @@ export default {
       let rankType = rank.replace(/ /g, "");
       if (!rank) return "";
       if (option == "badge") {
-        return `../../public/rank-img/${rankType.toLowerCase()}_badge.png`;
+        return `../../rank-img/${rankType.toLowerCase()}_badge.png`;
       } else if (option == "medal") {
-        return `../../public/rank-img/${rankType.toLowerCase()}.png`;
+        return `../../rank-img/${rankType.toLowerCase()}.png`;
       }
     },
     energyBar(energy) {

@@ -36,7 +36,7 @@
           <span
             >VT Rank - {{ overallRank }}
             <img
-              :src="`../../public/rank-img/${imagePath(overallRank)}_badge.png`"
+              :src="`../../rank-img/${imagePath(overallRank)}_badge.png`"
               class="h-5 inline"
               alt=""
           /></span>
