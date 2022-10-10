@@ -44,11 +44,11 @@
 
       <!-- Benchmarks table -->
       <section class="p-4 relative" id="benchmark-table">
-        <header class="grid grid-cols-5 bg-slate-700 pr-4 pl-16 py-2">
-          <p class="col-span-2 ml-2">Scenario</p>
+        <header class="grid grid-cols-12 bg-slate-700 pr-4 pl-16 py-2">
+          <p class="col-span-4 ml-2">Scenario</p>
           <p>Score</p>
-          <p>Rank</p>
-          <p>Energy</p>
+          <p class="col-span-3">Rank</p>
+          <p class="col-span-2">Energy</p>
         </header>
         <div
           v-for="(bench, index) in VTBenchmarks.benchmarks"
@@ -56,16 +56,16 @@
           class="
             bg-slate-800
             text-slate-200
-            grid grid-cols-5
+            grid grid-cols-12
             px-4
             py-2
             mt-1
             ml-14
           "
         >
-          <p class="col-span-2">{{ bench.name }}</p>
+          <p class="col-span-4">{{ bench.name }}</p>
           <p class="tracking-wide font-semibold">{{ bench.maxScore }}</p>
-          <p class="flex gap-2" :class="colorLookup[bench.rank]">
+          <p class="flex gap-2 col-span-3" :class="colorLookup[bench.rank]">
             <img
               class="h-5 self-center"
               :src="getImagePath(bench.rank, 'badge')"
@@ -73,7 +73,7 @@
             />
             {{ bench.rank }}
           </p>
-          <div class="flex justify-between items-center relative">
+          <div class="flex justify-between items-center relative col-span-3">
             <span
               class="
                 text-right
@@ -93,7 +93,61 @@
             ></progress-bar>
             <!-- colors: bg-grandmaster bg-nova bg-celestial bg-astra bg-iron bg-bronze bg-silver bg-gold bg-platinum bg-diamond bg-jade bg-master -->
           </div>
+          <p
+            class="col-start-12 ml-4 flex justify-center items-center relative"
+          >
+            <chevron-icon
+              direction="down"
+              class="
+                h-full
+                w-12
+                absolute
+                transition
+                hover:text-slate-400 hover:translate-y-0.5
+              "
+              :class="bench.detailsOpen ? 'rotate-180' : ''"
+              @click="toggleBenchDetails(bench)"
+            ></chevron-icon>
+          </p>
+          <div
+            class="
+              col-span-12
+              text-slate-300
+              flex
+              gap-10
+              mt-2
+              pt-1
+              pl-4
+              transition
+              border-t-2 border-t-slate-600
+            "
+            v-if="bench.detailsOpen"
+          >
+            <p>PB Accuracy : {{ Math.floor(bench.maxAcc) }}%</p>
+            <p>Average Score : {{ Math.floor(bench.avgScore) }}</p>
+
+            <p>Average Accuracy : {{ Math.floor(bench.avgAcc) }}%</p>
+            <p>Total Plays : {{ bench.count }}</p>
+            <div class="ml-auto flex gap-10 mr-10">
+              <a class="text-slate-500 pointer-events-none select-none"
+                >Watch Replay</a
+              >
+              <a
+                class="
+                  hover:text-slate-300
+                  cursor-pointer
+                  flex
+                  items-center
+                  gap-1
+                "
+                :href="scenarioLink(bench)"
+              >
+                <play-icon class="h-5 w-5"></play-icon> Play</a
+              >
+            </div>
+          </div>
         </div>
+
         <!-- Categories sidebar -->
         <!-- <div
           class="text-center origin-top-left absolute rotate-90"
@@ -255,6 +309,15 @@ export default {
     handleDropdownSelect(index) {
       this.currentTabIndex = index;
     },
+    toggleBenchDetails(bench) {
+      bench.detailsOpen = !bench.detailsOpen;
+    },
+    collapseBenchDetails() {
+      this.VTBenchmarks.forEach((element) => {
+        element.detailsOpen = false;
+      });
+    },
+    scenarioLink(bench) {},
   },
 };
 </script>

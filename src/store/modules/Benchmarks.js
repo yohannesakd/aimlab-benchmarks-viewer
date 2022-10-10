@@ -10,18 +10,21 @@ export default {
         overallRank: "Unranked",
         subCategoryEnergy: [],
         benchmarks: [],
+        detailsOpen: false,
       },
       VTIntermediate: {
         overallEnergy: 0,
         overallRank: "Unranked",
         subCategoryEnergy: [],
         benchmarks: [],
+        detailsOpen: false,
       },
       VTNovice: {
         overallEnergy: 0,
         overallRank: "Unranked",
         subCategoryEnergy: [],
         benchmarks: [],
+        detailsOpen: false,
       },
     };
   },

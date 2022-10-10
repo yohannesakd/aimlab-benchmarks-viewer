@@ -17,6 +17,7 @@ export const advancedBench = [
     categoryID: 1,
     scenarioID: 1,
     scores: [680, 850, 1020, 1100, 1140],
+    steamId: 2765722547,
   },
   {
     id: "CsLevel.VT Empyrean.VT Sky C.R7164L",
@@ -27,6 +28,7 @@ export const advancedBench = [
     categoryID: 1,
     scenarioID: 2,
     scores: [680, 880, 1050, 1140, 1200],
+    steamId: 2748726641,
   },
   {
     id: "CsLevel.VT Empyrean.VT Arc 1.R7WRND",
@@ -37,6 +39,7 @@ export const advancedBench = [
     categoryID: 1,
     scenarioID: 3,
     scores: [750, 900, 1050, 1250, 1300],
+    steamId: 2765759070,
   },
   {
     id: "CsLevel.VT Empyrean.VT Three.R7WSTK",
@@ -47,6 +50,7 @@ export const advancedBench = [
     categoryID: 2,
     scenarioID: 4,
     scores: [1450, 1550, 1650, 1750, 1825],
+    steamId: 2765768597,
   },
   {
     id: "CsLevel.VT Empyrean.VT Twosh.R7WTAX",
@@ -57,6 +61,7 @@ export const advancedBench = [
     categoryID: 2,
     scenarioID: 5,
     scores: [1150, 1250, 1350, 1500, 1580],
+    steamId: 2765771322,
   },
   {
     id: "CsLevel.VT Empyrean.VT Multi.R7WTKS",
@@ -67,6 +72,7 @@ export const advancedBench = [
     categoryID: 2,
     scenarioID: 6,
     scores: [1400, 1500, 1600, 1700, 1750],
+    steamId: 2765776948,
   },
   {
     id: "CsLevel.canner.VT Suave.R9N6JI",
@@ -77,6 +83,7 @@ export const advancedBench = [
     categoryID: 3,
     scenarioID: 7,
     scores: [3100, 3600, 4100, 4300, 4550],
+    steamId: 2776308107,
   },
   {
     id: "CsLevel.VT Empyrean.VT Preci.R7ZK29",

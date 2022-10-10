@@ -110,6 +110,8 @@
       <input
         type="text"
         v-model.number="goToPageInput"
+        @keydown.enter="goToPage"
+        @blur="goToPage"
         class="
           bg-slate-600
           text-center
@@ -167,6 +169,7 @@ export default {
           this.currentPage = this.goToPageInput - 1;
         }
       }
+      this.goToPageInput = null;
     },
   },
   computed: {
@@ -182,7 +185,8 @@ export default {
     },
     paginatedTaskList() {
       let perPage = 20;
-      let pageCount = Math.floor(this.currentPlayerTasks.length / perPage);
+      let pageCount = Math.ceil(this.currentPlayerTasks.length / perPage) - 1;
+      console.log(pageCount, this.currentPlayerTasks.length);
       let start = this.currentPage * perPage;
       let end = this.currentPage * perPage + perPage;
       let taskList = [...this.currentPlayerTasks];

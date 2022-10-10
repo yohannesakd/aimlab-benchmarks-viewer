@@ -39,6 +39,7 @@ export default {
           avgScore: task.aggregate.avg.score,
           avgAcc: task.aggregate.avg.accuracy,
           maxScore: task.aggregate.max.score,
+          maxAcc: task.aggregate.max.accuracy,
         };
       });
       plays = plays
