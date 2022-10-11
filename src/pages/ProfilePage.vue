@@ -1,7 +1,10 @@
 <template>
   <div>
     <base-card class="mt-10 mx-auto max-w-md">
-      <form class="flex flex-col gap-3 items-center py-2">
+      <form
+        @submit.prevent="null"
+        class="flex flex-col gap-3 items-center py-2"
+      >
         <input
           class="
             border-2
@@ -16,7 +19,7 @@
           type="text"
           id="username"
           autocomplete="off"
-          v-model="usernameInput"
+          v-model.trim="usernameInput"
           @input="searchUser"
         />
         <label class="block" for="username"

@@ -1,4 +1,8 @@
-import { advancedBench, intermediateBench, noviceBench } from "./voltaicData";
+import {
+  advancedBench,
+  intermediateBench,
+  noviceBench,
+} from "../../helpers/voltaicData";
 import { caclulateAll } from "../../helpers/functions";
 import _ from "lodash";
 

@@ -5,7 +5,7 @@ import {
   intermediateRanks,
   noviceEnergy,
   noviceRanks,
-} from "../store/modules/voltaicData";
+} from "./voltaicData";
 import _ from "lodash";
 
 //Take player full task list and the benchmark data

@@ -123,26 +123,40 @@
             "
             v-if="bench.detailsOpen"
           >
-            <p>PB Accuracy : {{ Math.floor(bench.maxAcc) }}%</p>
-            <p>Average Score : {{ Math.floor(bench.avgScore) }}</p>
-
-            <p>Average Accuracy : {{ Math.floor(bench.avgAcc) }}%</p>
-            <p>Total Plays : {{ bench.count }}</p>
+            <div class="flex flex-col">
+              <div class="flex gap-10">
+                <p>PB Accuracy : {{ Math.floor(bench.maxAcc) }}%</p>
+                <p>Total Plays : {{ bench.count }}</p>
+              </div>
+              <div class="flex gap-10">
+                <p>Average Score : {{ Math.floor(bench.avgScore) }}</p>
+                <p>Average Accuracy : {{ Math.floor(bench.avgAcc) }}%</p>
+              </div>
+            </div>
             <div class="ml-auto flex gap-10 mr-10">
-              <a class="text-slate-500 pointer-events-none select-none"
+              <a
+                class="
+                  text-slate-500
+                  pointer-events-none
+                  select-none
+                  flex
+                  items-center
+                "
                 >Watch Replay</a
               >
               <a
                 class="
-                  hover:text-slate-300
+                  text-white
                   cursor-pointer
                   flex
                   items-center
                   gap-1
+                  transition
+                  hover:text-slate-300
                 "
                 :href="scenarioLink(bench)"
               >
-                <play-icon class="h-5 w-5"></play-icon> Play</a
+                <play-icon class="h-5 w-5 transition"></play-icon> Play</a
               >
             </div>
           </div>
@@ -184,7 +198,7 @@ import {
   advancedEnergy,
   intermediateEnergy,
   noviceEnergy,
-} from "../store/modules/voltaicData";
+} from "@/helpers/voltaicData.js";
 
 export default {
   data() {
