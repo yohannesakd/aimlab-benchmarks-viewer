@@ -40,21 +40,24 @@ export const GET_USER_PLAYS_AGG = `
     }
   }
 `;
-//$slug = String! variable
+//$slug = String! variable for task id
 export const GET_TASK_BY_ID = `
   query getTasksById($slug: String!) {
     aimlab {
       task(slug: $slug) {
-          id
-          name
-          author_id
-          author{
-              username
-          }
-          created_at
-          workshop_id
-          __typename
-      }
+        id
+        name
+        weapon_id
+        description
+        image_url
+        author_id
+        author{
+            username
+        }
+        created_at
+        workshop_id
+        __typename
+    }
     }
   }
 `;

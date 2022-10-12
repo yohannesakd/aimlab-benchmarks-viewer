@@ -8,6 +8,7 @@ import PlayerProfile from "./pages/PlayerProfile.vue";
 import PlayerTasksOverview from "./pages/PlayerTasksOverview.vue";
 import RevosectBenchmarksPage from "./pages/RevosectBenchmarksPage.vue";
 import VoltaicBenchmarksPage from "./pages/VoltaicBenchmarksPage.vue";
+import TaskLeaderboard from "./pages/TaskLeaderboard.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -39,6 +40,13 @@ const router = createRouter({
       ],
     },
     { path: "/tasks", component: TasksPage },
+    {
+      path: "/tasks/:taskId",
+      component: TaskLeaderboard,
+      props: true,
+    },
+
+    // { path: "/:notFound(.*)", component: null },
   ],
 });
 

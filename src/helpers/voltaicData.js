@@ -231,7 +231,7 @@ export const intermediateBench = [
   {
     id: "CsLevel.VT Empyrean.VT Fives.R8YV6C",
     weapon: "Custom_VTnoADS",
-    name: "VT Fiveshot Wide Intermediate",
+    name: "VT Fiveshot Intermediate",
     category: "Clicking",
     subCategory: "Static",
     categoryID: 2,
@@ -241,7 +241,7 @@ export const intermediateBench = [
   {
     id: "CsLevel.VT Empyrean.VT Multi.R8S3PL",
     weapon: "Custom_VTnoADS",
-    name: "VT Multishot 180 Intermediate",
+    name: "VT Multishot 120 Intermediate",
     category: "Clicking",
     subCategory: "Static",
     categoryID: 2,

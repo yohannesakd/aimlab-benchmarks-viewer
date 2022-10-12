@@ -39,8 +39,8 @@
         >
       </form>
     </base-card>
-    <base-card class="mx-auto mt-4 max-w-2xl">
-      <div
+    <base-card class="mx-auto mt-4 max-w-2xl" v-if="taskList.length">
+      <router-link
         class="
           flex
           items-center
@@ -55,6 +55,7 @@
         "
         v-for="(task, index) in taskList"
         :key="index"
+        :to="taskLeaderboardLink(task.id)"
       >
         <p>{{ task.name }}</p>
         <div class="flex items-center gap-4">
@@ -62,10 +63,10 @@
           <img
             class="w-10 h-10 text-[8px] text-center bg-slate-700 p-1"
             :src="task.image_url"
-            :alt="task.name"
+            alt="Missing"
           />
         </div>
-      </div>
+      </router-link>
     </base-card>
   </section>
 </template>
@@ -91,6 +92,10 @@ export default {
       } else {
         console.log("task not found");
       }
+    },
+    taskLeaderboardLink(id) {
+      // let fixedId = id.replace(/\s/g, "-_-");
+      return this.$route.path + "/" + id;
     },
   },
 };
