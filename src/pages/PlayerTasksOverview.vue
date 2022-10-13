@@ -26,7 +26,7 @@
         v-model.trim="searchQuery"
         @change="handleQuery"
       />
-      <div
+      <router-link
         v-for="(task, index) in paginatedTaskList.data"
         :key="index"
         class="
@@ -43,6 +43,7 @@
           transition
           hover:scale-105
         "
+        :to="'/tasks/' + task.id"
       >
         <h3 class="text-lg uppercase text-slate-100">
           {{ task.name }}
@@ -54,7 +55,7 @@
         <p>
           <span class="text-sm text-blue-100">Plays : </span>{{ task.count }}
         </p>
-      </div>
+      </router-link>
     </div>
     <div class="max-w-max mx-auto flex gap-1 items-center mb-4">
       <button
