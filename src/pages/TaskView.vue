@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-10 px-10 mb-10">
+  <div class="mt-10 px-[10%] mb-10">
     <base-card class="max-w-3xl flex flex-col gap-4">
       <div class="flex justify-between">
         <h1 class="text-2xl font-semibold">{{ currentTask.name }}</h1>
@@ -30,14 +30,16 @@
       </div>
       <div>
         <div
-          class="grid grid-cols-7 px-4 py-2 my-1 bg-slate-700"
+          class="grid grid-cols-7 px-4 py-2 my-2 text-lg bg-slate-700"
           v-for="(task, index) in currentTaskLeaderboard.data"
           :key="index"
         >
           <p>{{ task.rank }}</p>
-          <router-link :to="'/profile/' + task.username" class="col-span-2">{{
-            task.username
-          }}</router-link>
+          <router-link
+            :to="'/profile/' + task.username"
+            class="col-span-2 hover:text-slate-300"
+            >{{ task.username }}</router-link
+          >
           <p>{{ task.score }}</p>
           <p>{{ task.shotsHit }}</p>
           <p>{{ task.accuracy }}</p>
@@ -64,7 +66,7 @@
           </div>
         </div>
       </div>
-      <div class="flex max-w-max mx-auto mt-4">
+      <div class="flex max-w-max gap-2 mx-auto mt-4">
         <button
           class="border border-gray-500 px-4 py-1"
           @click="switchPage(--currentPage)"
@@ -127,12 +129,11 @@ export default {
     },
     pageNumbers() {
       let pages = [];
-
-      if (this.currentPage > 1) pages.push(1);
-      if (this.currentPage > 2) pages.push("...");
+      if (this.currentPage > 3) pages.push(1);
+      if (this.currentPage > 3) pages.push("...");
       for (
-        let i = this.currentPage;
-        i < this.currentPage + 3 && i < this.pageCount + 2;
+        let i = this.currentPage - 2;
+        i < this.currentPage + 5 && i < this.pageCount + 2;
         i++
       ) {
         if (i > 0) pages.push(i);

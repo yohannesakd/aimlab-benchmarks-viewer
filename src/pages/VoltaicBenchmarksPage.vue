@@ -133,7 +133,7 @@
                 <p>Average Accuracy : {{ Math.floor(bench.avgAcc) }}%</p>
               </div>
             </div>
-            <div class="ml-auto flex items-center gap-10 mr-10">
+            <div class="ml-auto flex text-white items-center gap-10 mr-10">
               <a
                 class="
                   text-slate-500
@@ -146,7 +146,6 @@
               >
               <a
                 class="
-                  text-white
                   cursor-pointer
                   flex
                   items-center
