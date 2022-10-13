@@ -112,25 +112,25 @@
           <div
             class="
               col-span-12
-              text-slate-300
+              text-slate-200
               flex
               gap-10
               mt-2
-              pt-1
+              py-2
               pl-4
               transition
               border-t-2 border-t-slate-600
             "
             v-if="bench.detailsOpen"
           >
-            <div class="flex flex-col">
-              <div class="flex gap-10">
+            <div class="flex flex-col gap-2">
+              <div class="grid grid-cols-2">
                 <p>PB Accuracy : {{ Math.floor(bench.maxAcc) }}%</p>
                 <p>Total Plays : {{ bench.count }}</p>
               </div>
-              <div class="flex gap-10">
-                <p>Average Score : {{ Math.floor(bench.avgScore) }}</p>
-                <p>Average Accuracy : {{ Math.floor(bench.avgAcc) }}%</p>
+              <div class="grid grid-cols-2">
+                <p>Avg. Score : {{ Math.floor(bench.avgScore) }}</p>
+                <p>Avg. Accuracy : {{ Math.floor(bench.avgAcc) }}%</p>
               </div>
             </div>
             <div class="ml-auto flex text-white items-center gap-10 mr-10">
@@ -160,7 +160,7 @@
               <router-link
                 class="transition hover:text-slate-300"
                 :to="'/tasks/' + bench.id"
-                >Leaderboard</router-link
+                >View Leaderboard</router-link
               >
             </div>
           </div>

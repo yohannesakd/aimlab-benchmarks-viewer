@@ -1,5 +1,5 @@
 <template>
-  <div class="px-32 relative">
+  <div class="px-[8%] relative">
     <section class="py-8">
       <base-card v-if="isLoading" class="grid place-items-center max-w-md">
         <loading-spinner></loading-spinner>
@@ -16,7 +16,7 @@
           max-w-xl
         "
       >
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-4 w-[40%]">
           <span class="block text-2xl font-semibold">{{
             playerInfo.username
           }}</span>

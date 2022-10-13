@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-10 px-[10%] mb-10">
+  <div class="mt-10 px-[8%] mb-10">
     <base-card class="max-w-3xl flex flex-col gap-4">
       <div class="flex justify-between">
         <h1 class="text-2xl font-semibold">{{ currentTask.name }}</h1>
@@ -130,7 +130,7 @@ export default {
     pageNumbers() {
       let pages = [];
       if (this.currentPage > 3) pages.push(1);
-      if (this.currentPage > 3) pages.push("...");
+      if (this.currentPage > 4) pages.push("...");
       for (
         let i = this.currentPage - 2;
         i < this.currentPage + 5 && i < this.pageCount + 2;

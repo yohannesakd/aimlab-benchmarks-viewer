@@ -75,7 +75,7 @@
       <!-- Center Buttons -->
       <div class="flex gap-1">
         <p
-          class="py-2 px-4 bg-slate-700"
+          class="py-2 px-4 bg-slate-700 hover:cursor-pointer"
           v-for="page in pageNumbers"
           :key="page"
           :class="{
@@ -185,7 +185,7 @@ export default {
       return taskList;
     },
     paginatedTaskList() {
-      let perPage = 20;
+      let perPage = 24;
       let pageCount = Math.ceil(this.currentPlayerTasks.length / perPage) - 1;
       let start = this.currentPage * perPage;
       let end = this.currentPage * perPage + perPage;
