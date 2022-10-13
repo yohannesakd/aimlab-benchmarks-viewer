@@ -186,7 +186,6 @@ export default {
     paginatedTaskList() {
       let perPage = 20;
       let pageCount = Math.ceil(this.currentPlayerTasks.length / perPage) - 1;
-      console.log(pageCount, this.currentPlayerTasks.length);
       let start = this.currentPage * perPage;
       let end = this.currentPage * perPage + perPage;
       let taskList = [...this.currentPlayerTasks];

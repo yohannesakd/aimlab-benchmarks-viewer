@@ -56,7 +56,6 @@ export const GET_TASK_BY_ID = `
         }
         created_at
         workshop_id
-        __typename
     }
     }
   }

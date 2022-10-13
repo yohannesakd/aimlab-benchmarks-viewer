@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen">
+  <div class="relative min-h-max">
     <dropdown class="ml-4 absolute top-4" :selected-tab="currentTab">
       <li
         class="px-4 py-1 hover:bg-slate-600 transition"
@@ -133,7 +133,7 @@
                 <p>Average Accuracy : {{ Math.floor(bench.avgAcc) }}%</p>
               </div>
             </div>
-            <div class="ml-auto flex gap-10 mr-10">
+            <div class="ml-auto flex items-center gap-10 mr-10">
               <a
                 class="
                   text-slate-500
@@ -157,6 +157,11 @@
                 :href="scenarioLink(bench)"
               >
                 <play-icon class="h-5 w-5 transition"></play-icon> Play</a
+              >
+              <router-link
+                class="transition hover:text-slate-300"
+                :to="'/tasks/' + bench.id"
+                >Leaderboard</router-link
               >
             </div>
           </div>

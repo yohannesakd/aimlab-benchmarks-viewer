@@ -65,7 +65,7 @@
     </div>
     <router-view
       :isLoading="isLoading"
-      class="border border-slate-600 bg-slate-900 rounded-sm"
+      class="border border-slate-600 bg-slate-900 rounded-sm mb-10"
     ></router-view>
   </div>
 </template>
@@ -171,6 +171,6 @@ export default {
   @apply bg-slate-900 border-b-transparent;
 }
 #profile-nav {
-  top: 1px;
+  top: 2px;
 }
 </style>

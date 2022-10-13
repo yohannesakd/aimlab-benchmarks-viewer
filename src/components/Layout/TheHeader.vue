@@ -12,9 +12,7 @@
     "
   >
     <h1 class="text-3xl font-semibold">
-      <router-link to="/home" id="header-text"
-        >Aimlab Benchmarks Viewer</router-link
-      >
+      <router-link to="/home" id="header-text">Aimtraining Tracker</router-link>
     </h1>
     <nav id="nav">
       <ul class="flex gap-4">

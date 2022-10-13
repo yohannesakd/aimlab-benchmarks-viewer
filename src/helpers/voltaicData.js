@@ -76,14 +76,14 @@ export const advancedBench = [
   },
   {
     id: "CsLevel.canner.VT Suave.R9N6JI",
-    weapon: "Custom_VoltaicZapper",
+    weapon: "Custom_YoshZapper",
     name: "VT Suavetrack Advanced",
     category: "Tracking",
     subCategory: "Precise",
     categoryID: 3,
     scenarioID: 7,
     scores: [3100, 3600, 4100, 4300, 4550],
-    steamId: 2776308107,
+    steamId: 2787595653,
   },
   {
     id: "CsLevel.VT Empyrean.VT Preci.R7ZK29",
