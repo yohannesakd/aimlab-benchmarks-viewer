@@ -117,7 +117,7 @@ export const advancedBench = [
   },
   {
     id: "CsLevel.zcr.VT Pillt.R8DF2N",
-    weapon: "Custom_VoltaicZapper",
+    weapon: "Custom_VoltaicZapper2",
     name: "VT Pilltrack Advanced",
     category: "Tracking",
     subCategory: "Reactive",

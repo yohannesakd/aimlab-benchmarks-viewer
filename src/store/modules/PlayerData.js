@@ -6,6 +6,9 @@ export default {
     };
   },
   getters: {
+    currentPlayerInfo(state) {
+      return state.currentPlayerInfo;
+    },
     tasksPlayed(state) {
       return state.currentPlayerTasks.length;
     },

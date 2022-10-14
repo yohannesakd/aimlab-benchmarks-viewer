@@ -125,25 +125,33 @@
           >
             <div class="flex flex-col gap-2">
               <div class="grid grid-cols-2">
-                <p>PB Accuracy : {{ Math.floor(bench.maxAcc) }}%</p>
+                <p v-if="bench.count">
+                  PB Accuracy : {{ Math.floor(bench.maxAcc) }}%
+                </p>
                 <p>Total Plays : {{ bench.count }}</p>
               </div>
               <div class="grid grid-cols-2">
-                <p>Avg. Score : {{ Math.floor(bench.avgScore) }}</p>
-                <p>Avg. Accuracy : {{ Math.floor(bench.avgAcc) }}%</p>
+                <p v-if="bench.count">
+                  Avg. Score : {{ Math.floor(bench.avgScore) }}
+                </p>
+                <p v-if="bench.count">
+                  Avg. Accuracy : {{ Math.floor(bench.avgAcc) }}%
+                </p>
               </div>
             </div>
             <div class="ml-auto flex text-white items-center gap-10 mr-10">
-              <a
-                class="
-                  text-slate-500
-                  pointer-events-none
-                  select-none
-                  flex
-                  items-center
+              <button
+                class="flex items-center"
+                :class="
+                  bench.count == 0
+                    ? 'text-slate-500 pointer-events-none disabled'
+                    : ''
                 "
-                >Watch Replay</a
+                @click="replayLink(bench.id, bench.weapon)"
               >
+                <span v-if="replayLoading">Loading...</span>
+                <span v-else>Watch Replay</span>
+              </button>
               <a
                 class="
                   cursor-pointer
@@ -153,9 +161,8 @@
                   transition
                   hover:text-slate-300
                 "
-                :href="scenarioLink(bench)"
               >
-                <play-icon class="h-5 w-5 transition"></play-icon> Play</a
+                <play-icon class="h-5 w-5 transition"></play-icon>Play</a
               >
               <router-link
                 class="transition hover:text-slate-300"
@@ -203,11 +210,12 @@ import {
   intermediateEnergy,
   noviceEnergy,
 } from "@/helpers/voltaicData.js";
-
+import { findReplay } from "@/helpers/functions.js";
 export default {
   data() {
     return {
       dropdownIsOpen: false,
+      replayLoading: false,
       currentTabIndex: 2,
       categories: ["Clicking", "Tracking", "Switching"],
       subCategories: [
@@ -222,6 +230,9 @@ export default {
     };
   },
   computed: {
+    currentPlayerInfo() {
+      return this.$store.getters.currentPlayerInfo;
+    },
     currentTab() {
       return {
         value: this.dropdownElements[this.currentTabIndex].toLowerCase(),
@@ -335,7 +346,19 @@ export default {
         element.detailsOpen = false;
       });
     },
-    scenarioLink(bench) {},
+    async replayLink(taskId, weapon) {
+      this.replayLoading = true;
+      let link = await findReplay(
+        this.currentPlayerInfo.username,
+        taskId,
+        weapon
+      );
+      if (link) {
+        window.open(link, "_blank");
+        window.focus();
+      }
+      this.replayLoading = false;
+    },
   },
 };
 </script>

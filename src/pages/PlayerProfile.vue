@@ -121,6 +121,7 @@ export default {
   //Fetching the Player ID and Username again
   // Assigning the fetched data to our component
   // Fetching player Task History using ID from the previous request
+
   async mounted() {
     this.playerInfo = {};
     this.isLoading = true;
@@ -150,10 +151,11 @@ export default {
           },
         },
       });
-      if (!plays_agg) {
+      if (!plays_agg?.aimlab) {
         this.$router.go();
       }
       this.$store.dispatch("updateCurrentPlayerInfo", this.playerInfo);
+      localStorage.setItem("currentPlayer", this.playerInfo.username);
       this.$store.dispatch(
         "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg

@@ -6,6 +6,7 @@ import {
   noviceEnergy,
   noviceRanks,
 } from "./voltaicData";
+import { APIFetch, GET_TASK_LEADERBOARD } from "./queries.js";
 import _ from "lodash";
 
 //Take player full task list and the benchmark data
@@ -204,4 +205,41 @@ export function taskDeepLink(taskId) {
 }
 export function replayDeepLink(playId) {
   return `https://go.aimlab.gg/v1/redirects?link=aimlab%3a%2f%2fcompare%3fid%3d${playId}%26source%3d84966503A24BD515&link=steam%3a%2f%2frungameid%2f714010`;
+}
+export async function findReplay(playerName, taskId, weapon) {
+  let limit = 100;
+  let offset = 0;
+  let playerFound = false;
+  while (!playerFound) {
+    let ldb = await APIFetch(GET_TASK_LEADERBOARD, {
+      leaderboardInput: {
+        clientId: "aimlab",
+        limit: limit,
+        offset: offset,
+        taskId: taskId,
+        taskMode: 0,
+        weaponId: weapon,
+      },
+    });
+
+    if (ldb?.aimlab.leaderboard) {
+      let located = [...ldb.aimlab.leaderboard.data].filter(
+        (entry) => entry.username == playerName
+      );
+      console.log(located);
+      if (_.isEmpty(located)) {
+        console.log("not found on page", offset / limit + 1);
+        offset += limit;
+        if (offset >= ldb.aimlab.leaderboard.metadata.totalRows) {
+          console.log("Score not found");
+          return false;
+        }
+        continue;
+      } else {
+        console.log("found on page", offset / limit + 1);
+        playerFound = true;
+        return replayDeepLink(located[0].play_id);
+      }
+    } else continue;
+  }
 }
