@@ -1,6 +1,21 @@
 <template>
   <div class="px-[8%] relative">
-    <section class="py-8">
+    <section class="py-8 relative">
+      <button
+        class="
+          absolute
+          right-0
+          border-2 border-slate-500
+          px-6
+          py-2
+          rounded
+          transition
+          hover:bg-slate-500
+        "
+        @click="handleSwitchProfile"
+      >
+        Switch Profile
+      </button>
       <base-card v-if="isLoading" class="grid place-items-center max-w-md">
         <loading-spinner></loading-spinner>
       </base-card>
@@ -117,6 +132,10 @@ export default {
     imagePath(rank) {
       return rank.replace(/ /g, "").toLowerCase();
     },
+    handleSwitchProfile() {
+      sessionStorage.removeItem("currentPlayer");
+      this.$router.push("/profile");
+    },
   },
   //Fetching the Player ID and Username again
   // Assigning the fetched data to our component
@@ -155,7 +174,7 @@ export default {
         this.$router.go();
       }
       this.$store.dispatch("updateCurrentPlayerInfo", this.playerInfo);
-      localStorage.setItem("currentPlayer", this.playerInfo.username);
+      sessionStorage.setItem("currentPlayer", this.playerInfo.username);
       this.$store.dispatch(
         "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg

@@ -1,5 +1,22 @@
 <template>
   <div class="mt-10 px-[8%] mb-10">
+    <div class="relative">
+      <button
+        class="
+          absolute
+          right-0
+          border-2 border-slate-500
+          px-6
+          py-2
+          rounded
+          transition
+          hover:bg-slate-500
+        "
+        @click="handleSwitchTask"
+      >
+        Switch Task
+      </button>
+    </div>
     <base-card class="max-w-3xl flex flex-col gap-4">
       <div class="flex justify-between">
         <h1 class="text-2xl font-semibold">{{ currentTask.name }}</h1>
@@ -169,6 +186,10 @@ export default {
     replayLink(playId) {
       return replayDeepLink(playId);
     },
+    handleSwitchTask() {
+      sessionStorage.removeItem("currentTask");
+      this.$router.push("/tasks");
+    },
   },
   async mounted() {
     const res = await APIFetch(GET_TASK_BY_ID, { slug: this.taskId });
@@ -188,6 +209,7 @@ export default {
       ldb.aimlab.leaderboard.metadata.rows = this.perPage;
 
       this.$store.dispatch("setCurrentTask", res.aimlab.task);
+      sessionStorage.setItem("currentTask", res.aimlab.task.id);
       this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
     }
   },

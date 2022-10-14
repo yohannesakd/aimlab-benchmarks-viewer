@@ -16,7 +16,18 @@ const router = createRouter({
   routes: [
     { path: "/", redirect: "/home" },
     { path: "/home", component: HomePage },
-    { path: "/profile", component: ProfileSearch },
+    {
+      path: "/profile",
+      component: ProfileSearch,
+      beforeEnter: (_, from) => {
+        if (from.name == "profile-overview") {
+          sessionStorage.removeItem("currentPlayer");
+        }
+        if (sessionStorage.getItem("currentPlayer")) {
+          router.push("/profile/" + sessionStorage.getItem("currentPlayer"));
+        }
+      },
+    },
     {
       path: "/profile/:username",
       component: PlayerProfile,
@@ -43,7 +54,18 @@ const router = createRouter({
         },
       ],
     },
-    { path: "/tasks", component: TaskSearch },
+    {
+      path: "/tasks",
+      component: TaskSearch,
+      beforeEnter: (_, from) => {
+        if (from.name == "task-view") {
+          sessionStorage.removeItem("currentTask");
+        }
+        if (sessionStorage.getItem("currentTask")) {
+          router.push("/tasks/" + sessionStorage.getItem("currentTask"));
+        }
+      },
+    },
     {
       path: "/tasks/:taskId",
       redirect: { name: "task-view" },
