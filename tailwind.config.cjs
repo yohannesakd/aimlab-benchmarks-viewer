@@ -20,6 +20,12 @@ module.exports = {
         nova: "#7d4ac5",
         astra: "#ff1761",
         celestial: "#ffffff",
+        //ra colors
+        mythic: "#ffd700",
+        immortal: "#c36eff",
+        archon: "#ff0000",
+        ethereal: "#91d7e4",
+        divine: "#050000",
       },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],

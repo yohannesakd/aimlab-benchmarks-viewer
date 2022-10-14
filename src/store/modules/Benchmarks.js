@@ -3,8 +3,9 @@ import {
   intermediateBench,
   noviceBench,
 } from "../../helpers/voltaicData";
-import { caclulateAll } from "../../helpers/functions";
+import { caclulateAll, calculateRA } from "../../helpers/functions";
 import _ from "lodash";
+import { hardBench } from "../../helpers/revosectData";
 
 export default {
   state() {
@@ -30,6 +31,13 @@ export default {
         benchmarks: [],
         detailsOpen: false,
       },
+      RAHard: {
+        overallPoints: 0,
+        overallRank: "Unranked",
+        subCategoryPoints: [],
+        benchmarks: [],
+        detailsOpen: false,
+      },
     };
   },
   getters: {
@@ -42,12 +50,15 @@ export default {
     VTNovice(state) {
       return state.VTNovice;
     },
-    allRanks(state) {
+    allVTRanks(state) {
       return [
         state.VTAdvanced.overallRank,
         state.VTIntermediate.overallRank,
         state.VTNovice.overallRank,
       ];
+    },
+    RAHard(state) {
+      return state.RAHard;
     },
   },
   mutations: {
@@ -59,6 +70,9 @@ export default {
     },
     setVTNovice(state, payload) {
       state.VTNovice = payload;
+    },
+    setRAHard(state, payload) {
+      state.RAHard = payload;
     },
   },
   actions: {
@@ -85,6 +99,12 @@ export default {
         "novice"
       );
       context.commit("setVTNovice", benchData);
+    },
+    setRAHard(context) {
+      let benchData = calculateRA(context.rootGetters.currentPlayerTasks, [
+        ...hardBench,
+      ]);
+      context.commit("setRAHard", benchData);
     },
   },
 };

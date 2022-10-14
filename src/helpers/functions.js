@@ -6,9 +6,63 @@ import {
   noviceEnergy,
   noviceRanks,
 } from "./voltaicData";
+
+import {
+  hardSubPoints,
+  hardPoints,
+  hardSubRanks,
+  hardRanks,
+} from "./revosectData";
 import { APIFetch, GET_TASK_LEADERBOARD } from "./queries.js";
 import _ from "lodash";
 
+//UTILITY FUNCTIONS
+
+export function taskDeepLink(taskId) {
+  return `https://go.aimlab.gg/v1/redirects?link=aimlab://workshop?id=${taskId}&source=EEDCC708991834C0&link=steam://rungameid/714010`;
+}
+export function replayDeepLink(playId) {
+  return `https://go.aimlab.gg/v1/redirects?link=aimlab%3a%2f%2fcompare%3fid%3d${playId}%26source%3d84966503A24BD515&link=steam%3a%2f%2frungameid%2f714010`;
+}
+export async function findReplay(playerName, taskId, weapon) {
+  let limit = 100;
+  let offset = 0;
+  let playerFound = false;
+  while (!playerFound) {
+    let ldb = await APIFetch(GET_TASK_LEADERBOARD, {
+      leaderboardInput: {
+        clientId: "aimlab",
+        limit: limit,
+        offset: offset,
+        taskId: taskId,
+        taskMode: 0,
+        weaponId: weapon,
+      },
+    });
+
+    if (ldb?.aimlab.leaderboard) {
+      let located = [...ldb.aimlab.leaderboard.data].filter(
+        (entry) => entry.username == playerName
+      );
+      console.log(located);
+      if (_.isEmpty(located)) {
+        console.log("not found on page", offset / limit + 1);
+        offset += limit;
+        if (offset >= ldb.aimlab.leaderboard.metadata.totalRows) {
+          console.log("Score not found");
+          return;
+        }
+        continue;
+      } else {
+        console.log("found on page", offset / limit + 1);
+        playerFound = true;
+        return replayDeepLink(located[0].play_id);
+      }
+    } else continue;
+  }
+}
+
+//Voltaic Functions
 //Take player full task list and the benchmark data
 export function caclulateAll(playerTasks, playerBench, mode) {
   playerBench.forEach((bench) => {
@@ -83,7 +137,7 @@ export function caclulateAll(playerTasks, playerBench, mode) {
 
   return {
     overallEnergy: harmonicMean,
-    overallRank: overallRank,
+    overallRank,
     subCategoryEnergy: categoryEnergyList,
     benchmarks: playerBench,
   };
@@ -200,46 +254,96 @@ function calculateRankNov(bench, userTask) {
   return [energy, rank];
 }
 
-export function taskDeepLink(taskId) {
-  return `https://go.aimlab.gg/v1/redirects?link=aimlab://workshop?id=${taskId}&source=EEDCC708991834C0&link=steam://rungameid/714010`;
-}
-export function replayDeepLink(playId) {
-  return `https://go.aimlab.gg/v1/redirects?link=aimlab%3a%2f%2fcompare%3fid%3d${playId}%26source%3d84966503A24BD515&link=steam%3a%2f%2frungameid%2f714010`;
-}
-export async function findReplay(playerName, taskId, weapon) {
-  let limit = 100;
-  let offset = 0;
-  let playerFound = false;
-  while (!playerFound) {
-    let ldb = await APIFetch(GET_TASK_LEADERBOARD, {
-      leaderboardInput: {
-        clientId: "aimlab",
-        limit: limit,
-        offset: offset,
-        taskId: taskId,
-        taskMode: 0,
-        weaponId: weapon,
-      },
+//End of Voltaic Section
+//Revosect section
+export function calculateRA(playerTasks, playerBench) {
+  playerBench.forEach((bench) => {
+    bench.avgAcc = 0;
+    bench.count = 0;
+    bench.maxScore = 0;
+    bench.avgScore = 0;
+    bench.points = 0;
+    bench.rank = "Unranked";
+  });
+  for (let i = 0; i < playerTasks.length; i++) {
+    for (let j = 0; j < playerBench.length; j++) {
+      if (playerTasks[i].id == playerBench[j].id) {
+        let rankData = [0, 0, "Unranked"];
+        if (playerTasks[i].count > 0) {
+          //calculate rank and points for different modes
+          rankData = calculateRankHard(playerBench[j], playerTasks[i]);
+        }
+
+        playerBench[j] = {
+          ...playerBench[j],
+          ...playerTasks[i],
+        };
+        playerBench[j].points = rankData[0] || 0;
+        playerBench[j].progress = rankData[1] || 0;
+        playerBench[j].rank = rankData[2] || "Unranked";
+      }
+    }
+  }
+  playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
+  //calculating category points
+  const grouped = _.groupBy(playerBench, "categoryID");
+  let categoryPointsList = Object.entries(grouped)
+    .map(([_, group]) => {
+      return [...group.map(({ points }) => points)];
+    })
+    .map((item) => {
+      return item.reduce((acc, curr) => acc + curr) - Math.min(...item);
     });
 
-    if (ldb?.aimlab.leaderboard) {
-      let located = [...ldb.aimlab.leaderboard.data].filter(
-        (entry) => entry.username == playerName
-      );
-      console.log(located);
-      if (_.isEmpty(located)) {
-        console.log("not found on page", offset / limit + 1);
-        offset += limit;
-        if (offset >= ldb.aimlab.leaderboard.metadata.totalRows) {
-          console.log("Score not found");
-          return false;
-        }
-        continue;
-      } else {
-        console.log("found on page", offset / limit + 1);
-        playerFound = true;
-        return replayDeepLink(located[0].play_id);
+  let overallPoints = categoryPointsList.reduce((acc, curr) => acc + curr);
+  let floorPoints = 0;
+
+  hardPoints.forEach((point) => {
+    if (overallPoints > point) {
+      floorPoints = point;
+    }
+  });
+  const overallRank = hardRanks[floorPoints] || "Unranked";
+
+  return {
+    overallPoints,
+    overallRank,
+    subCategoryPoints: categoryPointsList,
+    benchmarks: playerBench,
+  };
+}
+
+export function calculateRankHard(bench, userTask) {
+  let points = 0;
+  let progress = 0;
+  let rank = "Unranked";
+  if (userTask.maxScore < bench.scores[0]) {
+    points = 0;
+    progress = Math.floor((userTask.maxScore * 100) / bench.scores[0]);
+  } else if (userTask.maxScore > bench.scores[4]) {
+    points = hardSubPoints[4];
+    let playerDiff = userTask.maxScore - bench.scores[4];
+    let perPoint =
+      (hardSubPoints[4] - hardSubPoints[3]) / bench.scores[4] / bench.scores[3];
+    points += Math.floor(playerDiff * perPoint);
+    progress = 100;
+  } else {
+    let i = 0;
+    bench.scores.forEach((score, index) => {
+      if (userTask.maxScore >= score) {
+        points = hardSubPoints[index];
+        rank = hardSubRanks[points];
+        i = index;
       }
-    } else continue;
+    });
+    let playerDiff = userTask.maxScore - bench.scores[i];
+    let perPoint =
+      (hardSubPoints[i + 1] - hardSubPoints[i]) /
+      (bench.scores[i + 1] - bench.scores[i]);
+    points += Math.floor(playerDiff * perPoint);
+    progress = Math.floor(
+      (playerDiff * 100) / (bench.scores[i + 1] - bench.scores[i])
+    );
   }
+  return [points, progress, rank];
 }

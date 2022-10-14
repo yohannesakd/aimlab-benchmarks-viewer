@@ -49,13 +49,19 @@
           <span>Unique Tasks Played - {{ tasksPlayed }}</span>
           <span>Total Play Count - {{ totalPlays }}</span>
           <span
-            >VT Rank - {{ overallRank }}
+            >VT Rank - {{ overallRankVT }}
             <img
-              :src="`../../rank-img/${imagePath(overallRank)}_badge.png`"
+              :src="`../../rank-img/${imagePath(overallRankVT)}_badge.png`"
               class="h-5 inline"
               alt=""
           /></span>
-          <span>rA Rank -</span>
+          <span
+            >rA Rank - {{ overallRankRA }}
+            <img
+              :src="`../../rank-img/ra/${imagePath(overallRankRA)}.png`"
+              class="h-5 inline"
+              alt=""
+          /></span>
         </div>
       </base-card>
     </section>
@@ -105,13 +111,18 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["VTAdvanced", "VTIntermediate", "VTNovice"]),
-    overallRank() {
+    ...mapGetters(["VTAdvanced", "VTIntermediate", "VTNovice", "RAHard"]),
+    overallRankVT() {
       return this.VTAdvanced.overallRank != "Unranked"
         ? this.VTAdvanced.overallRank
         : this.VTIntermediate.overallRank != "Unranked"
         ? this.VTIntermediate.overallRank
         : this.VTNovice.overallRank;
+    },
+    overallRankRA() {
+      return this.RAHard.overallRank != "Unranked"
+        ? this.RAHard.overallRank
+        : "Unranked";
     },
     playerSkill() {
       if (this.playerInfo.skill) {
@@ -182,6 +193,7 @@ export default {
       this.$store.dispatch("setVTAdvanced");
       this.$store.dispatch("setVTIntermediate");
       this.$store.dispatch("setVTNovice");
+      this.$store.dispatch("setRAHard");
     }
   },
 };
