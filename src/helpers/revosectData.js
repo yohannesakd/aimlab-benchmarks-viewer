@@ -31,7 +31,7 @@ export const hardBench = [
   {
     name: "rA Threewide Small",
     weapon: "Custom_9mmrAnoADS",
-    id: "rA Threewide Small",
+    id: "CsLevel.rA hebe.rA Three.R2IW6T",
     scores: [1000, 1050, 1100, 1150, 1200],
     category: "Clicking",
     subCategory: "Static",

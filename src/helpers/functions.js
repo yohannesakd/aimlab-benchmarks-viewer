@@ -287,6 +287,7 @@ export function calculateRA(playerTasks, playerBench) {
   playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
   //calculating category points
   const grouped = _.groupBy(playerBench, "categoryID");
+  const allPointsList = playerBench.map((bench) => bench.points);
   let categoryPointsList = Object.entries(grouped)
     .map(([_, group]) => {
       return [...group.map(({ points }) => points)];
@@ -303,8 +304,16 @@ export function calculateRA(playerTasks, playerBench) {
       floorPoints = point;
     }
   });
-  const overallRank = hardRanks[floorPoints] || "Unranked";
-
+  let overallRank = hardRanks[floorPoints] || "Unranked";
+  if (checkDivinity(allPointsList)) {
+    overallRank = "Divinity";
+  }
+  console.log({
+    overallPoints,
+    overallRank,
+    subCategoryPoints: categoryPointsList,
+    benchmarks: playerBench,
+  });
   return {
     overallPoints,
     overallRank,
@@ -320,13 +329,16 @@ export function calculateRankHard(bench, userTask) {
   if (userTask.maxScore < bench.scores[0]) {
     points = 0;
     progress = Math.floor((userTask.maxScore * 100) / bench.scores[0]);
-  } else if (userTask.maxScore > bench.scores[4]) {
+  } else if (userTask.maxScore >= bench.scores[4]) {
     points = hardSubPoints[4];
     let playerDiff = userTask.maxScore - bench.scores[4];
     let perPoint =
-      (hardSubPoints[4] - hardSubPoints[3]) / bench.scores[4] / bench.scores[3];
+      (hardSubPoints[4] - hardSubPoints[3]) /
+      (bench.scores[4] - bench.scores[3]);
+
     points += Math.floor(playerDiff * perPoint);
     progress = 100;
+    rank = "Divine";
   } else {
     let i = 0;
     bench.scores.forEach((score, index) => {
@@ -346,4 +358,11 @@ export function calculateRankHard(bench, userTask) {
     );
   }
   return [points, progress, rank];
+}
+
+function checkDivinity(pointsList) {
+  let filter = pointsList.filter((point) => {
+    return point >= hardSubPoints[4];
+  });
+  return filter.length == 18;
 }
