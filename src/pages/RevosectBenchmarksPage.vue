@@ -1,5 +1,15 @@
 <template>
   <div class="min-h-max relative">
+    <dropdown class="ml-4 absolute top-4" :selected-tab="currentTab">
+      <li
+        class="px-4 py-1 hover:bg-slate-600 transition"
+        v-for="(element, index) in dropdownElements"
+        :key="index"
+        @click="handleDropdownSelect(index)"
+      >
+        {{ element }}
+      </li>
+    </dropdown>
     <div>
       <div class="flex max-h-96 max-w-max mx-auto mt-4 gap-4 font-oswald">
         <div class="grid items-center">
@@ -159,7 +169,7 @@
           </div>
         </div>
         <!-- Categories sidebar -->
-        <div
+        <!-- <div
           class="text-center origin-top-left absolute rotate-90"
           id="category-bar"
         >
@@ -180,7 +190,7 @@
               >{{ category }}</span
             >
           </div>
-        </div>
+        </div> -->
       </section>
     </div>
   </div>
@@ -229,9 +239,9 @@ export default {
         case "hard":
           return this.$store.getters.RAHard;
         case "medium":
-          return null;
+          return this.$store.getters.RAMedium;
         case "easy":
-          return null;
+          return this.$store.getters.RAEasy;
         default:
           return this.$store.getters.RAHard;
       }
@@ -284,32 +294,6 @@ export default {
     getImagePath(rank) {
       return `../../rank-img/ra/${rank.toLowerCase()}.png`;
     },
-    // energyBar(energy) {
-    //   let energyList = null;
-    //   let value = 0;
-    //   let max = 0;
-    //   switch (this.currentTab.value) {
-    //     case "advanced":
-    //       energyList = advancedEnergy;
-    //       max = energy < 900 ? 900 : 100;
-    //       break;
-    //     case "intermediate":
-    //       energyList = intermediateEnergy;
-    //       max = energy < 500 ? 500 : 100;
-    //       break;
-    //     case "novice":
-    //       energyList = noviceEnergy;
-    //       max = 100;
-    //       break;
-    //   }
-    //   if (energy >= energyList[4]) value = 100;
-    //   else if (energy < energyList[1]) value = energy;
-    //   else value = energy % 100;
-    //   return {
-    //     value,
-    //     max,
-    //   };
-    // },
     handleDropdownSelect(index) {
       this.currentTabIndex = index;
     },

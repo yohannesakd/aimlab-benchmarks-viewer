@@ -1,3 +1,4 @@
+"use strict";
 import {
   advancedRanks,
   advancedEnergy,
@@ -12,6 +13,14 @@ import {
   hardPoints,
   hardSubRanks,
   hardRanks,
+  mediumPoints,
+  mediumRanks,
+  mediumSubPoints,
+  mediumSubRanks,
+  easyPoints,
+  easyRanks,
+  easySubPoints,
+  easySubRanks,
 } from "./revosectData";
 import { APIFetch, GET_TASK_LEADERBOARD, GET_TASK_BY_ID } from "./queries.js";
 import _ from "lodash";
@@ -260,7 +269,7 @@ function calculateRankNov(bench, userTask) {
 
 //End of Voltaic Section
 //Revosect section
-export function calculateRA(playerTasks, playerBench) {
+export function calculateRA(playerTasks, playerBench, mode) {
   playerBench.forEach((bench) => {
     bench.avgAcc = 0;
     bench.count = 0;
@@ -275,7 +284,20 @@ export function calculateRA(playerTasks, playerBench) {
         let rankData = [0, 0, "Unranked"];
         if (playerTasks[i].count > 0) {
           //calculate rank and points for different modes
-          rankData = calculateRankHard(playerBench[j], playerTasks[i]);
+          switch (mode) {
+            case "hard":
+              rankData = calculateRankHard(playerBench[j], playerTasks[i]);
+              break;
+            case "medium":
+              rankData = calculateRankMed(playerBench[j], playerTasks[i]);
+              break;
+            case "easy":
+              rankData = calculateRankEasy(playerBench[j], playerTasks[i]);
+              break;
+            default:
+              rankData = calculateRankHard(playerBench[j], playerTasks[i]);
+              break;
+          }
         }
 
         playerBench[j] = {
@@ -289,29 +311,52 @@ export function calculateRA(playerTasks, playerBench) {
     }
   }
   playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
-  console.log(playerBench);
   //calculating category points
   const grouped = _.groupBy(playerBench, "categoryID");
   const allPointsList = playerBench.map((bench) => bench.points);
-  let categoryPointsList = Object.entries(grouped)
-    .map(([_, group]) => {
-      return [...group.map(({ points }) => points)];
-    })
-    .map((item) => {
+  let categoryPointsList = Object.entries(grouped).map(([_, group]) => {
+    return [...group.map(({ points }) => points)];
+  });
+  if (mode == "easy") {
+    categoryPointsList = categoryPointsList.map((item) => {
+      return item.reduce((acc, curr) => acc + curr);
+    });
+  } else {
+    categoryPointsList = categoryPointsList.map((item) => {
       return item.reduce((acc, curr) => acc + curr) - Math.min(...item);
     });
-
+  }
   let overallPoints = categoryPointsList.reduce((acc, curr) => acc + curr);
   let floorPoints = 0;
 
-  hardPoints.forEach((point) => {
+  let overallRank = null;
+  let pointList = null;
+  let rankList = null;
+  switch (mode) {
+    case "hard":
+      pointList = hardPoints;
+      rankList = hardRanks;
+      break;
+    case "medium":
+      pointList = mediumPoints;
+      rankList = mediumRanks;
+      break;
+    case "easy":
+      pointList = easyPoints;
+      rankList = easyRanks;
+      break;
+  }
+  pointList.forEach((point) => {
     if (overallPoints > point) {
       floorPoints = point;
     }
   });
-  let overallRank = hardRanks[floorPoints] || "Unranked";
-  if (checkDivinity(allPointsList)) {
-    overallRank = "Divinity";
+  overallRank = rankList[floorPoints] || "Unranked";
+
+  if (overallRank == "Divine") {
+    if (checkDivinity(allPointsList)) {
+      overallRank = "Divinity";
+    }
   }
   console.log({
     overallPoints,
@@ -324,6 +369,7 @@ export function calculateRA(playerTasks, playerBench) {
     overallRank,
     subCategoryPoints: categoryPointsList,
     benchmarks: playerBench,
+    detailsOpen: false,
   };
 }
 
@@ -370,4 +416,79 @@ function checkDivinity(pointsList) {
     return point >= hardSubPoints[4];
   });
   return filter.length == 18;
+}
+
+export function calculateRankMed(bench, userTask) {
+  let points = 0;
+  let progress = 0;
+  let rank = "Unranked";
+  if (userTask.maxScore < bench.scores[0]) {
+    points = 0;
+    progress = Math.floor((userTask.maxScore * 100) / bench.scores[0]);
+  } else if (userTask.maxScore >= bench.scores[3]) {
+    points = mediumSubPoints[3];
+    let playerDiff = userTask.maxScore - bench.scores[3];
+    let perPoint =
+      (mediumSubPoints[3] - mediumSubPoints[2]) /
+      (bench.scores[3] - bench.scores[2]);
+
+    points += Math.floor(playerDiff * perPoint);
+    progress = 100;
+    rank = "Valour";
+  } else {
+    let i = 0;
+    bench.scores.forEach((score, index) => {
+      if (userTask.maxScore >= score) {
+        points = mediumSubPoints[index];
+        rank = mediumSubRanks[points];
+        i = index;
+      }
+    });
+    let playerDiff = userTask.maxScore - bench.scores[i];
+    let perPoint =
+      (mediumSubPoints[i + 1] - mediumSubPoints[i]) /
+      (bench.scores[i + 1] - bench.scores[i]);
+    points += Math.floor(playerDiff * perPoint);
+    progress = Math.floor(
+      (playerDiff * 100) / (bench.scores[i + 1] - bench.scores[i])
+    );
+  }
+  return [points, progress, rank];
+}
+export function calculateRankEasy(bench, userTask) {
+  let points = 0;
+  let progress = 0;
+  let rank = "Unranked";
+  if (userTask.maxScore < bench.scores[0]) {
+    points = 0;
+    progress = Math.floor((userTask.maxScore * 100) / bench.scores[0]);
+  } else if (userTask.maxScore >= bench.scores[3]) {
+    points = easySubPoints[3];
+    let playerDiff = userTask.maxScore - bench.scores[3];
+    let perPoint =
+      (easySubPoints[3] - easySubPoints[2]) /
+      (bench.scores[3] - bench.scores[2]);
+
+    points += Math.floor(playerDiff * perPoint);
+    progress = 100;
+    rank = "Platinum";
+  } else {
+    let i = 0;
+    bench.scores.forEach((score, index) => {
+      if (userTask.maxScore >= score) {
+        points = easySubPoints[index];
+        rank = easySubRanks[points];
+        i = index;
+      }
+    });
+    let playerDiff = userTask.maxScore - bench.scores[i];
+    let perPoint =
+      (easySubPoints[i + 1] - easySubPoints[i]) /
+      (bench.scores[i + 1] - bench.scores[i]);
+    points += Math.floor(playerDiff * perPoint);
+    progress = Math.floor(
+      (playerDiff * 100) / (bench.scores[i + 1] - bench.scores[i])
+    );
+  }
+  return [points, progress, rank];
 }

@@ -5,7 +5,7 @@ import {
 } from "../../helpers/voltaicData";
 import { caclulateAll, calculateRA } from "../../helpers/functions";
 import _ from "lodash";
-import { hardBench } from "../../helpers/revosectData";
+import { easyBench, hardBench, mediumBench } from "../../helpers/revosectData";
 
 export default {
   state() {
@@ -38,6 +38,20 @@ export default {
         benchmarks: [],
         detailsOpen: false,
       },
+      RAMedium: {
+        overallPoints: 0,
+        overallRank: "Unranked",
+        subCategoryPoints: [],
+        benchmarks: [],
+        detailsOpen: false,
+      },
+      RAEasy: {
+        overallPoints: 0,
+        overallRank: "Unranked",
+        subCategoryPoints: [],
+        benchmarks: [],
+        detailsOpen: false,
+      },
     };
   },
   getters: {
@@ -60,6 +74,12 @@ export default {
     RAHard(state) {
       return state.RAHard;
     },
+    RAMedium(state) {
+      return state.RAMedium;
+    },
+    RAEasy(state) {
+      return state.RAEasy;
+    },
   },
   mutations: {
     setVTAdvanced(state, payload) {
@@ -73,6 +93,12 @@ export default {
     },
     setRAHard(state, payload) {
       state.RAHard = payload;
+    },
+    setRAMedium(state, payload) {
+      state.RAMedium = payload;
+    },
+    setRAEasy(state, payload) {
+      state.RAEasy = payload;
     },
   },
   actions: {
@@ -101,10 +127,28 @@ export default {
       context.commit("setVTNovice", benchData);
     },
     setRAHard(context) {
-      let benchData = calculateRA(context.rootGetters.currentPlayerTasks, [
-        ...hardBench,
-      ]);
+      let benchData = calculateRA(
+        context.rootGetters.currentPlayerTasks,
+        [...hardBench],
+        "hard"
+      );
       context.commit("setRAHard", benchData);
+    },
+    setRAMedium(context) {
+      let benchData = calculateRA(
+        context.rootGetters.currentPlayerTasks,
+        [...mediumBench],
+        "medium"
+      );
+      context.commit("setRAMedium", benchData);
+    },
+    setRAEasy(context) {
+      let benchData = calculateRA(
+        context.rootGetters.currentPlayerTasks,
+        [...easyBench],
+        "easy"
+      );
+      context.commit("setRAEasy", benchData);
     },
   },
 };

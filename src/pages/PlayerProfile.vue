@@ -184,6 +184,7 @@ export default {
       if (!plays_agg?.aimlab) {
         this.$router.go();
       }
+
       this.$store.dispatch("updateCurrentPlayerInfo", this.playerInfo);
       sessionStorage.setItem("currentPlayer", this.playerInfo.username);
       this.$store.dispatch(
@@ -195,6 +196,8 @@ export default {
       this.$store.dispatch("setVTIntermediate");
       this.$store.dispatch("setVTNovice");
       this.$store.dispatch("setRAHard");
+      this.$store.dispatch("setRAMedium");
+      this.$store.dispatch("setRAEasy");
     }
   },
 };
