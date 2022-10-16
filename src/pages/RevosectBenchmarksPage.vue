@@ -117,7 +117,6 @@
             v-if="bench.detailsOpen"
           >
             <div class="pb-4 flex justify-between items-center">
-              <!-- text-mythic bg-mythic -->
               <span>Score Requirements</span>
               <div class="flex flex-col gap-0.5">
                 <div class="text-center grid gap-0.5" :class="scoreReqGrid">
@@ -217,6 +216,7 @@
       </section>
     </div>
   </div>
+  <!-- text-mythic bg-mythic grid-cols-5 grid-cols-4 -->
 </template>
 <script>
 import {
