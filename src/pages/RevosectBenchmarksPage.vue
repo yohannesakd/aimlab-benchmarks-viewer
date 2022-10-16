@@ -137,7 +137,7 @@
                 <span v-if="replayLoading">Loading...</span>
                 <span v-else>Watch Replay</span>
               </button>
-              <a
+              <button
                 class="
                   cursor-pointer
                   flex
@@ -146,9 +146,10 @@
                   transition
                   hover:text-slate-300
                 "
+                @click="handlePlayScenario(bench.id)"
               >
-                <play-icon class="h-5 w-5 transition"></play-icon>Play</a
-              >
+                <play-icon class="h-5 w-5 transition"></play-icon>Play
+              </button>
               <router-link
                 class="transition hover:text-slate-300"
                 :to="'/tasks/' + bench.id"
@@ -191,11 +192,14 @@ import {
   hardPoints,
   hardSubPoints,
 } from "@/helpers/revosectData.js";
-import { findReplay } from "@/helpers/functions.js";
+import {
+  findReplay,
+  findWorkshopId,
+  taskDeepLink,
+} from "@/helpers/functions.js";
 export default {
   data() {
     return {
-      dropdownIsOpen: false,
       replayLoading: false,
       currentTabIndex: 2,
       categories: ["Clicking", "Tracking", "Switching"],
@@ -316,6 +320,11 @@ export default {
       this.VTBenchmarks.forEach((element) => {
         element.detailsOpen = false;
       });
+    },
+    async handlePlayScenario(taskId) {
+      const workshopId = await findWorkshopId(taskId);
+      const taskLink = taskDeepLink(workshopId);
+      window.open(taskLink, "_blank");
     },
     async replayLink(taskId, weapon) {
       this.replayLoading = true;

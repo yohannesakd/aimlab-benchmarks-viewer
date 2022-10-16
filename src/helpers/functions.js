@@ -13,7 +13,7 @@ import {
   hardSubRanks,
   hardRanks,
 } from "./revosectData";
-import { APIFetch, GET_TASK_LEADERBOARD } from "./queries.js";
+import { APIFetch, GET_TASK_LEADERBOARD, GET_TASK_BY_ID } from "./queries.js";
 import _ from "lodash";
 
 //UTILITY FUNCTIONS
@@ -23,6 +23,10 @@ export function taskDeepLink(taskId) {
 }
 export function replayDeepLink(playId) {
   return `https://go.aimlab.gg/v1/redirects?link=aimlab%3a%2f%2fcompare%3fid%3d${playId}%26source%3d84966503A24BD515&link=steam%3a%2f%2frungameid%2f714010`;
+}
+export async function findWorkshopId(taskId) {
+  const task = await APIFetch(GET_TASK_BY_ID, { slug: taskId });
+  return task.aimlab.task.workshop_id;
 }
 export async function findReplay(playerName, taskId, weapon) {
   let limit = 100;
@@ -44,7 +48,7 @@ export async function findReplay(playerName, taskId, weapon) {
       let located = [...ldb.aimlab.leaderboard.data].filter(
         (entry) => entry.username == playerName
       );
-      console.log(located);
+      // console.log(located);
       if (_.isEmpty(located)) {
         console.log("not found on page", offset / limit + 1);
         offset += limit;
@@ -285,6 +289,7 @@ export function calculateRA(playerTasks, playerBench) {
     }
   }
   playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
+  console.log(playerBench);
   //calculating category points
   const grouped = _.groupBy(playerBench, "categoryID");
   const allPointsList = playerBench.map((bench) => bench.points);

@@ -1,5 +1,5 @@
 <template>
-  <div class="dropdown w-40" ref="wrapper">
+  <div class="dropdown w-40" ref="wrapper" @click="isOpen = !isOpen">
     <div
       id="selected"
       class="
@@ -13,7 +13,6 @@
         transition
         hover:bg-slate-600
       "
-      @click="isOpen = !isOpen"
     >
       <span class="inline px-2">{{ selectedTab.label }}</span>
       <chevron-icon
@@ -52,7 +51,7 @@ export default {
       if (this.$refs.wrapper.contains(event.target)) {
         return;
       }
-      this.$emit("close");
+      this.isOpen = false;
     },
   },
 };

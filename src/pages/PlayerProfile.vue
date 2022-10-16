@@ -190,6 +190,7 @@ export default {
         "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg
       );
+      console.log(plays_agg.aimlab.plays_agg);
       this.$store.dispatch("setVTAdvanced");
       this.$store.dispatch("setVTIntermediate");
       this.$store.dispatch("setVTNovice");
