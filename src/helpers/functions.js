@@ -21,6 +21,9 @@ import {
   easyRanks,
   easySubPoints,
   easySubRanks,
+  hardBench,
+  mediumBench,
+  easyBench,
 } from "./revosectData";
 import { APIFetch, GET_TASK_LEADERBOARD, GET_TASK_BY_ID } from "./queries.js";
 import _ from "lodash";
@@ -77,7 +80,7 @@ export async function findReplay(playerName, taskId, weapon) {
 
 //Voltaic Functions
 //Take player full task list and the benchmark data
-export function caclulateAll(playerTasks, playerBench, mode) {
+export function caclulateVT(playerTasks, playerBench, mode) {
   playerBench.forEach((bench) => {
     bench.avgAcc = 0;
     bench.count = 0;
@@ -270,15 +273,28 @@ function calculateRankNov(bench, userTask) {
 //End of Voltaic Section
 //Revosect section
 //Single function to handle all benchmark levels calculation
-export function calculateRA(playerTasks, benchData, mode) {
+export function calculateRA(playerTasks, mode) {
+  let benchData = null;
+  switch (mode) {
+    case "hard":
+      benchData = hardBench;
+      break;
+    case "medium":
+      benchData = mediumBench;
+      break;
+    case "easy":
+      benchData = easyBench;
+      break;
+  }
+
   let playerBench = getBenchmarkObject(playerTasks, benchData, mode);
   playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
   //calculating category points
-  const grouped = _.groupBy(playerBench, "categoryID");
-  const allPointsList = playerBench.map((bench) => bench.points);
-  let categoryPointsList = Object.entries(grouped).map(([_, group]) => {
+  const groupedTasks = _.groupBy(playerBench, "categoryID");
+  let categoryPointsList = Object.entries(groupedTasks).map(([_, group]) => {
     return [...group.map(({ points }) => points)];
   });
+  const allPointsList = playerBench.map((bench) => bench.points);
   let categoryPoints = null;
   //different point calculation between easy benchmarks and med/hard benchmarks
   if (mode == "easy") {
@@ -290,26 +306,8 @@ export function calculateRA(playerTasks, benchData, mode) {
       return item.reduce((acc, curr) => acc + curr) - Math.min(...item);
     });
   }
-
   //calculating overall points
   let overallPoints = categoryPoints.reduce((acc, curr) => acc + curr);
-
-  let pointList = null;
-  let rankList = null;
-  switch (mode) {
-    case "hard":
-      pointList = hardPoints;
-      rankList = hardRanks;
-      break;
-    case "medium":
-      pointList = mediumPoints;
-      rankList = mediumRanks;
-      break;
-    case "easy":
-      pointList = easyPoints;
-      rankList = easyRanks;
-      break;
-  }
 
   //Check if player is valour/platinum to add excess points to the total
   if (mode != "hard") {
@@ -325,7 +323,23 @@ export function calculateRA(playerTasks, benchData, mode) {
     categoryPoints = fixedData.categoryPoints;
   }
   //finding the player's rank
+  let pointList = null;
+  let rankList = null;
   let floorPoints = 0;
+  switch (mode) {
+    case "hard":
+      pointList = hardPoints;
+      rankList = hardRanks;
+      break;
+    case "medium":
+      pointList = mediumPoints;
+      rankList = mediumRanks;
+      break;
+    case "easy":
+      pointList = easyPoints;
+      rankList = easyRanks;
+      break;
+  }
   pointList.forEach((point) => {
     if (overallPoints > point) {
       floorPoints = point;
@@ -346,7 +360,7 @@ export function calculateRA(playerTasks, benchData, mode) {
     detailsOpen: false,
   };
 }
-
+//Create a complete object with player scores, rank, points and scenario information
 function getBenchmarkObject(playerTasks, benchData, mode) {
   benchData.forEach((bench) => {
     bench.avgAcc = 0;
@@ -442,10 +456,11 @@ function calculateRankRA(bench, userTask, benchRanks, benchPoints) {
 }
 
 function checkDivinity(pointsList) {
-  let filter = pointsList.filter((point) => {
-    return point >= hardSubPoints[4];
-  });
-  return filter.length == 18;
+  return (
+    pointsList.filter((point) => {
+      return point >= hardSubPoints[4];
+    }).length == 18
+  );
 }
 
 function checkExcessPoints(
@@ -492,7 +507,6 @@ function checkExcessPoints(
     }
     return bench;
   });
-  console.log(fixedBench);
   if (!(totalPoints > rankPoints)) {
     return {
       playerBench: fixedBench,

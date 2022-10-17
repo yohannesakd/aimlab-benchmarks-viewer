@@ -124,7 +124,7 @@
                   <span
                     v-for="(rank, index) in rankList"
                     :key="index"
-                    class="px-8 py-2 bg-slate-700 inline-block"
+                    class="px-8 py-2 bg-slate-700 text-center"
                     :class="colorLookup[rank]"
                     >{{ rank }}</span
                   >
@@ -133,7 +133,7 @@
                   <span
                     v-for="(score, index) in bench.scores"
                     :key="index"
-                    class="px-8 py-2 bg-slate-700 inline-block"
+                    class="px-8 py-2 bg-slate-700"
                     >{{ score }}</span
                   >
                 </div>
@@ -272,9 +272,6 @@ export default {
 
         case "easy":
           return ["Bronze", "Silver", "Gold", "Platinum"];
-
-        default:
-          break;
       }
     },
     RABenchmarks() {

@@ -185,18 +185,14 @@ export default {
         this.$router.go();
       }
 
-      this.$store.dispatch("updateCurrentPlayerInfo", this.playerInfo);
       sessionStorage.setItem("currentPlayer", this.playerInfo.username);
+      this.$store.dispatch("updateCurrentPlayerInfo", this.playerInfo);
       this.$store.dispatch(
         "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg
       );
-      this.$store.dispatch("setVTAdvanced");
-      this.$store.dispatch("setVTIntermediate");
-      this.$store.dispatch("setVTNovice");
-      this.$store.dispatch("setRAHard");
-      this.$store.dispatch("setRAMedium");
-      this.$store.dispatch("setRAEasy");
+      this.$store.dispatch("setVTBenches");
+      this.$store.dispatch("setRABenches");
     }
   },
 };

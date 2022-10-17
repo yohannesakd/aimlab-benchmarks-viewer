@@ -25,7 +25,7 @@ module.exports = {
         immortal: "#c36eff",
         archon: "#ff0000",
         ethereal: "#91d7e4",
-        divine: "#fff",
+        divine: "#999",
       },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
