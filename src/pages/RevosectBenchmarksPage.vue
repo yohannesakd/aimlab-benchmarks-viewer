@@ -25,18 +25,19 @@
             {{ RABenchmarks.overallRank }}
           </p>
         </div>
-        <div class="text-slate-200 tracking-wide flex items-center">
+
+        <div class="text-slate-200 tracking-wide inline">
           <p>
             Total Points :
             <span class="font-bold">{{ RABenchmarks.overallPoints }}</span>
           </p>
-          <!-- <p>SubCategories</p> -->
-          <!-- <ul class="pl-4">
-            <li v-for="(item, index) in mappedEnergy" :key="index">
-              {{ item.category }} :
-              <span class="font-bold">{{ item.energy }}</span> ({{ item.rank }})
+          <p>Subcategory Points</p>
+          <ul class="pl-4">
+            <li v-for="(item, index) in subCategoryPoints" :key="index">
+              {{ subCategories[index] }} : {{ item }}
+              <!-- <span class="font-bold">{{ item.energy }}</span> ({{ item.rank }}) -->
             </li>
-          </ul> -->
+          </ul>
         </div>
       </div>
       <section class="p-4 relative" id="benchmark-table">
@@ -300,33 +301,8 @@ export default {
         Divine: "text-divine",
       };
     },
-    mappedEnergy() {
-      let pointsList;
-      let subPointsList;
-      let rankList;
-      switch (this.currentTab.value) {
-        case "hard":
-          pointsList = hardPoints;
-          subPointsList = hardSubPoints;
-          rankList = hardRanks;
-          break;
-        case "med":
-          break;
-        case "easy":
-          break;
-        default:
-          break;
-      }
-      // this.RABenchmarks.subCategoryPoints.map((point, index) => {
-      //   return {
-      //     rank:
-      //       point < energyList[1]
-      //         ? "Unranked"
-      //         : rankList[Math.floor(energy / 100) * 100],
-      //     energy,
-      //     category: categories[index],
-      //   };
-      // });
+    subCategoryPoints() {
+      return this.RABenchmarks.subCategoryPoints;
     },
   },
   methods: {

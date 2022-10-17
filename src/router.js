@@ -9,6 +9,7 @@ import PlayerTasksOverview from "./pages/PlayerTasksOverview.vue";
 import RevosectBenchmarksPage from "./pages/RevosectBenchmarksPage.vue";
 import VoltaicBenchmarksPage from "./pages/VoltaicBenchmarksPage.vue";
 import TaskView from "./pages/TaskView.vue";
+import AboutPage from "./pages/AboutPage.vue";
 // import TaskLeaderboard from "./pages/TaskLeaderboard.vue";
 
 const router = createRouter({
@@ -76,8 +77,8 @@ const router = createRouter({
       component: TaskView,
       props: true,
     },
-
-    // { path: "/:notFound(.*)", component: null },
+    { path: "/about", component: AboutPage },
+    { path: "/:notFound(.*)", component: null },
   ],
 });
 
