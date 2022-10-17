@@ -266,10 +266,10 @@ export default {
       switch (this.currentTab.value) {
         case "hard":
           return ["Mythic", "Immortal", "Archon", "Ethereal", "Divine"];
-          break;
-
-        default:
-          break;
+        case "medium":
+          return ["Ace", "Legend", "Sentinel", "Valour"];
+        case "easy":
+          return ["Bronze", "Silver", "Gold", "Platinum"];
       }
     },
     RABenchmarks() {
