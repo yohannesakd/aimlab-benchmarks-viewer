@@ -45,7 +45,7 @@
 export default {
   data() {
     return {
-      navLinks: ["home", "profile", "tasks", "about"],
+      navLinks: ["home", "profile", "tasks"],
     };
   },
   computed: {},

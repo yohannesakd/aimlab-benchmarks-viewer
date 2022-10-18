@@ -124,7 +124,7 @@
                   <span
                     v-for="(rank, index) in rankList"
                     :key="index"
-                    class="px-8 py-2 bg-slate-700 inline-block"
+                    class="px-8 py-2 bg-slate-700 text-center"
                     :class="colorLookup[rank]"
                     >{{ rank }}</span
                   >
@@ -133,7 +133,7 @@
                   <span
                     v-for="(score, index) in bench.scores"
                     :key="index"
-                    class="px-8 py-2 bg-slate-700 inline-block"
+                    class="px-8 py-2 bg-slate-700"
                     >{{ score }}</span
                   >
                 </div>
@@ -266,8 +266,10 @@ export default {
       switch (this.currentTab.value) {
         case "hard":
           return ["Mythic", "Immortal", "Archon", "Ethereal", "Divine"];
+
         case "medium":
           return ["Ace", "Legend", "Sentinel", "Valour"];
+
         case "easy":
           return ["Bronze", "Silver", "Gold", "Platinum"];
       }

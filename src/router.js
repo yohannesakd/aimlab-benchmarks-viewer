@@ -8,6 +8,9 @@ import PlayerProfile from "./pages/PlayerProfile.vue";
 import PlayerTasksOverview from "./pages/PlayerTasksOverview.vue";
 import RevosectBenchmarksPage from "./pages/RevosectBenchmarksPage.vue";
 import VoltaicBenchmarksPage from "./pages/VoltaicBenchmarksPage.vue";
+import LeaderboardsPage from "./pages/LeaderboardsPage.vue";
+import VoltaicLeaderboardsPage from "./pages/VoltaicLeaderboardsPage.vue";
+import RevosectLeaderboardsPage from "./pages/RevosectLeaderboardsPage.vue";
 import TaskView from "./pages/TaskView.vue";
 import AboutPage from "./pages/AboutPage.vue";
 // import TaskLeaderboard from "./pages/TaskLeaderboard.vue";
@@ -23,6 +26,7 @@ const router = createRouter({
       beforeEnter: (_, from) => {
         if (from.name == "profile-overview") {
           sessionStorage.removeItem("currentPlayer");
+          return;
         }
         if (sessionStorage.getItem("currentPlayer")) {
           router.push("/profile/" + sessionStorage.getItem("currentPlayer"));
@@ -61,6 +65,7 @@ const router = createRouter({
       beforeEnter: (_, from) => {
         if (from.name == "task-view") {
           sessionStorage.removeItem("currentTask");
+          return;
         }
         if (sessionStorage.getItem("currentTask")) {
           router.push("/tasks/" + sessionStorage.getItem("currentTask"));
@@ -76,6 +81,23 @@ const router = createRouter({
       path: "/tasks/:taskId/leaderboard",
       component: TaskView,
       props: true,
+    },
+
+    {
+      path: "/leaderboards",
+      component: LeaderboardsPage,
+      children: [
+        {
+          name: "vt-leaderboards",
+          path: "vt",
+          component: VoltaicLeaderboardsPage,
+        },
+        {
+          name: "ra-leaderboards",
+          path: "ra",
+          component: RevosectLeaderboardsPage,
+        },
+      ],
     },
     { path: "/about", component: AboutPage },
     { path: "/:notFound(.*)", component: null },
