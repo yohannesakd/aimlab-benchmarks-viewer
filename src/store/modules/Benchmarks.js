@@ -123,6 +123,7 @@ export default {
       context.commit("setVTAdvanced", VTAdvanced);
     },
     setRABenches(context) {
+      console.time("ra-benches");
       let RAHard = calculateRA(context.rootGetters.currentPlayerTasks, "hard");
       let RAMedium = calculateRA(
         context.rootGetters.currentPlayerTasks,
@@ -132,6 +133,7 @@ export default {
       context.commit("setRAEasy", RAEasy);
       context.commit("setRAMedium", RAMedium);
       context.commit("setRAHard", RAHard);
+      console.timeEnd("ra-benches");
     },
   },
 };

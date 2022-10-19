@@ -34,6 +34,7 @@ export default {
       context.commit("updateCurrentPlayerInfo", payload);
     },
     updateCurrentPlayerTasks(context, payload) {
+      console.time("player-tasks");
       let plays = payload.map((task) => {
         return {
           name: task.group_by.task_name,
@@ -60,6 +61,7 @@ export default {
         a.count > b.count ? -1 : b.count > a.count ? 1 : 0
       );
       context.commit("updateCurrentPlayerTasks", plays);
+      console.timeEnd("player-tasks");
     },
   },
 };
