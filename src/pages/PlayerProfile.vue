@@ -192,7 +192,7 @@ export default {
         "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg
       );
-      console.time("userInfo");
+      console.timeEnd("userInfo");
       this.$store.dispatch("setVTBenches");
       this.$store.dispatch("setRABenches");
     }
