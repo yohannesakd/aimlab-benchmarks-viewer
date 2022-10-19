@@ -5,7 +5,6 @@ import {
 } from "../../helpers/voltaicData";
 import { caclulateVT, calculateRA } from "../../helpers/functions";
 import _ from "lodash";
-import { easyBench, hardBench, mediumBench } from "../../helpers/revosectData";
 
 export default {
   state() {
@@ -122,8 +121,11 @@ export default {
       context.commit("setVTIntermediate", VTIntermediate);
       context.commit("setVTAdvanced", VTAdvanced);
     },
+
     setRABenches(context) {
+      console.time("raBench");
       let RAHard = calculateRA(context.rootGetters.currentPlayerTasks, "hard");
+      console.timeLog("raBench");
       let RAMedium = calculateRA(
         context.rootGetters.currentPlayerTasks,
         "medium"
@@ -132,6 +134,7 @@ export default {
       context.commit("setRAEasy", RAEasy);
       context.commit("setRAMedium", RAMedium);
       context.commit("setRAHard", RAHard);
+      console.timeEnd("raBench");
     },
   },
 };

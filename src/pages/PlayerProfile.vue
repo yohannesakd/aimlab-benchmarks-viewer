@@ -155,6 +155,7 @@ export default {
   async mounted() {
     this.playerInfo = {};
     this.isLoading = true;
+    console.time("userInfo");
     let aimlabProfile = await queries.APIFetch(queries.GET_USER_INFO, {
       username: this.username,
     });
@@ -191,6 +192,7 @@ export default {
         "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg
       );
+      console.time("userInfo");
       this.$store.dispatch("setVTBenches");
       this.$store.dispatch("setRABenches");
     }

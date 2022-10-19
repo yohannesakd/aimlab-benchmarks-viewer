@@ -25,7 +25,12 @@ import {
   mediumBench,
   easyBench,
 } from "./revosectData";
-import { APIFetch, GET_TASK_LEADERBOARD, GET_TASK_BY_ID } from "./queries.js";
+import {
+  APIFetch,
+  GET_TASK_LEADERBOARD,
+  GET_TASK_BY_ID,
+  GET_USER_PLAYS_AGG,
+} from "./queries.js";
 import _ from "lodash";
 
 //UTILITY FUNCTIONS
@@ -78,6 +83,34 @@ export async function findReplay(playerName, taskId, weapon) {
   }
 }
 
+export function cleanUpUserTasks(taskList) {
+  let data = taskList.map((task) => {
+    return {
+      name: task.group_by.task_name,
+      id: task.group_by.task_id,
+      count: task.aggregate.count,
+      avgScore: task.aggregate.avg.score,
+      avgAcc: task.aggregate.avg.accuracy,
+      maxScore: task.aggregate.max.score,
+      maxAcc: task.aggregate.max.accuracy,
+    };
+  });
+  data = data
+    .filter((task) => {
+      if (task.name) return true;
+      if (!task.id.includes(".")) return true;
+    })
+    .map((task) => {
+      if (!task.name) {
+        task.name = task.id;
+      }
+      return task;
+    });
+  data = data.sort((a, b) =>
+    a.count > b.count ? -1 : b.count > a.count ? 1 : 0
+  );
+  return data;
+}
 //Voltaic Functions
 //Take player full task list and the benchmark data
 export function caclulateVT(playerTasks, playerBench, mode) {
@@ -352,6 +385,7 @@ export function calculateRA(playerTasks, mode) {
       overallRank = "Divinity";
     }
   }
+
   return {
     overallPoints,
     overallRank,
@@ -516,3 +550,52 @@ function checkExcessPoints(
   }
   return { playerBench, overallPoints, categoryPoints };
 }
+// async function getLeaderboardPlayers(benchItem) {
+//   console.time("ldbTime");
+//   const res = await APIFetch(GET_TASK_LEADERBOARD, {
+//     leaderboardInput: {
+//       clientId: "aimlab",
+//       limit: 100,
+//       offset: 0,
+//       taskId: benchItem.id,
+//       taskMode: 0,
+//       weaponId: benchItem.weapon,
+//     },
+//   });
+//   console.timeEnd("ldbTime");
+//   return [
+//     ...res.aimlab.leaderboard.data.map((play) => {
+//       return { id: play.user_id, username: play.username };
+//     }),
+//   ];
+// }
+
+// let listitems = await getLeaderboardPlayers(hardBench[1]);
+
+// console.log(myList);
+
+// {
+//   data.forEach(async (user) => {
+//     const response = await APIFetch(GET_USER_PLAYS_AGG, {
+//       where: {
+//         is_practice: {
+//           _eq: false,
+//         },
+//         score: {
+//           _gt: 0,
+//         },
+//         user_id: {
+//           _eq: user.id,
+//         },
+//       },
+//     });
+//     let userTasks = cleanUpUserTasks(response.aimlab.plays_agg);
+//     let userBench = calculateRA(userTasks, "hard");
+//     playerList.push({
+//       name: user.username,
+//       data: userBench,
+//     });
+//   });
+//   console.timeEnd("ldbTime");
+//   return playerList;
+// }

@@ -87,6 +87,7 @@ const router = createRouter({
       path: "/leaderboards",
       component: LeaderboardsPage,
       children: [
+        { path: "", redirect: { name: "ra-leaderboards" } },
         {
           name: "vt-leaderboards",
           path: "vt",
