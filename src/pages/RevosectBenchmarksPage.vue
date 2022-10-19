@@ -111,16 +111,17 @@
               text-slate-200
               mt-2
               py-2
-              pl-4
               transition
               border-t-2 border-t-slate-600
             "
             v-if="bench.detailsOpen"
           >
-            <div class="pb-4 flex justify-between items-center">
-              <span>Score Requirements</span>
+            <div class="pb-4">
               <div class="flex flex-col gap-0.5">
-                <div class="text-center grid gap-0.5" :class="scoreReqGrid">
+                <div
+                  class="text-center grid gap-0.5 min-w-3/4"
+                  :class="scoreReqGrid"
+                >
                   <span
                     v-for="(rank, index) in rankList"
                     :key="index"
@@ -139,7 +140,7 @@
                 </div>
               </div>
             </div>
-            <div class="flex gap-10">
+            <div class="flex gap-10 pl-4">
               <div class="flex flex-col gap-2">
                 <div class="grid grid-cols-2">
                   <p v-if="bench.count">
@@ -224,12 +225,7 @@
   <!-- text-mythic bg-mythic grid-cols-5 grid-cols-4 -->
 </template>
 <script>
-import {
-  hardRanks,
-  hardSubRanks,
-  hardPoints,
-  hardSubPoints,
-} from "@/helpers/revosectData.js";
+import * as ra from "../helpers/revosectData.js";
 import {
   findReplay,
   findWorkshopId,
@@ -272,6 +268,16 @@ export default {
 
         case "easy":
           return ["Bronze", "Silver", "Gold", "Platinum"];
+      }
+    },
+    pointList() {
+      switch (this.currentTab.value) {
+        case "hard":
+          return ra.hardSubPoints;
+        case "medium":
+          return ra.mediumPoints;
+        case "easy":
+          return ra.easySubPoints;
       }
     },
     RABenchmarks() {

@@ -305,6 +305,7 @@ function calculateRankNov(bench, userTask) {
 
 //End of Voltaic Section
 //Revosect section
+<<<<<<< Updated upstream
 //Single function to handle all benchmark levels calculation
 export function calculateRA(playerTasks, mode) {
   let benchData = null;
@@ -318,6 +319,45 @@ export function calculateRA(playerTasks, mode) {
     case "easy":
       benchData = easyBench;
       break;
+=======
+export function calculateRA(playerTasks, playerBench, mode) {
+  playerBench.forEach((bench) => {
+    bench.avgAcc = 0;
+    bench.count = 0;
+    bench.maxScore = 0;
+    bench.avgScore = 0;
+    bench.points = 0;
+    bench.rank = "Unranked";
+  });
+  for (let i = 0; i < playerTasks.length; i++) {
+    for (let j = 0; j < playerBench.length; j++) {
+      if (playerTasks[i].id == playerBench[j].id) {
+        let rankData = [0, 0, "Unranked"];
+        if (playerTasks[i].count > 0) {
+          //calculate rank and points for different modes
+          switch (mode) {
+            case "hard":
+              rankData = calculateRankHard(playerBench[j], playerTasks[i]);
+              break;
+            case "medium":
+              rankData = calculateRankMed(playerBench[j], playerTasks[i]);
+              break;
+            case "easy":
+              rankData = calculateRankEasy(playerBench[j], playerTasks[i]);
+              break;
+          }
+        }
+
+        playerBench[j] = {
+          ...playerBench[j],
+          ...playerTasks[i],
+        };
+        playerBench[j].points = rankData[0] || 0;
+        playerBench[j].progress = rankData[1] || 0;
+        playerBench[j].rank = rankData[2] || "Unranked";
+      }
+    }
+>>>>>>> Stashed changes
   }
 
   let playerBench = getBenchmarkObject(playerTasks, benchData, mode);
