@@ -549,52 +549,59 @@ function checkExcessPoints(
   }
   return { playerBench, overallPoints, categoryPoints };
 }
-// async function getLeaderboardPlayers(benchItem) {
-//   console.time("ldbTime");
-//   const res = await APIFetch(GET_TASK_LEADERBOARD, {
-//     leaderboardInput: {
-//       clientId: "aimlab",
-//       limit: 100,
-//       offset: 0,
-//       taskId: benchItem.id,
-//       taskMode: 0,
-//       weaponId: benchItem.weapon,
-//     },
-//   });
-//   console.timeEnd("ldbTime");
-//   return [
-//     ...res.aimlab.leaderboard.data.map((play) => {
-//       return { id: play.user_id, username: play.username };
-//     }),
-//   ];
-// }
 
-// let listitems = await getLeaderboardPlayers(hardBench[1]);
+async function getLeaderboardPlayers(fullBench) {
+  let playerList = [];
+  console.time("leaderboard");
+  for (let bench of fullBench) {
+    let res = null;
+    let offset = 0;
+    let limit = 100;
+    let currentBenchList = [];
+    while (true) {
+      res = await APIFetch(GET_TASK_LEADERBOARD, {
+        leaderboardInput: {
+          clientId: "aimlab",
+          limit: limit,
+          offset: offset,
+          taskId: bench.id,
+          taskMode: 0,
+          weaponId: bench.weapon,
+        },
+      });
+      let data = res.aimlab.leaderboard.data;
+      currentBenchList.push(...data);
+      if (data[data.length - 1].score > bench.scores[0]) {
+        offset += limit;
+        continue;
+      } else {
+        break;
+      }
+    }
+    let filteredData = currentBenchList.map((player) => {
+      return { id: player.user_id, username: player.username };
+    });
+    playerList.push(...filteredData);
+  }
+  // for (let player of playerList) {
+  //   let res = await APIFetch(GET_USER_PLAYS_AGG, {
+  //     where: {
+  //       is_practice: {
+  //         _eq: false,
+  //       },
+  //       score: {
+  //         _gt: 0,
+  //       },
+  //       user_id: {
+  //         _eq: player.id,
+  //       },
+  //     },
+  //   });
+  //   playerListData.push(res.aimlab.plays_agg);
+  // }
+  console.timeEnd("leaderboard");
+  console.log(playerList);
+  // console.log(playerListData);
+}
 
-// console.log(myList);
-
-// {
-//   data.forEach(async (user) => {
-//     const response = await APIFetch(GET_USER_PLAYS_AGG, {
-//       where: {
-//         is_practice: {
-//           _eq: false,
-//         },
-//         score: {
-//           _gt: 0,
-//         },
-//         user_id: {
-//           _eq: user.id,
-//         },
-//       },
-//     });
-//     let userTasks = cleanUpUserTasks(response.aimlab.plays_agg);
-//     let userBench = calculateRA(userTasks, "hard");
-//     playerList.push({
-//       name: user.username,
-//       data: userBench,
-//     });
-//   });
-//   console.timeEnd("ldbTime");
-//   return playerList;
-// }
+getLeaderboardPlayers(hardBench);
