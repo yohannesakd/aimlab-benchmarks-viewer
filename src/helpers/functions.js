@@ -24,6 +24,7 @@ import {
   hardBench,
   mediumBench,
   easyBench,
+  categories,
 } from "./revosectData";
 import {
   APIFetch,
@@ -306,7 +307,7 @@ function calculateRankNov(bench, userTask) {
 //End of Voltaic Section
 //Revosect section
 //Single function to handle all benchmark levels calculation
-export function calculateRA(playerTasks, mode) {
+export function calculateRA(playerData, mode) {
   let benchData = null;
   switch (mode) {
     case "hard":
@@ -319,7 +320,7 @@ export function calculateRA(playerTasks, mode) {
       benchData = easyBench;
       break;
   }
-  let playerBench = getBenchmarkObject(playerTasks, benchData, mode);
+  let playerBench = getBenchmarkObject(playerData, benchData, mode);
   playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
   //calculating category points
   const groupedTasks = _.groupBy(playerBench, "categoryID");
@@ -384,17 +385,21 @@ export function calculateRA(playerTasks, mode) {
       overallRank = "Divinity";
     }
   }
-
   return {
     overallPoints,
     overallRank,
+    allPoints: allPointsList,
     subCategoryPoints: categoryPoints,
     benchmarks: playerBench,
     detailsOpen: false,
   };
 }
 //Create a complete object with player scores, rank, points and scenario information
-function getBenchmarkObject(playerTasks, benchData, mode) {
+function getBenchmarkObject(playerData, benchData, mode) {
+  let currentPlayer = playerData.id;
+  let playerTasks = playerData.tasks;
+  //Score Overrides section
+
   benchData.forEach((bench) => {
     bench.avgAcc = 0;
     bench.count = 0;
@@ -550,58 +555,156 @@ function checkExcessPoints(
   return { playerBench, overallPoints, categoryPoints };
 }
 
-async function getLeaderboardPlayers(fullBench) {
-  let playerList = [];
-  console.time("leaderboard");
-  for (let bench of fullBench) {
-    let res = null;
-    let offset = 0;
-    let limit = 100;
-    let currentBenchList = [];
-    while (true) {
-      res = await APIFetch(GET_TASK_LEADERBOARD, {
-        leaderboardInput: {
-          clientId: "aimlab",
-          limit: limit,
-          offset: offset,
-          taskId: bench.id,
-          taskMode: 0,
-          weaponId: bench.weapon,
-        },
-      });
-      let data = res.aimlab.leaderboard.data;
-      currentBenchList.push(...data);
-      if (data[data.length - 1].score > bench.scores[0]) {
-        offset += limit;
-        continue;
-      } else {
+export function organizeLeaderboard(playerList, fullBench, mode) {
+  for (let task of fullBench) {
+    let index = playerList[task.id].length;
+    for (let i = 0; i < playerList[task.id].length; i++) {
+      if (playerList[task.id][i]?.score < task.scores[0]) {
+        index = i;
         break;
       }
     }
-    let filteredData = currentBenchList.map((player) => {
-      return { id: player.user_id, username: player.username };
-    });
-    playerList.push(...filteredData);
+    playerList[task.id] = playerList[task.id].slice(0, index);
   }
-  // for (let player of playerList) {
-  //   let res = await APIFetch(GET_USER_PLAYS_AGG, {
-  //     where: {
-  //       is_practice: {
-  //         _eq: false,
-  //       },
-  //       score: {
-  //         _gt: 0,
-  //       },
-  //       user_id: {
-  //         _eq: player.id,
-  //       },
-  //     },
-  //   });
-  //   playerListData.push(res.aimlab.plays_agg);
-  // }
-  console.timeEnd("leaderboard");
-  console.log(playerList);
-  // console.log(playerListData);
-}
+  let allPlayers = [];
+  Object.entries(playerList).forEach((task) => {
+    allPlayers.push(...task[1]);
+  });
 
-getLeaderboardPlayers(hardBench);
+  let uniquePlayers = [
+    ...new Map(allPlayers.map((item) => [item["user_id"], item])).values(),
+  ].map((player) => {
+    return {
+      id: player.user_id,
+      username: player.username,
+      scores: [],
+    };
+  });
+  uniquePlayers.forEach((player) => {
+    Object.entries(playerList).forEach((task) => {
+      let foundPlay = task[1].find((task) => task.user_id == player.id);
+      if (foundPlay) {
+        player.scores.push({
+          id: foundPlay.task_id,
+          maxScore: foundPlay.score,
+          count: 1,
+        });
+      }
+    });
+  });
+
+  // uniquePlayers = [
+  //   {
+  //     username: "VT Matty",
+  //     scores: {
+  //       id: "7C41BF18A9F63928",
+  //       tasks: [
+  //         {
+  //           id: "CsLevel.rA hebe.f96a4d2c.R2GOSC",
+  //           maxScore: 1481,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.Unans.jumptrac.R241E2",
+  //           maxScore: 3455,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.hebellionaire.XYSmooth.R32JN4",
+  //           maxScore: 3007,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.hebellionaire.41e73264.R352T3",
+  //           maxScore: 148,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.hebebebebebebe.bfts rab.R2IVS9",
+  //           maxScore: 154,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.rA Unans.rA Waves.R35D7E",
+  //           maxScore: 60,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.rA hebe.JumpClic.R294OG",
+  //           maxScore: 7021,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.morcaillionaire.rA React.R2KW6C",
+  //           maxScore: 2743,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.rA Unans.rA Widef.R35DDI",
+  //           maxScore: 130,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.morcaillionaire.rA Straf.R35DSK",
+  //           maxScore: 3037,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.rA hebe.rA Fourw.R2J1AJ",
+  //           maxScore: 1830,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.rA hebe.morcaCli.R2673Z",
+  //           maxScore: 1313,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.rA hebe.rA Three.R2IW6T",
+  //           maxScore: 1212,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.Unans.rA XYCli.QVY03S",
+  //           maxScore: 1448,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.morcaillionaire.rA Preci.R35DLM",
+  //           maxScore: 3607,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.rA hebe.morcaTS .R26763",
+  //           maxScore: 69,
+  //           count: 1,
+  //         },
+  //         {
+  //           id: "CsLevel.rA Unans.rA XYswi.R35D6N",
+  //           maxScore: 110,
+  //           count: 1,
+  //         },
+  //       ],
+  //     },
+  //   },
+  // ];
+
+  let leaderboard = [];
+  uniquePlayers.forEach((player) => {
+    leaderboard.push({
+      username: player.username,
+      ...calculateRA({ tasks: player.scores, id: player.id }, mode),
+    });
+  });
+  leaderboard.forEach((player) => {
+    let points = {};
+    player.subCategoryPoints.forEach((item, index) => {
+      points[categories[index]] = item;
+    });
+    player.subCategoryPoints = points;
+  });
+  leaderboard = leaderboard.sort((a, b) => b.overallPoints - a.overallPoints);
+  console.log(leaderboard);
+  // localStorage.setItem(mode, JSON.stringify(leaderboard));
+  return leaderboard;
+}

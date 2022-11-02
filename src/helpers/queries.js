@@ -117,7 +117,7 @@ export async function APIFetch(query, variables) {
   try {
     const response = await axios({
       method: "POST",
-      url: "https://api.aimlab.gg/graphql",
+      url: API_ENDPOINT,
       headers: {
         "Content-Type": "application/json",
       },
