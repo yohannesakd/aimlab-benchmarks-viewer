@@ -733,7 +733,7 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
     player.subCategoryPoints = points;
   });
   leaderboard = leaderboard.sort((a, b) => b.overallPoints - a.overallPoints);
-  console.log(leaderboard);
+  // console.log(leaderboard);
   // localStorage.setItem(mode, JSON.stringify(leaderboard));
   return leaderboard;
 }

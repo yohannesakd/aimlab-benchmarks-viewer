@@ -117,6 +117,8 @@ export default {
       "VTIntermediate",
       "VTNovice",
       "RAHard",
+      "RAMedium",
+      "RAEasy",
       "currentPlayerTasks",
       "currentPlayerInfo",
     ]),
@@ -130,7 +132,9 @@ export default {
     overallRankRA() {
       return this.RAHard.overallRank != "Unranked"
         ? this.RAHard.overallRank
-        : "Unranked";
+        : this.RAMedium.overallRank != "Unranked"
+        ? this.RAMedium.overallRank
+        : this.RAEasy.overallRank;
     },
     playerSkill() {
       if (this.playerInfo.skill) {

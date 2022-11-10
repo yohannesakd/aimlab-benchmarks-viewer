@@ -85,28 +85,42 @@
       </div>
       <div class="flex max-w-max gap-2 mx-auto mt-4">
         <button
-          class="border border-gray-500 px-4 py-1"
+          class="
+            px-3
+            py-2.5
+            inline-block
+            bg-slate-700
+            transition
+            hover:bg-slate-600
+          "
           @click="switchPage(--currentPage)"
           v-if="currentPage > 0"
         >
           Previous
         </button>
         <div class="flex gap-1">
-          <p
-            class="py-2 px-4 bg-slate-700"
+          <div
+            class="py-2 px-4 bg-slate-700 transition flex items-center"
             v-for="page in pageNumbers"
             :key="page"
             :class="{
-              'bg-slate-500 pointer-events-none': this.currentPage == page - 1,
+              'bg-slate-600 pointer-events-none': this.currentPage == page - 1,
               ' hover:bg-slate-600': !!parseInt(page),
             }"
             @click="handlePageSelect($event)"
           >
-            {{ page }}
-          </p>
+            <span class="pointer-events-none">{{ page }}</span>
+          </div>
         </div>
         <button
-          class="border border-gray-500 px-4 py-1"
+          class="
+            px-3
+            py-2.5
+            inline-block
+            bg-slate-700
+            transition
+            hover:bg-slate-600
+          "
           @click="switchPage(++currentPage)"
           v-if="currentPage < pageCount"
         >

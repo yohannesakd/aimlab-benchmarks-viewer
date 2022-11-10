@@ -3,6 +3,16 @@ import { easyBench, hardBench, mediumBench } from "../../helpers/revosectData";
 export default {
   state() {
     return {
+      selectedBenchmarkRA: 2,
+      selectedCategoryRA: 3,
+      selectedSubCategoryRA: 1,
+      benchmarksRA: ["Easy", "Medium", "Hard"],
+      categoriesRA: ["Clicking", "Tracking", "Switching", "Overall"],
+      subCategoriesRA: {
+        Clicking: ["Static", "Dynamic", "Overall"],
+        Tracking: ["Precise", "Reactive", "Overall"],
+        Switching: ["Flick", "Track", "Overall"],
+      },
       hardLdb: [],
       mediumLdb: [],
       easyLdb: [],
@@ -18,6 +28,24 @@ export default {
     easyLdb(state) {
       return state.easyLdb;
     },
+    selectedBenchmarkRA(state) {
+      return state.selectedBenchmarkRA;
+    },
+    selectedCategoryRA(state) {
+      return state.selectedCategoryRA;
+    },
+    selectedSubCategoryRA(state) {
+      return state.selectedSubCategoryRA;
+    },
+    benchmarksRA(state) {
+      return state.benchmarksRA;
+    },
+    categoriesRA(state) {
+      return state.categoriesRA;
+    },
+    subCategoriesRA(state) {
+      return state.subCategoriesRA;
+    },
   },
   mutations: {
     setHardLdb(state, payload) {
@@ -28,6 +56,15 @@ export default {
     },
     setEasyLdb(state, payload) {
       state.easyLdb = payload;
+    },
+    setSelectedBenchmarkRA(state, payload) {
+      state.selectedBenchmarkRA = payload;
+    },
+    setSelectedCategoryRA(state, payload) {
+      state.selectedCategoryRA = payload;
+    },
+    setSelectedSubCategoryRA(state, payload) {
+      state.selectedSubCategoryRA = payload;
     },
   },
   actions: {
