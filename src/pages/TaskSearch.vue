@@ -88,9 +88,9 @@ export default {
       });
       if (searchedTasks.aimlab.tasks.length) {
         this.taskList = searchedTasks.aimlab.tasks;
-        console.log(this.taskList);
+        // console.log(this.taskList);
       } else {
-        console.log("task not found");
+        // console.log("task not found");
       }
     },
     taskLeaderboardLink(id) {

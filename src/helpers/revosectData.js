@@ -480,7 +480,7 @@ export const easyBench = [
   },
   {
     name: "rA Strafetrack Easy",
-    weapon: "Custom_rA100HzSetLeaderboar",
+    weapon: "Custom_rA100hz",
     id: "CsLevel.morcaillionaire.rA Straf.R3JV8U",
     scores: [1900, 2400, 2900, 3400],
     category: "Tracking",

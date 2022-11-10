@@ -51,6 +51,7 @@ export default {
         worker.onmessage = (event) => {
           playerList[event.data[1]] = event.data[0];
           if (Object.entries(playerList).length == fullBench.length) {
+            // console.log(playerList);
             ldb = organizeLeaderboard(playerList, fullBench, payload);
             switch (payload) {
               case "hard":

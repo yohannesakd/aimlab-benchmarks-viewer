@@ -65,9 +65,21 @@
     </base-card>
 
     <div
-      v-if="selectedLeaderboard"
-      class="border border-slate-600 bg-slate-900 rounded-sm mb-10"
+      v-if="leaderboardLoading"
+      class="
+        border border-slate-600
+        bg-slate-900
+        rounded-sm
+        mb-16
+        flex
+        justify-center
+        items-center
+        py-10
+      "
     >
+      <loading-spinner></loading-spinner>
+    </div>
+    <div v-else class="border border-slate-600 bg-slate-900 rounded-sm">
       <div class="grid grid-cols-5 px-6 py-2 bg-slate-600 mx-2 mt-2">
         <p>#</p>
         <p>Name</p>
@@ -85,7 +97,7 @@
         <p>{{ player.selectedPoints }}</p>
       </div>
 
-      <div class="max-w-max mx-auto flex gap-1 items-center mb-4">
+      <div class="max-w-max mx-auto flex gap-1 items-center my-4">
         <button
           type="button"
           class="px-3 py-2.5 h-full inline-block bg-slate-700"
@@ -187,6 +199,7 @@ export default {
     return {
       currentPage: 0,
       goToPageInput: 0,
+      leaderboardLoading: false,
       benchmark: ["Easy", "Medium", "Hard"],
       category: ["Clicking", "Tracking", "Switching", "Overall"],
       subCategory: {
@@ -194,8 +207,8 @@ export default {
         Tracking: ["Precise", "Reactive", "Overall"],
         Switching: ["Flick", "Track", "Overall"],
       },
-      selectedBenchmarkIndex: 1,
-      selectedCategoryIndex: 0,
+      selectedBenchmarkIndex: 2,
+      selectedCategoryIndex: 3,
       selectedSubCategoryIndex: 1,
     };
   },
@@ -205,7 +218,13 @@ export default {
       if (bench == "hard" && this.$store.getters.hardLdb != 0) return;
       if (bench == "medium" && this.$store.getters.mediumLdb != 0) return;
       if (bench == "easy" && this.$store.getters.easyLdb != 0) return;
+      this.leaderboardLoading = true;
       this.$store.dispatch("fetchLeaderboard", bench);
+    },
+    selectedLeaderboard(newArr) {
+      if (newArr.length) {
+        this.leaderboardLoading = false;
+      }
     },
   },
   computed: {
@@ -291,7 +310,6 @@ export default {
       }
       this.goToPageInput = null;
     },
-    handleLeaderboardChange() {},
   },
 
   mounted() {
@@ -299,6 +317,7 @@ export default {
     if (bench == "hard" && this.$store.getters.hardLdb != 0) return;
     if (bench == "medium" && this.$store.getters.mediumLdb != 0) return;
     if (bench == "easy" && this.$store.getters.easyLdb != 0) return;
+    this.leaderboardLoading = true;
     this.$store.dispatch("fetchLeaderboard", bench);
   },
 };

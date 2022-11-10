@@ -345,12 +345,14 @@ export function calculateRA(playerData, mode) {
   //Check if player is valour/platinum to add excess points to the total
   if (mode != "hard") {
     let fixedData = checkExcessPoints(
-      playerBench,
+      JSON.stringify(playerBench),
       categoryPointsList,
       mode,
       overallPoints,
-      categoryPoints
+      categoryPoints,
+      playerData.id
     );
+
     playerBench = fixedData.playerBench;
     overallPoints = fixedData.overallPoints;
     categoryPoints = fixedData.categoryPoints;
@@ -385,6 +387,21 @@ export function calculateRA(playerData, mode) {
       overallRank = "Divinity";
     }
   }
+
+  // if (playerData.id == "BF0D92146C9B39A0") {
+  //   console.log(
+  //     JSON.parse(
+  //       JSON.stringify({
+  //         overallPoints,
+  //         overallRank,
+  //         allPoints: allPointsList,
+  //         subCategoryPoints: categoryPoints,
+  //         benchmarks: playerBench,
+  //         detailsOpen: false,
+  //       })
+  //     )
+  //   );
+  // }
   return {
     overallPoints,
     overallRank,
@@ -399,7 +416,6 @@ function getBenchmarkObject(playerData, benchData, mode) {
   let currentPlayer = playerData.id;
   let playerTasks = playerData.tasks;
   //Score Overrides section
-
   benchData.forEach((bench) => {
     bench.avgAcc = 0;
     bench.count = 0;
@@ -438,6 +454,7 @@ function getBenchmarkObject(playerData, benchData, mode) {
                 easySubRanks,
                 easySubPoints
               );
+
               break;
           }
         }
@@ -445,12 +462,13 @@ function getBenchmarkObject(playerData, benchData, mode) {
           ...benchData[j],
           ...playerTasks[i],
         };
-        benchData[j].points = rankData[0] || 0;
-        benchData[j].progress = rankData[1] || 0;
-        benchData[j].rank = rankData[2] || "Unranked";
+        benchData[j].points = rankData[0];
+        benchData[j].progress = rankData[1];
+        benchData[j].rank = rankData[2];
       }
     }
   }
+
   return benchData;
 }
 
@@ -506,8 +524,18 @@ function checkExcessPoints(
   categoryPointsList,
   mode,
   overallPoints,
-  categoryPoints
+  categoryPoints,
+  id
 ) {
+  playerBench = JSON.parse(playerBench);
+  // console.log(
+  //   playerBench,
+  //   categoryPointsList,
+  //   mode,
+  //   overallPoints,
+  //   categoryPoints
+  // );
+
   let pointLimit = 0;
   let rankPoints = 0;
   if (mode == "easy") {
@@ -566,6 +594,7 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
     }
     playerList[task.id] = playerList[task.id].slice(0, index);
   }
+
   let allPlayers = [];
   Object.entries(playerList).forEach((task) => {
     allPlayers.push(...task[1]);

@@ -33,10 +33,11 @@
       >
         <div class="flex flex-col gap-4 w-[40%]">
           <span class="block text-2xl font-semibold">{{
-            playerInfo.username
+            currentPlayerInfo.username
           }}</span>
           <span class="block"
-            >{{ playerInfo.rank }} - {{ Math.floor(playerInfo.skill) }}</span
+            >{{ currentPlayerInfo.rank }} -
+            {{ Math.floor(currentPlayerInfo.skill) }}</span
           >
 
           <progress-bar
@@ -111,7 +112,14 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["VTAdvanced", "VTIntermediate", "VTNovice", "RAHard"]),
+    ...mapGetters([
+      "VTAdvanced",
+      "VTIntermediate",
+      "VTNovice",
+      "RAHard",
+      "currentPlayerTasks",
+      "currentPlayerInfo",
+    ]),
     overallRankVT() {
       return this.VTAdvanced.overallRank != "Unranked"
         ? this.VTAdvanced.overallRank
@@ -139,6 +147,13 @@ export default {
       return this.$store.getters.totalPlays;
     },
   },
+  watch: {
+    currentPlayerTasks(newArr) {
+      if (newArr.length) {
+        this.isLoading = false;
+      }
+    },
+  },
   methods: {
     imagePath(rank) {
       return rank.replace(/ /g, "").toLowerCase();
@@ -153,13 +168,13 @@ export default {
   // Fetching player Task History using ID from the previous request
 
   async mounted() {
+    // if (this.username == this.currentPlayerInfo.username) return;
+
     this.playerInfo = {};
     this.isLoading = true;
-    console.time("userInfo");
     let aimlabProfile = await queries.APIFetch(queries.GET_USER_INFO, {
       username: this.username,
     });
-    this.isLoading = false;
 
     if (aimlabProfile != null) {
       this.playerInfo = {
@@ -168,7 +183,6 @@ export default {
         rank: aimlabProfile.aimlabProfile.ranking.rank.displayName,
         skill: aimlabProfile.aimlabProfile.ranking.skill,
       };
-
       let plays_agg = await queries.APIFetch(queries.GET_USER_PLAYS_AGG, {
         where: {
           is_practice: {
@@ -192,7 +206,6 @@ export default {
         "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg
       );
-      console.timeEnd("userInfo");
       this.$store.dispatch("setVTBenches");
       this.$store.dispatch("setRABenches");
     }
