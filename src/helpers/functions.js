@@ -600,6 +600,8 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
     allPlayers.push(...task[1]);
   });
 
+  console.log(JSON.parse(JSON.stringify(allPlayers)));
+
   let uniquePlayers = [
     ...new Map(allPlayers.map((item) => [item["user_id"], item])).values(),
   ].map((player) => {
@@ -609,6 +611,7 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
       scores: [],
     };
   });
+  console.log(JSON.parse(JSON.stringify(uniquePlayers)));
   uniquePlayers.forEach((player) => {
     Object.entries(playerList).forEach((task) => {
       let foundPlay = task[1].find((task) => task.user_id == player.id);
@@ -621,103 +624,7 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
       }
     });
   });
-
-  // uniquePlayers = [
-  //   {
-  //     username: "VT Matty",
-  //     scores: {
-  //       id: "7C41BF18A9F63928",
-  //       tasks: [
-  //         {
-  //           id: "CsLevel.rA hebe.f96a4d2c.R2GOSC",
-  //           maxScore: 1481,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.Unans.jumptrac.R241E2",
-  //           maxScore: 3455,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.hebellionaire.XYSmooth.R32JN4",
-  //           maxScore: 3007,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.hebellionaire.41e73264.R352T3",
-  //           maxScore: 148,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.hebebebebebebe.bfts rab.R2IVS9",
-  //           maxScore: 154,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.rA Unans.rA Waves.R35D7E",
-  //           maxScore: 60,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.rA hebe.JumpClic.R294OG",
-  //           maxScore: 7021,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.morcaillionaire.rA React.R2KW6C",
-  //           maxScore: 2743,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.rA Unans.rA Widef.R35DDI",
-  //           maxScore: 130,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.morcaillionaire.rA Straf.R35DSK",
-  //           maxScore: 3037,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.rA hebe.rA Fourw.R2J1AJ",
-  //           maxScore: 1830,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.rA hebe.morcaCli.R2673Z",
-  //           maxScore: 1313,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.rA hebe.rA Three.R2IW6T",
-  //           maxScore: 1212,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.Unans.rA XYCli.QVY03S",
-  //           maxScore: 1448,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.morcaillionaire.rA Preci.R35DLM",
-  //           maxScore: 3607,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.rA hebe.morcaTS .R26763",
-  //           maxScore: 69,
-  //           count: 1,
-  //         },
-  //         {
-  //           id: "CsLevel.rA Unans.rA XYswi.R35D6N",
-  //           maxScore: 110,
-  //           count: 1,
-  //         },
-  //       ],
-  //     },
-  //   },
-  // ];
-
+  console.log(JSON.parse(JSON.stringify(uniquePlayers)));
   let leaderboard = [];
   uniquePlayers.forEach((player) => {
     leaderboard.push({
