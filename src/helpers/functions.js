@@ -320,42 +320,61 @@ export function calculateRA(playerData, mode) {
       benchData = easyBench;
       break;
   }
-  let playerBench = getBenchmarkObject(playerData, benchData, mode);
-  playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
+
+  //Filtering out the benchmark scenarios the player has played from the provided full list of played scenarios
+  let playedBenchmarks = playerData.tasks.filter((n) =>
+    benchData.some((n2) => n.id == n2.id)
+  );
+
+  //Computing the scores and ranks for each of the played benchmark scenarios
+  let playerBenchmarks = getPlayerBenchmarkResults(
+    playedBenchmarks,
+    benchData,
+    mode
+  );
+
+  playerBenchmarks.sort((a, b) => a.scenarioID - b.scenarioID);
+  console.log(JSON.parse(JSON.stringify(playerBenchmarks)));
   //calculating category points
-  const groupedTasks = _.groupBy(playerBench, "categoryID");
-  let categoryPointsList = Object.entries(groupedTasks).map(([_, group]) => {
-    return [...group.map(({ points }) => points)];
-  });
-  const allPointsList = playerBench.map((bench) => bench.points);
-  let categoryPoints = null;
+  const allPointsList = playerBenchmarks.map((bench) => bench.points);
+  const subCategoryGroupedBenchmarks = _.groupBy(
+    playerBenchmarks,
+    "categoryID"
+  );
+  let subCategoryPointsList = Object.entries(subCategoryGroupedBenchmarks).map(
+    ([_, group]) => {
+      return [...group.map(({ points }) => points)];
+    }
+  );
+
+  let subCategoryPoints = null;
   //different point calculation between easy benchmarks and med/hard benchmarks
   if (mode == "easy") {
-    categoryPoints = categoryPointsList.map((item) => {
+    subCategoryPoints = subCategoryPointsList.map((item) => {
       return item.reduce((acc, curr) => acc + curr);
     });
   } else {
-    categoryPoints = categoryPointsList.map((item) => {
+    subCategoryPoints = subCategoryPointsList.map((item) => {
       return item.reduce((acc, curr) => acc + curr) - Math.min(...item);
     });
   }
   //calculating overall points
-  let overallPoints = categoryPoints.reduce((acc, curr) => acc + curr);
+  let overallPoints = subCategoryPoints.reduce((acc, curr) => acc + curr);
 
   //Check if player is valour/platinum to add excess points to the total
   if (mode != "hard") {
-    let fixedData = checkExcessPoints(
-      JSON.stringify(playerBench),
-      categoryPointsList,
+    let pointNormalizedData = checkExcessPoints(
+      JSON.stringify(playerBenchmarks),
+      subCategoryPointsList,
       mode,
       overallPoints,
-      categoryPoints,
+      subCategoryPoints,
       playerData.id
     );
 
-    playerBench = fixedData.playerBench;
-    overallPoints = fixedData.overallPoints;
-    categoryPoints = fixedData.categoryPoints;
+    playerBenchmarks = pointNormalizedData.playerBench;
+    overallPoints = pointNormalizedData.overallPoints;
+    subCategoryPoints = pointNormalizedData.categoryPoints;
   }
   //finding the player's rank
   let pointList = null;
@@ -396,7 +415,7 @@ export function calculateRA(playerData, mode) {
   //         overallRank,
   //         allPoints: allPointsList,
   //         subCategoryPoints: categoryPoints,
-  //         benchmarks: playerBench,
+  //         benchmarks: playerBenchmarks,
   //         detailsOpen: false,
   //       })
   //     )
@@ -406,15 +425,15 @@ export function calculateRA(playerData, mode) {
     overallPoints,
     overallRank,
     allPoints: allPointsList,
-    subCategoryPoints: categoryPoints,
-    benchmarks: playerBench,
+    subCategoryPoints: subCategoryPoints,
+    benchmarks: playerBenchmarks,
     detailsOpen: false,
   };
 }
 //Create a complete object with player scores, rank, points and scenario information
-function getBenchmarkObject(playerData, benchData, mode) {
-  let currentPlayer = playerData.id;
-  let playerTasks = playerData.tasks;
+function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
+  // let currentPlayer = playerData.id;
+  // let playerTasks = playerData;
   //Score Overrides section
   benchData.forEach((bench) => {
     bench.avgAcc = 0;
@@ -428,7 +447,7 @@ function getBenchmarkObject(playerData, benchData, mode) {
     for (let j = 0; j < benchData.length; j++) {
       if (playerTasks[i].id == benchData[j].id) {
         let rankData = [0, 0, "Unranked"];
-        if (playerTasks[i].count > 0) {
+        if (playerTasks[i].count) {
           //calculate rank and points for different modes
           switch (mode) {
             case "hard":
@@ -494,11 +513,11 @@ function calculateRankRA(bench, userTask, benchRanks, benchPoints) {
     let i = 0;
     bench.scores.forEach((score, index) => {
       if (userTask.maxScore >= score) {
-        points = benchPoints[index];
-        rank = benchRanks[points];
         i = index;
       }
     });
+    points = benchPoints[i];
+    rank = benchRanks[points];
     let playerDiff = userTask.maxScore - bench.scores[i];
     let perPoint =
       (benchPoints[i + 1] - benchPoints[i]) /

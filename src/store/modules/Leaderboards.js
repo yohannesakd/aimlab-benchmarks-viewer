@@ -84,7 +84,7 @@ export default {
       }
       let playerList = {};
       for (let bench of fullBench) {
-        const worker = new Worker("/src/helpers/leaderboard-worker.js");
+        const worker = new Worker("/scripts/leaderboard-worker.js");
         worker.onmessage = (event) => {
           playerList[event.data[1]] = event.data[0];
           if (Object.entries(playerList).length == fullBench.length) {

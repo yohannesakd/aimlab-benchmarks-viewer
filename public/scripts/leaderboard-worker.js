@@ -2,7 +2,7 @@ let count = 0;
 self.onmessage = async (e) => {
   let allData = [];
   for (let i = 0; i < 10; i++) {
-    const worker = new Worker("/src/helpers/ldb-fetch.js");
+    const worker = new Worker("/scripts/ldb-fetch.js");
     worker.onmessage = async (event) => {
       // if (e.data.id == "CsLevel.rA Theo.rA Airtr.R3GBA9") {
       //   console.log(event.data);
