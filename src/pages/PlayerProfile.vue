@@ -33,10 +33,11 @@
       >
         <div class="flex flex-col gap-4 w-[40%]">
           <span class="block text-2xl font-semibold">{{
-            playerInfo.username
+            currentPlayerInfo.username
           }}</span>
           <span class="block"
-            >{{ playerInfo.rank }} - {{ Math.floor(playerInfo.skill) }}</span
+            >{{ currentPlayerInfo.rank }} -
+            {{ Math.floor(currentPlayerInfo.skill) }}</span
           >
 
           <progress-bar
@@ -111,7 +112,16 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["VTAdvanced", "VTIntermediate", "VTNovice", "RAHard"]),
+    ...mapGetters([
+      "VTAdvanced",
+      "VTIntermediate",
+      "VTNovice",
+      "RAHard",
+      "RAMedium",
+      "RAEasy",
+      "currentPlayerTasks",
+      "currentPlayerInfo",
+    ]),
     overallRankVT() {
       return this.VTAdvanced.overallRank != "Unranked"
         ? this.VTAdvanced.overallRank
@@ -122,12 +132,14 @@ export default {
     overallRankRA() {
       return this.RAHard.overallRank != "Unranked"
         ? this.RAHard.overallRank
-        : "Unranked";
+        : this.RAMedium.overallRank != "Unranked"
+        ? this.RAMedium.overallRank
+        : this.RAEasy.overallRank;
     },
     playerSkill() {
-      if (this.playerInfo.skill) {
-        if (this.playerInfo.skill == 1000) return 100;
-        return this.playerInfo.skill % 100;
+      if (this.currentPlayerInfo.skill) {
+        if (this.currentPlayerInfo.skill == 1000) return 100;
+        return this.currentPlayerInfo.skill % 100;
       } else {
         return 0;
       }
@@ -137,6 +149,13 @@ export default {
     },
     totalPlays() {
       return this.$store.getters.totalPlays;
+    },
+  },
+  watch: {
+    currentPlayerTasks(newArr) {
+      if (newArr.length) {
+        this.isLoading = false;
+      }
     },
   },
   methods: {
@@ -153,13 +172,14 @@ export default {
   // Fetching player Task History using ID from the previous request
 
   async mounted() {
+    if (this.username == this.$store.getters.currentPlayerInfo.username) return;
+
     this.playerInfo = {};
     this.isLoading = true;
     console.time("query-player");
     let aimlabProfile = await queries.APIFetch(queries.GET_USER_INFO, {
       username: this.username,
     });
-    this.isLoading = false;
 
     if (aimlabProfile != null) {
       this.playerInfo = {
@@ -168,7 +188,6 @@ export default {
         rank: aimlabProfile.aimlabProfile.ranking.rank.displayName,
         skill: aimlabProfile.aimlabProfile.ranking.skill,
       };
-
       let plays_agg = await queries.APIFetch(queries.GET_USER_PLAYS_AGG, {
         where: {
           is_practice: {

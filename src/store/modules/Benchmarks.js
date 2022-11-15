@@ -3,9 +3,11 @@ import {
   intermediateBench,
   noviceBench,
 } from "../../helpers/voltaicData";
-import { caclulateVT, calculateRA } from "../../helpers/functions";
+import {
+  caclulateVT,
+  calculateRevosectBenchmarks,
+} from "../../helpers/functions";
 import _ from "lodash";
-import { easyBench, hardBench, mediumBench } from "../../helpers/revosectData";
 
 export default {
   state() {
@@ -122,14 +124,29 @@ export default {
       context.commit("setVTIntermediate", VTIntermediate);
       context.commit("setVTAdvanced", VTAdvanced);
     },
+
     setRABenches(context) {
-      console.time("ra-benches");
-      let RAHard = calculateRA(context.rootGetters.currentPlayerTasks, "hard");
-      let RAMedium = calculateRA(
-        context.rootGetters.currentPlayerTasks,
+      let RAHard = calculateRevosectBenchmarks(
+        {
+          tasks: context.rootGetters.currentPlayerTasks,
+          id: context.rootGetters.currentPlayerInfo.id,
+        },
+        "hard"
+      );
+      let RAMedium = calculateRevosectBenchmarks(
+        {
+          tasks: context.rootGetters.currentPlayerTasks,
+          id: context.rootGetters.currentPlayerInfo.id,
+        },
         "medium"
       );
-      let RAEasy = calculateRA(context.rootGetters.currentPlayerTasks, "easy");
+      let RAEasy = calculateRevosectBenchmarks(
+        {
+          tasks: context.rootGetters.currentPlayerTasks,
+          id: context.rootGetters.currentPlayerInfo.id,
+        },
+        "easy"
+      );
       context.commit("setRAEasy", RAEasy);
       context.commit("setRAMedium", RAMedium);
       context.commit("setRAHard", RAHard);

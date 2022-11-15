@@ -59,7 +59,7 @@
       >
         <p>{{ task.name }}</p>
         <div class="flex items-center gap-4">
-          <p>{{ task.author.username }}</p>
+          <p>{{ task.author?.username || "?" }}</p>
           <img
             class="w-10 h-10 text-[8px] text-center bg-slate-700 p-1"
             :src="task.image_url"
@@ -88,7 +88,6 @@ export default {
       });
       if (searchedTasks.aimlab.tasks.length) {
         this.taskList = searchedTasks.aimlab.tasks;
-        console.log(this.taskList);
       } else {
         console.log("task not found");
       }

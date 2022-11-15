@@ -11,7 +11,7 @@
       text-white
     "
   >
-    <h1 class="text-3xl font-semibold">
+    <h1 class="text-2xl font-semibold">
       <router-link to="/home" id="header-text">Aimlab Tracker</router-link>
     </h1>
     <nav id="nav">
@@ -23,7 +23,7 @@
               px-6
               py-3
               uppercase
-              text-lg
+              text-md
               tracking-wide
               hover:bg-slate-500 hover:text-white
               transition
@@ -45,7 +45,7 @@
 export default {
   data() {
     return {
-      navLinks: ["home", "profile", "tasks"],
+      navLinks: ["home", "profile", "tasks", "leaderboards"],
     };
   },
   computed: {},

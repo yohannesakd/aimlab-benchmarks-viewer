@@ -1,41 +1,58 @@
 <template>
   <div class="mt-10 px-[8%] mb-10">
-    <div class="relative">
-      <button
-        class="
-          absolute
-          right-0
-          border-2 border-slate-500
-          px-6
-          py-2
-          rounded
-          transition
-          hover:bg-slate-500
-        "
-        @click="handleSwitchTask"
-      >
-        Switch Task
-      </button>
-    </div>
-    <base-card class="max-w-3xl flex flex-col gap-4">
-      <div class="flex justify-between">
-        <h1 class="text-2xl font-semibold">{{ currentTask.name }}</h1>
-        <p>
-          Created by:
-          {{ currentTask.author?.username ? currentTask.author.username : "" }}
-        </p>
+    <!-- <div class="relative">
+      
+    </div> -->
+    <div class="flex justify-between">
+      <base-card class="max-w-3xl flex flex-col gap-4">
+        <div class="flex justify-between">
+          <h1 class="text-2xl font-semibold">{{ currentTask.name }}</h1>
+          <p>
+            Created by:
+            {{
+              currentTask.author?.username ? currentTask.author.username : ""
+            }}
+          </p>
+        </div>
+        <p>Description: {{ currentTask.description }}</p>
+        <!-- <img class="h-20" :src="currentTask.image_url" alt="" /> -->
+        <a
+          :href="taskLink"
+          class="flex items-center gap-2 text-xl self-end"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <play-icon class="h-8 w-8"></play-icon> Play Task</a
+        >
+      </base-card>
+
+      <div class="flex flex-col justify-between relative">
+        <button
+          class="
+            border-2 border-slate-500
+            px-6
+            py-2
+            rounded
+            transition
+            hover:bg-slate-500
+          "
+          @click="handleSwitchTask"
+        >
+          Switch Task
+        </button>
+        <!-- <dropdown class="" :selected-tab="currentWindow">
+          <li
+            class="px-4 py-1 hover:bg-slate-600 transition"
+            :class="currentWindowIndex == index ? 'bg-slate-700' : ''"
+            v-for="(element, index) in leaderboardWindows"
+            :key="index"
+            @click="handleWindowSelect(index)"
+          >
+            {{ element }}
+          </li>
+        </dropdown> -->
       </div>
-      <p>Description: {{ currentTask.description }}</p>
-      <!-- <img class="h-20" :src="currentTask.image_url" alt="" /> -->
-      <a
-        :href="taskLink"
-        class="flex items-center gap-2 text-xl self-end"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <play-icon class="h-8 w-8"></play-icon> Play Task</a
-      >
-    </base-card>
+    </div>
 
     <section class="bg-slate-900 mt-10 p-4">
       <div class="grid grid-cols-7 bg-slate-800 p-2">
@@ -85,28 +102,42 @@
       </div>
       <div class="flex max-w-max gap-2 mx-auto mt-4">
         <button
-          class="border border-gray-500 px-4 py-1"
+          class="
+            px-3
+            py-2.5
+            inline-block
+            bg-slate-700
+            transition
+            hover:bg-slate-600
+          "
           @click="switchPage(--currentPage)"
           v-if="currentPage > 0"
         >
           Previous
         </button>
         <div class="flex gap-1">
-          <p
-            class="py-2 px-4 bg-slate-700"
+          <div
+            class="py-2 px-4 bg-slate-700 transition flex items-center"
             v-for="page in pageNumbers"
             :key="page"
             :class="{
-              'bg-slate-500 pointer-events-none': this.currentPage == page - 1,
+              'bg-slate-600 pointer-events-none': this.currentPage == page - 1,
               ' hover:bg-slate-600': !!parseInt(page),
             }"
             @click="handlePageSelect($event)"
           >
-            {{ page }}
-          </p>
+            <span class="pointer-events-none">{{ page }}</span>
+          </div>
         </div>
         <button
-          class="border border-gray-500 px-4 py-1"
+          class="
+            px-3
+            py-2.5
+            inline-block
+            bg-slate-700
+            transition
+            hover:bg-slate-600
+          "
           @click="switchPage(++currentPage)"
           v-if="currentPage < pageCount"
         >
@@ -130,15 +161,25 @@ export default {
   data() {
     return {
       currentPage: 0,
+      // currentWindowIndex: 3,
       perPage: 25,
     };
   },
   computed: {
-    ...mapGetters(["currentTask", "currentTaskLeaderboard"]),
+    ...mapGetters([
+      "currentTask",
+      "currentTaskLeaderboard",
+      "leaderboardWindows",
+    ]),
     taskLink() {
       return taskDeepLink(this.currentTask.workshop_id);
     },
-
+    currentWindow() {
+      return {
+        value: this.leaderboardWindows[this.currentWindowIndex].toLowerCase(),
+        label: this.leaderboardWindows[this.currentWindowIndex],
+      };
+    },
     pageCount() {
       if (this.currentTaskLeaderboard?.pagination)
         return this.currentTaskLeaderboard.pagination.pageCount;
@@ -175,6 +216,34 @@ export default {
       ldb.aimlab.leaderboard.metadata.rows = this.perPage;
       this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
     },
+    // async currentWindowIndex(newWindow) {
+    //   let date = new Date();
+    //   const window = {
+    //     week: `${date.getFullYear()}-${parseInt(
+    //       date.getMonth() + 1
+    //     )}-${date.getDate()}`,
+    //     month: `${date.getFullYear()}-${parseInt(date.getMonth() + 1)}`,
+    //     year: `${date.getFullYear()}`,
+    //     allTime: "",
+    //   };
+    //   const period = this.leaderboardWindows[this.newWindow];
+    //   const ldb = await APIFetch(GET_TASK_LEADERBOARD, {
+    //     leaderboardInput: {
+    //       clientId: "aimlab",
+    //       limit: this.perPage,
+    //       offset: this.currentPage,
+    //       taskId: this.currentTask.id,
+    //       taskMode: 0,
+    //       weaponId: this.currentTask.weapon_id,
+    //     },
+    //     window: {
+    //       period: period,
+    //       value: window[period],
+    //     },
+    //   });
+    //   ldb.aimlab.leaderboard.metadata.rows = this.perPage;
+    //   this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
+    // },
   },
   methods: {
     handlePageSelect(event) {
@@ -189,6 +258,9 @@ export default {
     handleSwitchTask() {
       sessionStorage.removeItem("currentTask");
       this.$router.push("/tasks");
+    },
+    handleWindowSelect(index) {
+      this.currentWindowIndex = index;
     },
   },
   async mounted() {
@@ -211,6 +283,7 @@ export default {
       this.$store.dispatch("setCurrentTask", res.aimlab.task);
       sessionStorage.setItem("currentTask", res.aimlab.task.id);
       this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
+      console.log(this.currentTaskLeaderboard);
     }
   },
 };

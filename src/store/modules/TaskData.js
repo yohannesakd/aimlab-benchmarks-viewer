@@ -3,6 +3,7 @@ export default {
     return {
       currentTask: {},
       currentTaskLeaderboard: {},
+      // leaderboardWindows: ["Week", "Month", "Year", "Alltime"],
     };
   },
   getters: {
@@ -11,6 +12,9 @@ export default {
     },
     currentTaskLeaderboard(state) {
       return state.currentTaskLeaderboard;
+    },
+    leaderboardWindows(state) {
+      return state.leaderboardWindows;
     },
   },
   mutations: {

@@ -19,7 +19,7 @@
         class="h-5 w-5 inline absolute right-2 top-1/2 -translate-y-1/2"
       ></chevron-icon>
     </div>
-    <ul class="absolute z-10 bg-slate-800 w-full" v-show="isOpen">
+    <ul class="absolute shadow-lg z-10 bg-slate-800 w-full" v-show="isOpen">
       <slot></slot>
     </ul>
   </div>

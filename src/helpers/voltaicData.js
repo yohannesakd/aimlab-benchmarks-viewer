@@ -190,7 +190,6 @@ export const advancedBench = [
   },
 ];
 
-// console.log(advancedBench.length);
 export const advancedRanks = {
   900: "Grandmaster",
   1000: "Nova",

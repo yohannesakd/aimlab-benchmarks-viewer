@@ -14,7 +14,7 @@
             px-2
             w-3/4
             text-black
-            focus:ring-2 focus:ring-blue-500
+            outline-2 outline-blue-500
           "
           type="text"
           id="username"
@@ -30,10 +30,10 @@
     </base-card>
     <base-card class="mx-auto mt-4 max-w-md" v-if="usernameInput">
       <p v-if="isLoading">Searching...</p>
-      <p v-else-if="!playerInfo.username">User not found</p>
+      <p v-else-if="!playerInfo?.username">User not found</p>
       <div class="flex justify-between" v-else>
         <div>
-          <h2 class="text-slate-300 text-center">Profile Found</h2>
+          <h2 class="text-slate-300">Profile Found</h2>
           <h2>
             <span class="text-slate-300">Username :</span>
             {{ playerInfo.username }}
@@ -92,7 +92,7 @@ export default {
           skill: aimlabProfile.aimlabProfile.ranking.skill,
         };
       }
-    }, 500),
+    }, 600),
   },
 };
 </script>

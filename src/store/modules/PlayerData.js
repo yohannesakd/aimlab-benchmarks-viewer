@@ -1,3 +1,5 @@
+import { cleanUpUserTasks } from "../../helpers/functions";
+
 export default {
   state() {
     return {
@@ -34,32 +36,7 @@ export default {
       context.commit("updateCurrentPlayerInfo", payload);
     },
     updateCurrentPlayerTasks(context, payload) {
-      console.time("player-tasks");
-      let plays = payload.map((task) => {
-        return {
-          name: task.group_by.task_name,
-          id: task.group_by.task_id,
-          count: task.aggregate.count,
-          avgScore: task.aggregate.avg.score,
-          avgAcc: task.aggregate.avg.accuracy,
-          maxScore: task.aggregate.max.score,
-          maxAcc: task.aggregate.max.accuracy,
-        };
-      });
-      plays = plays
-        .filter((task) => {
-          if (task.name) return true;
-          if (!task.id.includes(".")) return true;
-        })
-        .map((task) => {
-          if (!task.name) {
-            task.name = task.id;
-          }
-          return task;
-        });
-      plays = plays.sort((a, b) =>
-        a.count > b.count ? -1 : b.count > a.count ? 1 : 0
-      );
+      let plays = cleanUpUserTasks(payload);
       context.commit("updateCurrentPlayerTasks", plays);
       console.timeEnd("player-tasks");
     },

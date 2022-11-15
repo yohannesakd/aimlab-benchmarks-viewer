@@ -10,7 +10,13 @@
         {{ element }}
       </li>
     </dropdown>
-    <div>
+    <div
+      v-if="!RABenchmarks.overallPoints"
+      class="grid place-items-center p-10"
+    >
+      <loading-spinner></loading-spinner>
+    </div>
+    <div v-else>
       <div class="flex max-h-96 max-w-max mx-auto mt-4 gap-4 font-oswald">
         <div class="grid items-center">
           <img
@@ -40,6 +46,7 @@
           </ul>
         </div>
       </div>
+
       <section class="p-4 relative" id="benchmark-table">
         <header class="grid grid-cols-12 bg-slate-700 pr-4 pl-16 py-2">
           <p class="col-span-4 ml-2">Scenario</p>
@@ -111,16 +118,17 @@
               text-slate-200
               mt-2
               py-2
-              pl-4
               transition
               border-t-2 border-t-slate-600
             "
             v-if="bench.detailsOpen"
           >
-            <div class="pb-4 flex justify-between items-center">
-              <span>Score Requirements</span>
+            <div class="pb-4">
               <div class="flex flex-col gap-0.5">
-                <div class="text-center grid gap-0.5" :class="scoreReqGrid">
+                <div
+                  class="text-center grid gap-0.5 min-w-3/4"
+                  :class="scoreReqGrid"
+                >
                   <span
                     v-for="(rank, index) in rankList"
                     :key="index"
@@ -139,7 +147,7 @@
                 </div>
               </div>
             </div>
-            <div class="flex gap-10">
+            <div class="flex gap-10 pl-4">
               <div class="flex flex-col gap-2">
                 <div class="grid grid-cols-2">
                   <p v-if="bench.count">
@@ -158,6 +166,19 @@
               </div>
               <div class="ml-auto flex text-white items-center gap-10 mr-10">
                 <button
+                  class="
+                    cursor-pointer
+                    flex
+                    items-center
+                    gap-1
+                    transition
+                    hover:text-slate-300
+                  "
+                  @click="handlePlayScenario(bench.id)"
+                >
+                  <play-icon class="h-5 w-5 transition"></play-icon>Play
+                </button>
+                <button
                   class="flex items-center"
                   :class="
                     bench.count == 0
@@ -173,19 +194,7 @@
                     >Watch Replay</span
                   >
                 </button>
-                <button
-                  class="
-                    cursor-pointer
-                    flex
-                    items-center
-                    gap-1
-                    transition
-                    hover:text-slate-300
-                  "
-                  @click="handlePlayScenario(bench.id)"
-                >
-                  <play-icon class="h-5 w-5 transition"></play-icon>Play
-                </button>
+
                 <router-link
                   class="transition hover:text-slate-300 cursor-pointer"
                   :to="'/tasks/' + bench.id"
@@ -196,9 +205,10 @@
           </div>
         </div>
         <!-- Categories sidebar -->
-        <!-- <div
+        <div
           class="text-center origin-top-left absolute rotate-90"
           id="category-bar"
+          v-if="RABenchmarks.overallPoints"
         >
           <div class="grid grid-cols-6 gap-1" id="category-item">
             <span
@@ -217,19 +227,14 @@
               >{{ category }}</span
             >
           </div>
-        </div> -->
+        </div>
       </section>
     </div>
   </div>
   <!-- text-mythic bg-mythic grid-cols-5 grid-cols-4 -->
 </template>
 <script>
-import {
-  hardRanks,
-  hardSubRanks,
-  hardPoints,
-  hardSubPoints,
-} from "@/helpers/revosectData.js";
+import * as ra from "../helpers/revosectData.js";
 import {
   findReplay,
   findWorkshopId,
@@ -272,6 +277,16 @@ export default {
 
         case "easy":
           return ["Bronze", "Silver", "Gold", "Platinum"];
+      }
+    },
+    pointList() {
+      switch (this.currentTab.value) {
+        case "hard":
+          return ra.hardSubPoints;
+        case "medium":
+          return ra.mediumPoints;
+        case "easy":
+          return ra.easySubPoints;
       }
     },
     RABenchmarks() {

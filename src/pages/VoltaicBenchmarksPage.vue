@@ -150,7 +150,9 @@
                 @click="replayLink(bench.id, bench.weapon)"
               >
                 <span v-if="replayLoading">Loading...</span>
-                <span v-else>Watch Replay</span>
+                <span v-else class="hover:text-slate-400 transition"
+                  >Watch Replay</span
+                >
               </button>
               <button
                 class="
@@ -159,14 +161,14 @@
                   items-center
                   gap-1
                   transition
-                  hover:text-slate-300
+                  hover:text-slate-400
                 "
                 @click="handlePlayScenario(bench.id)"
               >
                 <play-icon class="h-5 w-5 transition"></play-icon>Play
               </button>
               <router-link
-                class="transition hover:text-slate-300"
+                class="transition hover:text-slate-400"
                 :to="'/tasks/' + bench.id"
                 >View Leaderboard</router-link
               >
