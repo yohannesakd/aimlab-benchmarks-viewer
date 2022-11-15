@@ -4,9 +4,6 @@ self.onmessage = async (e) => {
   for (let i = 0; i < 10; i++) {
     const worker = new Worker("/scripts/ldb-fetch.js");
     worker.onmessage = async (event) => {
-      // if (e.data.id == "CsLevel.rA Theo.rA Airtr.R3GBA9") {
-      //   console.log(event.data);
-      // }
       allData.push(await event.data);
       if (allData.length == 10) {
         allData = allData.flat().sort((a, b) => a.rank - b.rank);

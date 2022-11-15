@@ -68,15 +68,15 @@ export async function findReplay(playerName, taskId, weapon) {
       );
       // console.log(located);
       if (_.isEmpty(located)) {
-        console.log("not found on page", offset / limit + 1);
+        // console.log("not found on page", offset / limit + 1);
         offset += limit;
         if (offset >= ldb.aimlab.leaderboard.metadata.totalRows) {
-          console.log("Score not found");
+          // console.log("Score not found");
           return;
         }
         continue;
       } else {
-        console.log("found on page", offset / limit + 1);
+        // console.log("found on page", offset / limit + 1);
         playerFound = true;
         return replayDeepLink(located[0].play_id);
       }
@@ -622,8 +622,6 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
     allPlayers.push(...task[1]);
   });
 
-  console.log(JSON.parse(JSON.stringify(allPlayers)));
-
   let uniquePlayers = [
     ...new Map(allPlayers.map((item) => [item["user_id"], item])).values(),
   ].map((player) => {
@@ -645,7 +643,6 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
       }
     });
   });
-  console.log(JSON.parse(JSON.stringify(uniquePlayers)));
   let leaderboard = [];
   uniquePlayers.forEach((player) => {
     leaderboard.push({
@@ -664,7 +661,6 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
     player.subCategoryPoints = points;
   });
   leaderboard = leaderboard.sort((a, b) => b.overallPoints - a.overallPoints);
-  // console.log(leaderboard);
   // localStorage.setItem(mode, JSON.stringify(leaderboard));
   return leaderboard;
 }

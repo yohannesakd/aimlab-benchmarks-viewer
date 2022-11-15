@@ -287,7 +287,6 @@ export default {
     paginatedPlayerList() {
       let perPage = 25;
       let playerList = [...this.selectedLeaderboard];
-      console.log(playerList);
       let pageCount = Math.ceil(playerList.length / perPage) - 1;
       let start = this.currentPage * perPage;
       let end = this.currentPage * perPage + perPage;
