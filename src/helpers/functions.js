@@ -307,7 +307,7 @@ function calculateRankNov(bench, userTask) {
 //End of Voltaic Section
 //Revosect section
 //Single function to handle all benchmark levels calculation
-export function calculateRA(playerData, mode) {
+export function calculateRevosectBenchmarks(playerData, mode) {
   let benchData = null;
   switch (mode) {
     case "hard":
@@ -334,9 +334,8 @@ export function calculateRA(playerData, mode) {
   );
 
   playerBenchmarks.sort((a, b) => a.scenarioID - b.scenarioID);
-  console.log(JSON.parse(JSON.stringify(playerBenchmarks)));
-  //calculating category points
   const allPointsList = playerBenchmarks.map((bench) => bench.points);
+  //Grouping benchmark scenarios by subcategories
   const subCategoryGroupedBenchmarks = _.groupBy(
     playerBenchmarks,
     "categoryID"
@@ -347,59 +346,65 @@ export function calculateRA(playerData, mode) {
     }
   );
 
-  let subCategoryPoints = null;
+  let aggregateSubCategoryPoints = null;
   //different point calculation between easy benchmarks and med/hard benchmarks
   if (mode == "easy") {
-    subCategoryPoints = subCategoryPointsList.map((item) => {
+    aggregateSubCategoryPoints = subCategoryPointsList.map((item) => {
       return item.reduce((acc, curr) => acc + curr);
     });
   } else {
-    subCategoryPoints = subCategoryPointsList.map((item) => {
+    aggregateSubCategoryPoints = subCategoryPointsList.map((item) => {
       return item.reduce((acc, curr) => acc + curr) - Math.min(...item);
     });
   }
   //calculating overall points
-  let overallPoints = subCategoryPoints.reduce((acc, curr) => acc + curr);
+  let overallPoints = aggregateSubCategoryPoints.reduce(
+    (acc, curr) => acc + curr
+  );
 
   //Check if player is valour/platinum to add excess points to the total
   if (mode != "hard") {
     let pointNormalizedData = checkExcessPoints(
-      JSON.stringify(playerBenchmarks),
+      playerBenchmarks,
       subCategoryPointsList,
       mode,
       overallPoints,
-      subCategoryPoints,
-      playerData.id
+      aggregateSubCategoryPoints
     );
 
     playerBenchmarks = pointNormalizedData.playerBench;
     overallPoints = pointNormalizedData.overallPoints;
-    subCategoryPoints = pointNormalizedData.categoryPoints;
+    aggregateSubCategoryPoints = pointNormalizedData.aggregateSubCategoryPoints;
   }
-  //finding the player's rank
-  let pointList = null;
-  let rankList = null;
-  let floorPoints = 0;
+  //finding the player's overall rank
+  let benchmarkPointsList = null;
+  let benchmarkRankList = null;
+  let basePoints = 0;
   switch (mode) {
     case "hard":
-      pointList = hardPoints;
-      rankList = hardRanks;
+      benchmarkPointsList = hardPoints;
+      benchmarkRankList = hardRanks;
       break;
     case "medium":
-      pointList = mediumPoints;
-      rankList = mediumRanks;
+      benchmarkPointsList = mediumPoints;
+      benchmarkRankList = mediumRanks;
       break;
     case "easy":
-      pointList = easyPoints;
-      rankList = easyRanks;
+      benchmarkPointsList = easyPoints;
+      benchmarkRankList = easyRanks;
       break;
   }
-  pointList.forEach((point) => {
+  benchmarkPointsList.forEach((point) => {
     if (overallPoints > point) {
-      floorPoints = point;
+      basePoints = point;
     }
   });
-  let overallRank = rankList[floorPoints] || "Unranked";
+
+  const hasPlayedAllSubCategories = !aggregateSubCategoryPoints.includes(0);
+  let overallRank = "Unranked";
+  if (hasPlayedAllSubCategories) {
+    overallRank = benchmarkRankList[basePoints];
+  }
   //Checking for Divinity
   if (overallRank == "Divine") {
     if (checkDivinity(allPointsList)) {
@@ -425,7 +430,7 @@ export function calculateRA(playerData, mode) {
     overallPoints,
     overallRank,
     allPoints: allPointsList,
-    subCategoryPoints: subCategoryPoints,
+    subCategoryPoints: aggregateSubCategoryPoints,
     benchmarks: playerBenchmarks,
     detailsOpen: false,
   };
@@ -543,10 +548,8 @@ function checkExcessPoints(
   categoryPointsList,
   mode,
   overallPoints,
-  categoryPoints,
-  id
+  aggregateSubCategoryPoints
 ) {
-  playerBench = JSON.parse(playerBench);
   // console.log(
   //   playerBench,
   //   categoryPointsList,
@@ -554,7 +557,6 @@ function checkExcessPoints(
   //   overallPoints,
   //   categoryPoints
   // );
-
   let pointLimit = 0;
   let rankPoints = 0;
   if (mode == "easy") {
@@ -564,25 +566,26 @@ function checkExcessPoints(
     pointLimit = mediumSubPoints[3];
     rankPoints = mediumPoints[3];
   }
-  let fixedPoints = [];
+  let fixedPointsList = [];
   categoryPointsList.forEach((category) => {
-    fixedPoints.push(
+    fixedPointsList.push(
       category.map((point) => {
         if (point > pointLimit) return pointLimit;
         return point;
       })
     );
   });
+  let fixedAggregatePoints = null;
   if (mode == "easy") {
-    fixedPoints = fixedPoints.map((item) => {
+    fixedAggregatePoints = fixedPointsList.map((item) => {
       return item.reduce((acc, curr) => acc + curr);
     });
   } else {
-    fixedPoints = fixedPoints.map((item) => {
+    fixedAggregatePoints = fixedPointsList.map((item) => {
       return item.reduce((acc, curr) => acc + curr) - Math.min(...item);
     });
   }
-  let totalPoints = fixedPoints.reduce((acc, curr) => acc + curr);
+  let totalPoints = fixedAggregatePoints.reduce((acc, curr) => acc + curr);
   let fixedBench = playerBench.map((bench) => {
     if (bench.points > pointLimit) {
       return {
@@ -596,10 +599,10 @@ function checkExcessPoints(
     return {
       playerBench: fixedBench,
       overallPoints: totalPoints,
-      categoryPoints: fixedPoints,
+      aggregateSubCategoryPoints: fixedAggregatePoints,
     };
   }
-  return { playerBench, overallPoints, categoryPoints };
+  return { playerBench, overallPoints, aggregateSubCategoryPoints };
 }
 
 export function organizeLeaderboard(playerList, fullBench, mode) {
@@ -630,7 +633,6 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
       scores: [],
     };
   });
-  console.log(JSON.parse(JSON.stringify(uniquePlayers)));
   uniquePlayers.forEach((player) => {
     Object.entries(playerList).forEach((task) => {
       let foundPlay = task[1].find((task) => task.user_id == player.id);
@@ -648,7 +650,10 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
   uniquePlayers.forEach((player) => {
     leaderboard.push({
       username: player.username,
-      ...calculateRA({ tasks: player.scores, id: player.id }, mode),
+      ...calculateRevosectBenchmarks(
+        { tasks: player.scores, id: player.id },
+        mode
+      ),
     });
   });
   leaderboard.forEach((player) => {

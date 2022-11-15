@@ -10,7 +10,13 @@
         {{ element }}
       </li>
     </dropdown>
-    <div>
+    <div
+      v-if="!RABenchmarks.overallPoints"
+      class="grid place-items-center p-10"
+    >
+      <loading-spinner></loading-spinner>
+    </div>
+    <div v-else>
       <div class="flex max-h-96 max-w-max mx-auto mt-4 gap-4 font-oswald">
         <div class="grid items-center">
           <img
@@ -40,6 +46,7 @@
           </ul>
         </div>
       </div>
+
       <section class="p-4 relative" id="benchmark-table">
         <header class="grid grid-cols-12 bg-slate-700 pr-4 pl-16 py-2">
           <p class="col-span-4 ml-2">Scenario</p>
@@ -159,6 +166,19 @@
               </div>
               <div class="ml-auto flex text-white items-center gap-10 mr-10">
                 <button
+                  class="
+                    cursor-pointer
+                    flex
+                    items-center
+                    gap-1
+                    transition
+                    hover:text-slate-300
+                  "
+                  @click="handlePlayScenario(bench.id)"
+                >
+                  <play-icon class="h-5 w-5 transition"></play-icon>Play
+                </button>
+                <button
                   class="flex items-center"
                   :class="
                     bench.count == 0
@@ -174,19 +194,7 @@
                     >Watch Replay</span
                   >
                 </button>
-                <button
-                  class="
-                    cursor-pointer
-                    flex
-                    items-center
-                    gap-1
-                    transition
-                    hover:text-slate-300
-                  "
-                  @click="handlePlayScenario(bench.id)"
-                >
-                  <play-icon class="h-5 w-5 transition"></play-icon>Play
-                </button>
+
                 <router-link
                   class="transition hover:text-slate-300 cursor-pointer"
                   :to="'/tasks/' + bench.id"
@@ -197,9 +205,10 @@
           </div>
         </div>
         <!-- Categories sidebar -->
-        <!-- <div
+        <div
           class="text-center origin-top-left absolute rotate-90"
           id="category-bar"
+          v-if="RABenchmarks.overallPoints"
         >
           <div class="grid grid-cols-6 gap-1" id="category-item">
             <span
@@ -218,7 +227,7 @@
               >{{ category }}</span
             >
           </div>
-        </div> -->
+        </div>
       </section>
     </div>
   </div>

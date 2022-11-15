@@ -137,9 +137,9 @@ export default {
         : this.RAEasy.overallRank;
     },
     playerSkill() {
-      if (this.playerInfo.skill) {
-        if (this.playerInfo.skill == 1000) return 100;
-        return this.playerInfo.skill % 100;
+      if (this.currentPlayerInfo.skill) {
+        if (this.currentPlayerInfo.skill == 1000) return 100;
+        return this.currentPlayerInfo.skill % 100;
       } else {
         return 0;
       }
@@ -172,7 +172,7 @@ export default {
   // Fetching player Task History using ID from the previous request
 
   async mounted() {
-    // if (this.username == this.currentPlayerInfo.username) return;
+    if (this.username == this.$store.getters.currentPlayerInfo.username) return;
 
     this.playerInfo = {};
     this.isLoading = true;

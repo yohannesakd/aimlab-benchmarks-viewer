@@ -3,9 +3,11 @@ import {
   intermediateBench,
   noviceBench,
 } from "../../helpers/voltaicData";
-import { caclulateVT, calculateRA } from "../../helpers/functions";
+import {
+  caclulateVT,
+  calculateRevosectBenchmarks,
+} from "../../helpers/functions";
 import _ from "lodash";
-import { hardBench } from "../../helpers/revosectData";
 
 export default {
   state() {
@@ -124,21 +126,21 @@ export default {
     },
 
     setRABenches(context) {
-      let RAHard = calculateRA(
+      let RAHard = calculateRevosectBenchmarks(
         {
           tasks: context.rootGetters.currentPlayerTasks,
           id: context.rootGetters.currentPlayerInfo.id,
         },
         "hard"
       );
-      let RAMedium = calculateRA(
+      let RAMedium = calculateRevosectBenchmarks(
         {
           tasks: context.rootGetters.currentPlayerTasks,
           id: context.rootGetters.currentPlayerInfo.id,
         },
         "medium"
       );
-      let RAEasy = calculateRA(
+      let RAEasy = calculateRevosectBenchmarks(
         {
           tasks: context.rootGetters.currentPlayerTasks,
           id: context.rootGetters.currentPlayerInfo.id,
