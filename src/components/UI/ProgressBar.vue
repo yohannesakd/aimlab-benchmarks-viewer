@@ -20,12 +20,12 @@ export default {
   },
   data() {
     return {
-      progressColors: {
-        900: "bg-nova",
-        1000: "bg-astra",
-        1100: "bg-celestial",
-        1200: "bg-celestial text-black",
-      },
+      // progressColors: {
+      //   900: "bg-nova",
+      //   1000: "bg-astra",
+      //   1100: "bg-celestial",
+      //   1200: "bg-celestial text-black",
+      // },
     };
   },
   computed: {

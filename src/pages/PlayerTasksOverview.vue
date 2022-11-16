@@ -3,7 +3,7 @@
     <loading-spinner class="mx-auto"></loading-spinner>
   </section>
   <section v-else>
-    <div class="grid grid-cols-4 gap-4 p-4 relative">
+    <div class="grid grid-cols-4 gap-3 p-3 relative">
       <input
         type="text"
         name=""
@@ -32,17 +32,18 @@
         :key="index"
         class="
           bg-slate-800
+          border border-slate-800
           min-h-[128px]
           px-4
           py-2
           flex flex-col
           justify-center
-          rounded
+          rounded-lg
           shadow-md
           font-semibold
           tracking-wide
           transition
-          hover:scale-105 hover:shadow-xl
+          hover:scale-[101%] hover:shadow-xl hover:border hover:border-slate-500
         "
         :to="'/tasks/' + task.id"
       >

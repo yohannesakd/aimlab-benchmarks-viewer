@@ -3,7 +3,7 @@
     <div id="mode-wrapper">
       <!-- Overall Benchmark Stats -->
       <div class="flex max-h-96 w-full mt-4 gap-4 justify-center font-oswald">
-        <dropdown class="ml-4 mr-auto" :selected-tab="currentTab">
+        <dropdown class="ml-4 mr-auto self-start" :selected-tab="currentTab">
           <li
             class="px-4 py-1 hover:bg-slate-600 transition"
             v-for="(element, index) in dropdownElements"

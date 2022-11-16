@@ -82,6 +82,7 @@
               hover:bg-slate-500
             "
             :to="{ name: tab }"
+            @click="displayRoute"
           >
             {{ key }}
           </router-link>
@@ -168,6 +169,9 @@ export default {
     handleSwitchProfile() {
       sessionStorage.removeItem("currentPlayer");
       this.$router.push("/profile");
+    },
+    displayRoute() {
+      console.log(this.$route);
     },
   },
   //Fetching the Player ID and Username again

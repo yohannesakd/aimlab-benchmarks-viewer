@@ -1,5 +1,10 @@
 <template>
-  <div class="dropdown w-40 relative" ref="wrapper" @click="isOpen = !isOpen">
+  <div
+    class="dropdown w-40 relative"
+    ref="wrapper"
+    :class="isOpen ? 'bg-slate-600' : ''"
+    @click="isOpen = !isOpen"
+  >
     <div
       id="selected"
       class="

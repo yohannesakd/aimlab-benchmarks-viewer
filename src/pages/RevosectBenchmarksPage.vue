@@ -205,7 +205,7 @@
           </div>
         </div>
         <!-- Categories sidebar -->
-        <div
+        <!-- <div
           class="text-center origin-top-left absolute rotate-90"
           id="category-bar"
           v-if="RABenchmarks.overallPoints"
@@ -227,7 +227,7 @@
               >{{ category }}</span
             >
           </div>
-        </div>
+        </div> -->
       </section>
     </div>
   </div>
