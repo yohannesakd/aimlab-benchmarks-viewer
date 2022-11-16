@@ -1,22 +1,10 @@
 <template>
   <div class="px-[8%] relative">
-    <section class="py-8 relative">
-      <button
-        class="
-          absolute
-          right-0
-          border-2 border-slate-500
-          px-6
-          py-2
-          rounded
-          transition
-          hover:bg-slate-500
-        "
-        @click="handleSwitchProfile"
+    <section class="py-8 flex items-start justify-between">
+      <base-card
+        v-if="isLoading"
+        class="grid place-items-center max-w-md py-5 px-10"
       >
-        Switch Profile
-      </button>
-      <base-card v-if="isLoading" class="grid place-items-center max-w-md">
         <loading-spinner></loading-spinner>
       </base-card>
       <base-card
@@ -26,7 +14,7 @@
           text-gray-900
           tracking-wide
           p-8
-          flex
+          flex flex-1
           gap-10
           max-w-xl
         "
@@ -41,7 +29,7 @@
           >
 
           <progress-bar
-            class="w-40 h-5 bg-zinc-200"
+            class="w-40 h-5 bg-slate-200 rounded-sm"
             :value="playerSkill"
             :color="'bg-mainCyan'"
           ></progress-bar>
@@ -65,8 +53,23 @@
           /></span>
         </div>
       </base-card>
+      <button
+        class="
+          right-0
+          border-2 border-slate-500
+          px-6
+          py-2
+          rounded
+          transition
+          hover:bg-slate-500
+        "
+        @click="handleSwitchProfile"
+      >
+        Switch Profile
+      </button>
     </section>
-    <div class="mx-auto relative z-10" id="profile-nav">
+
+    <div class="relative z-10" id="profile-nav">
       <ul class="flex">
         <li v-for="(tab, key) in tabs" :key="tab">
           <router-link
@@ -87,7 +90,7 @@
     </div>
     <router-view
       :isLoading="isLoading"
-      class="border border-slate-600 bg-slate-900 rounded-sm mb-10"
+      class="border border-slate-600 bg-slate-900 rounded-b-md mb-10"
     ></router-view>
   </div>
 </template>
@@ -176,7 +179,6 @@ export default {
 
     this.playerInfo = {};
     this.isLoading = true;
-    console.time("query-player");
     let aimlabProfile = await queries.APIFetch(queries.GET_USER_INFO, {
       username: this.username,
     });
@@ -210,7 +212,6 @@ export default {
         "updateCurrentPlayerTasks",
         plays_agg.aimlab.plays_agg
       );
-      console.timeEnd("query-player");
       this.$store.dispatch("setVTBenches");
       this.$store.dispatch("setRABenches");
     }
@@ -223,6 +224,13 @@ export default {
   @apply bg-slate-900 border-b-transparent;
 }
 #profile-nav {
-  top: 2px;
+  top: 1px;
+}
+
+ul li:first-of-type a {
+  border-top-left-radius: 0.25rem;
+}
+ul li:last-of-type a {
+  border-top-right-radius: 0.25rem;
 }
 </style>

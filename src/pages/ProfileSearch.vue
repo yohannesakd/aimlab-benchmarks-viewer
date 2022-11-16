@@ -30,8 +30,8 @@
     </base-card>
     <base-card class="mx-auto mt-4 max-w-md" v-if="usernameInput">
       <p v-if="isLoading">Searching...</p>
-      <p v-else-if="!playerInfo?.username">User not found</p>
-      <div class="flex justify-between" v-else>
+      <p v-else-if="!playerInfo.username">User not found</p>
+      <div v-else class="flex justify-between">
         <div>
           <h2 class="text-slate-300">Profile Found</h2>
           <h2>

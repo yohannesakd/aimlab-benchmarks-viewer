@@ -12,14 +12,15 @@
           w-72
           px-4
           py-1.5
-          bg-slate-500
+          bg-slate-600
+          rounded-t-md
           absolute
-          right-0
           top-0
+          -right-[1px]
           -translate-y-full
           z-10
           outline-none
-          border-2 border-slate-500
+          border-2 border-slate-600
           placeholder-slate-200
         "
         placeholder="Search..."
@@ -36,12 +37,12 @@
           py-2
           flex flex-col
           justify-center
-          rounded-sm
+          rounded
           shadow-md
           font-semibold
           tracking-wide
           transition
-          hover:scale-105
+          hover:scale-105 hover:shadow-xl
         "
         :to="'/tasks/' + task.id"
       >

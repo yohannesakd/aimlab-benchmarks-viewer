@@ -1,5 +1,5 @@
 <template>
-  <div class="dropdown w-40" ref="wrapper" @click="isOpen = !isOpen">
+  <div class="dropdown w-40 relative" ref="wrapper" @click="isOpen = !isOpen">
     <div
       id="selected"
       class="

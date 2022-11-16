@@ -1,44 +1,67 @@
 <template>
   <div class="relative min-h-max">
-    <dropdown class="ml-4 absolute top-4" :selected-tab="currentTab">
-      <li
-        class="px-4 py-1 hover:bg-slate-600 transition"
-        v-for="(element, index) in dropdownElements"
-        :key="index"
-        @click="handleDropdownSelect(index)"
-      >
-        {{ element }}
-      </li>
-    </dropdown>
-
     <div id="mode-wrapper">
       <!-- Overall Benchmark Stats -->
-      <div class="flex max-h-96 max-w-max mx-auto mt-4 gap-4 font-oswald">
-        <div class="grid items-center">
-          <img
-            class="h-36"
-            :src="getImagePath(VTBenchmarks.overallRank, 'medal')"
-            alt=""
-          />
-          <p
-            class="uppercase text-center font-bold tracking-widest"
-            :class="colorLookup[VTBenchmarks.overallRank]"
+      <div class="flex max-h-96 w-full mt-4 gap-4 justify-center font-oswald">
+        <dropdown class="ml-4 mr-auto" :selected-tab="currentTab">
+          <li
+            class="px-4 py-1 hover:bg-slate-600 transition"
+            v-for="(element, index) in dropdownElements"
+            :key="index"
+            @click="handleDropdownSelect(index)"
           >
-            {{ VTBenchmarks.overallRank }}
-          </p>
-        </div>
-        <div class="inline text-slate-200 tracking-wide">
-          <p>
-            Overall Energy :
-            <span class="font-bold">{{ VTBenchmarks.overallEnergy }}</span>
-          </p>
-          <p>SubCategories</p>
-          <ul class="pl-4">
-            <li v-for="(item, index) in mappedEnergy" :key="index">
-              {{ item.category }} :
-              <span class="font-bold">{{ item.energy }}</span> ({{ item.rank }})
-            </li>
-          </ul>
+            {{ element }}
+          </li>
+        </dropdown>
+
+        <div class="flex gap-4 mr-auto my-2">
+          <div class="grid items-center text-center">
+            <img
+              class="h-36"
+              :src="getImagePath(VTBenchmarks.overallRank, 'medal')"
+              alt=""
+            />
+            <p
+              class="uppercase font-bold tracking-widest"
+              :class="colorLookup[VTBenchmarks.overallRank]"
+            >
+              {{ VTBenchmarks.overallRank }}
+            </p>
+            <p>
+              Overall Energy :
+              <span
+                class="font-bold"
+                :class="colorLookup[VTBenchmarks.overallRank]"
+                >{{ VTBenchmarks.overallEnergy }}</span
+              >
+            </p>
+          </div>
+          <div
+            class="
+              text-slate-200
+              tracking-wide
+              flex flex-col
+              items-center
+              justify-center
+            "
+          >
+            <p class="font-bold text-lg">SubCategories</p>
+            <ul class="grid grid-cols-2 gap-1 mt-4">
+              <li
+                v-for="(item, index) in mappedEnergy"
+                :key="index"
+                class="flex gap-2 items-center"
+              >
+                {{ item.category }} :
+                <span class="font-bold">{{ item.energy }}</span>
+                <img
+                  :src="getImagePath(item.rank, 'badge')"
+                  class="w-6 inline-block"
+                  alt=""
+                />
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -384,4 +407,4 @@ export default {
 #category-bar span {
   transform: scale(-1, -1);
 }
-</style>
+</style>   

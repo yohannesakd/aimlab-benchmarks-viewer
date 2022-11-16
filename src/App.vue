@@ -13,7 +13,6 @@ export default {
     TheHeader,
     TheFooter,
   },
-  mounted() {},
 };
 </script>
 <style>

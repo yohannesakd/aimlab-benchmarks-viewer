@@ -38,7 +38,6 @@ export default {
     updateCurrentPlayerTasks(context, payload) {
       let plays = cleanUpUserTasks(payload);
       context.commit("updateCurrentPlayerTasks", plays);
-      console.timeEnd("player-tasks");
     },
   },
 };

@@ -161,7 +161,7 @@ export default {
   data() {
     return {
       currentPage: 0,
-      // currentWindowIndex: 3,
+      currentWindowIndex: 3,
       perPage: 25,
     };
   },
@@ -216,34 +216,34 @@ export default {
       ldb.aimlab.leaderboard.metadata.rows = this.perPage;
       this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
     },
-    // async currentWindowIndex(newWindow) {
-    //   let date = new Date();
-    //   const window = {
-    //     week: `${date.getFullYear()}-${parseInt(
-    //       date.getMonth() + 1
-    //     )}-${date.getDate()}`,
-    //     month: `${date.getFullYear()}-${parseInt(date.getMonth() + 1)}`,
-    //     year: `${date.getFullYear()}`,
-    //     allTime: "",
-    //   };
-    //   const period = this.leaderboardWindows[this.newWindow];
-    //   const ldb = await APIFetch(GET_TASK_LEADERBOARD, {
-    //     leaderboardInput: {
-    //       clientId: "aimlab",
-    //       limit: this.perPage,
-    //       offset: this.currentPage,
-    //       taskId: this.currentTask.id,
-    //       taskMode: 0,
-    //       weaponId: this.currentTask.weapon_id,
-    //     },
-    //     window: {
-    //       period: period,
-    //       value: window[period],
-    //     },
-    //   });
-    //   ldb.aimlab.leaderboard.metadata.rows = this.perPage;
-    //   this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
-    // },
+    async currentWindowIndex(newWindow) {
+      let date = new Date();
+      const window = {
+        week: `${date.getFullYear()}-${parseInt(
+          date.getMonth() + 1
+        )}-${date.getDate()}`,
+        month: `${date.getFullYear()}-${parseInt(date.getMonth() + 1)}`,
+        year: `${date.getFullYear()}`,
+        allTime: "",
+      };
+      const period = this.leaderboardWindows[this.newWindow];
+      const ldb = await APIFetch(GET_TASK_LEADERBOARD, {
+        leaderboardInput: {
+          clientId: "aimlab",
+          limit: this.perPage,
+          offset: this.currentPage,
+          taskId: this.currentTask.id,
+          taskMode: 0,
+          weaponId: this.currentTask.weapon_id,
+        },
+        window: {
+          period: period,
+          value: window[period],
+        },
+      });
+      ldb.aimlab.leaderboard.metadata.rows = this.perPage;
+      this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
+    },
   },
   methods: {
     handlePageSelect(event) {

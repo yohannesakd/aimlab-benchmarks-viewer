@@ -150,7 +150,6 @@ export default {
       context.commit("setRAEasy", RAEasy);
       context.commit("setRAMedium", RAMedium);
       context.commit("setRAHard", RAHard);
-      console.timeEnd("ra-benches");
     },
   },
 };

@@ -3,7 +3,7 @@ export default {
     return {
       currentTask: {},
       currentTaskLeaderboard: {},
-      // leaderboardWindows: ["Week", "Month", "Year", "Alltime"],
+      leaderboardWindows: ["Week", "Month", "Year", "Alltime"],
     };
   },
   getters: {

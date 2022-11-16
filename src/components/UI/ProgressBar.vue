@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full">
+  <div class="relative w-full overflow-hidden">
     <div
       class="absolute left-0 inset-y-0"
       :class="color"
