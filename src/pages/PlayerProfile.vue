@@ -227,6 +227,7 @@ export default {
 #profile-nav .router-link-active {
   @apply bg-slate-900 border-b-transparent;
 }
+
 #profile-nav {
   top: 1px;
 }

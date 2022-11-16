@@ -1,15 +1,5 @@
 <template>
-  <div class="min-h-max relative">
-    <dropdown class="ml-4 absolute top-4" :selected-tab="currentTab">
-      <li
-        class="px-4 py-1 hover:bg-slate-600 transition"
-        v-for="(element, index) in dropdownElements"
-        :key="index"
-        @click="handleDropdownSelect(index)"
-      >
-        {{ element }}
-      </li>
-    </dropdown>
+  <div class="min-h-max">
     <div
       v-if="!RABenchmarks.overallPoints"
       class="grid place-items-center p-10"
@@ -17,34 +7,65 @@
       <loading-spinner></loading-spinner>
     </div>
     <div v-else>
-      <div class="flex max-h-96 max-w-max mx-auto mt-4 gap-4 font-oswald">
-        <div class="grid items-center">
-          <img
-            class="h-36"
-            :src="getImagePath(RABenchmarks.overallRank)"
-            alt=""
-          />
-          <p
-            class="uppercase text-center font-bold tracking-widest"
-            :class="colorLookup[RABenchmarks.overallRank]"
+      <div class="flex max-h-96 w-full mt-4 gap-4 justify-center font-oswald">
+        <dropdown class="ml-4 mr-auto" :selected-tab="currentTab">
+          <li
+            class="px-4 py-1 hover:bg-slate-600 transition"
+            v-for="(element, index) in dropdownElements"
+            :key="index"
+            @click="handleDropdownSelect(index)"
           >
-            {{ RABenchmarks.overallRank }}
-          </p>
+            {{ element }}
+          </li>
+        </dropdown>
+        <div class="flex gap-20 mr-auto my-2">
+          <!--  -->
+          <div class="flex gap-20 mr-auto my-2">
+            <div class="grid items-center text-center">
+              <img
+                class="h-36"
+                :src="getImagePath(RABenchmarks.overallRank, 'medal')"
+                alt=""
+              />
+              <p
+                class="uppercase font-bold tracking-widest"
+                :class="colorLookup[RABenchmarks.overallRank]"
+              >
+                {{ RABenchmarks.overallRank }}
+              </p>
+              <p>
+                Overall Points :
+                <span
+                  class="font-bold tracking-wider"
+                  :class="colorLookup[RABenchmarks.overallRank]"
+                  >{{ RABenchmarks.overallPoints }}</span
+                >
+              </p>
+            </div>
+            <div
+              class="
+                text-slate-200
+                tracking-wide
+                flex flex-col
+                items-center
+                justify-center
+              "
+            >
+              <p class="font-bold text-lg">SubCategories</p>
+              <ul class="grid grid-cols-2 gap-1 mt-4">
+                <li
+                  v-for="(item, index) in subCategoryPoints"
+                  :key="index"
+                  class="flex gap-2 items-center pr-4"
+                >
+                  {{ subCategories[index] }} :
+                  <span class="font-bold">{{ item }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-
-        <div class="text-slate-200 tracking-wide inline">
-          <p>
-            Total Points :
-            <span class="font-bold">{{ RABenchmarks.overallPoints }}</span>
-          </p>
-          <p>Subcategory Points</p>
-          <ul class="pl-4">
-            <li v-for="(item, index) in subCategoryPoints" :key="index">
-              {{ subCategories[index] }} : {{ item }}
-              <!-- <span class="font-bold">{{ item.energy }}</span> ({{ item.rank }}) -->
-            </li>
-          </ul>
-        </div>
+        <!-- <span class="font-bold">{{ item.energy }}</span> ({{ item.rank }}) -->
       </div>
 
       <section class="p-4 relative" id="benchmark-table">
@@ -90,7 +111,7 @@
               >{{ bench.points }}</span
             >
             <progress-bar
-              class="bg-slate-600 w-full h-5"
+              class="bg-slate-600 w-full h-5 rounded-sm"
               :value="bench.progress"
               color="bg-blue-500"
             ></progress-bar>

@@ -59,6 +59,7 @@
         </p>
       </router-link>
     </div>
+    <!-- Paginator -->
     <div class="max-w-max mx-auto flex gap-1 items-center mb-4">
       <button
         type="button"
@@ -81,7 +82,7 @@
           v-for="page in pageNumbers"
           :key="page"
           :class="{
-            'bg-slate-500 pointer-events-none': this.currentPage == page - 1,
+            'bg-slate-600 pointer-events-none': this.currentPage == page - 1,
             ' hover:bg-slate-600': !!parseInt(page),
           }"
           @click="handlePageSelect($event)"
@@ -203,7 +204,6 @@ export default {
 
     pageNumbers() {
       let pages = [];
-
       if (this.currentPage > 1) pages.push(1);
       if (this.currentPage > 2) pages.push("...");
       for (

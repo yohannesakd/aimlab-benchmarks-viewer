@@ -1,6 +1,12 @@
 <template>
   <div class="relative min-h-max">
-    <div id="mode-wrapper">
+    <div
+      v-if="!VTBenchmarks.overallEnergy"
+      class="grid place-items-center p-10"
+    >
+      <loading-spinner></loading-spinner>
+    </div>
+    <div v-else id="mode-wrapper">
       <!-- Overall Benchmark Stats -->
       <div class="flex max-h-96 w-full mt-4 gap-4 justify-center font-oswald">
         <dropdown class="ml-4 mr-auto self-start" :selected-tab="currentTab">
@@ -14,7 +20,7 @@
           </li>
         </dropdown>
 
-        <div class="flex gap-4 mr-auto my-2">
+        <div class="flex gap-20 mr-auto my-2">
           <div class="grid items-center text-center">
             <img
               class="h-36"
@@ -50,7 +56,7 @@
               <li
                 v-for="(item, index) in mappedEnergy"
                 :key="index"
-                class="flex gap-2 items-center"
+                class="flex gap-2 items-center pr-4"
               >
                 {{ item.category }} :
                 <span class="font-bold">{{ item.energy }}</span>

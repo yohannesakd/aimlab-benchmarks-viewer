@@ -54,21 +54,29 @@
       </div>
     </div>
 
-    <section class="bg-slate-900 mt-10 p-4">
-      <div class="grid grid-cols-7 bg-slate-800 p-2">
-        <p>Rank</p>
-        <p class="col-span-2">Name</p>
+    <section class="bg-slate-900 mt-10 p-3 rounded-lg">
+      <div class="grid grid-cols-7 bg-slate-800 p-2 text-lg rounded-t">
+        <p class="ml-2">Rank</p>
+        <p class="ml-2 col-span-2">Name</p>
         <p>Score</p>
         <p>Hits</p>
         <p>Accuracy</p>
       </div>
       <div>
         <div
-          class="grid grid-cols-7 px-4 py-2 my-2 text-lg bg-slate-700"
+          class="
+            grid grid-cols-7
+            px-4
+            py-2
+            my-2
+            rounded-sm
+            text-lg
+            bg-slate-700
+          "
           v-for="(task, index) in currentTaskLeaderboard.data"
           :key="index"
         >
-          <p>{{ task.rank }}</p>
+          <p class="ml-2">{{ task.rank }}</p>
           <router-link
             :to="'/profile/' + task.username"
             class="col-span-2 hover:text-slate-300"
@@ -111,9 +119,11 @@
             hover:bg-slate-600
           "
           @click="switchPage(--currentPage)"
-          v-if="currentPage > 0"
+          :class="
+            currentPage > 0 ? '' : 'disabled text-slate-500 pointer-events-none'
+          "
         >
-          Previous
+          <chevron-icon class="h-5 w-5" direction="left"></chevron-icon>
         </button>
         <div class="flex gap-1">
           <div
@@ -139,9 +149,44 @@
             hover:bg-slate-600
           "
           @click="switchPage(++currentPage)"
-          v-if="currentPage < pageCount"
+          :class="
+            currentPage < pageCount
+              ? ''
+              : 'disabled text-slate-500 pointer-events-none'
+          "
         >
-          Next
+          <chevron-icon class="h-5 w-5" direction="right"></chevron-icon>
+        </button>
+        <input
+          type="text"
+          v-model.number="goToPageInput"
+          @keydown.enter="goToPage"
+          @blur="goToPage"
+          class="
+            bg-slate-600
+            text-center
+            w-10
+            py-2
+            outline-none
+            ml-2
+            transition
+            focus:ring-2
+            ring-inset ring-slate-300
+          "
+        />
+        <button
+          class="
+            text-center
+            bg-slate-600
+            w-10
+            py-2
+            outline-none
+            transition
+            hover:bg-slate-500
+          "
+          @click="goToPage"
+        >
+          Go
         </button>
       </div>
     </section>
@@ -161,6 +206,7 @@ export default {
   data() {
     return {
       currentPage: 0,
+      goToPageInput: null,
       currentWindowIndex: 3,
       perPage: 25,
     };
@@ -196,8 +242,8 @@ export default {
       ) {
         if (i > 0) pages.push(i);
       }
-      if (this.currentPage < this.pageCount - 2) pages.push("...");
-      if (this.currentPage < this.pageCount - 1) pages.push(this.pageCount + 1);
+      if (this.currentPage < this.pageCount - 4) pages.push("...");
+      if (this.currentPage < this.pageCount - 3) pages.push(this.pageCount + 1);
       return pages;
     },
   },
@@ -261,6 +307,18 @@ export default {
     },
     handleWindowSelect(index) {
       this.currentWindowIndex = index;
+    },
+    goToPage() {
+      if (this.goToPageInput) {
+        if (this.goToPageInput > this.pageCount + 1) {
+          this.currentPage = this.pageCount;
+        } else if (this.goToPageInput < 1) {
+          this.currentPage = 0;
+        } else {
+          this.currentPage = this.goToPageInput - 1;
+        }
+      }
+      this.goToPageInput = null;
     },
   },
   async mounted() {

@@ -19,13 +19,13 @@
         <li v-for="link in navLinks" :key="link">
           <router-link
             class="
-              border border-slate-600
-              px-6
-              py-3
+              px-4
+              py-2
               uppercase
               text-md
               tracking-wide
-              hover:bg-slate-500 hover:text-white
+              text-slate-400
+              hover:text-slate-300
               transition
             "
             :class="
@@ -55,6 +55,6 @@ export default {
 <style scoped>
 nav .router-link-active,
 nav .router-link-exact-active {
-  @apply bg-slate-500 text-white;
+  @apply text-white font-semibold tracking-wider;
 }
 </style>
