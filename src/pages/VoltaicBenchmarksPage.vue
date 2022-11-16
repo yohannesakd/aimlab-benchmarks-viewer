@@ -21,7 +21,7 @@
         </dropdown>
 
         <div class="flex gap-20 mr-auto my-2">
-          <div class="grid items-center text-center">
+          <div class="flex flex-col justify-center items-center text-center">
             <img
               class="h-36"
               :src="getImagePath(VTBenchmarks.overallRank, 'medal')"
@@ -33,8 +33,8 @@
             >
               {{ VTBenchmarks.overallRank }}
             </p>
-            <p>
-              Overall Energy :
+            <p class="flex items-center gap-1">
+              <span class="-mt-1">Overall Energy :</span>
               <span
                 class="font-bold"
                 :class="colorLookup[VTBenchmarks.overallRank]"

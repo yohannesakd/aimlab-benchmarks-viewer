@@ -14,7 +14,7 @@ export default {
       type: Number,
       default: 100,
     },
-    color: { type: String, default: "bg-blue-500", required: false },
+    color: { type: String, default: "bg-blue-700", required: false },
     energy: { type: Number, default: 0, required: false },
     value: { type: Number, default: 0 },
   },

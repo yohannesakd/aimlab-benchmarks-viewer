@@ -8,7 +8,7 @@
     </div>
     <div v-else>
       <div class="flex max-h-96 w-full mt-4 gap-4 justify-center font-oswald">
-        <dropdown class="ml-4 mr-auto" :selected-tab="currentTab">
+        <dropdown class="ml-4 mr-auto self-start" :selected-tab="currentTab">
           <li
             class="px-4 py-1 hover:bg-slate-600 transition"
             v-for="(element, index) in dropdownElements"
@@ -20,10 +20,10 @@
         </dropdown>
         <div class="flex gap-20 mr-auto my-2">
           <!--  -->
-          <div class="flex gap-20 mr-auto my-2">
-            <div class="grid items-center text-center">
+          <div class="flex gap-20 mr-auto">
+            <div class="flex flex-col items-center justify-center text-center">
               <img
-                class="h-36"
+                class="h-36 self-center"
                 :src="getImagePath(RABenchmarks.overallRank, 'medal')"
                 alt=""
               />
@@ -33,14 +33,14 @@
               >
                 {{ RABenchmarks.overallRank }}
               </p>
-              <p>
-                Overall Points :
+              <div class="flex items-center gap-1">
+                <span class="-mt-1">Overall Points :</span>
                 <span
                   class="font-bold tracking-wider"
                   :class="colorLookup[RABenchmarks.overallRank]"
                   >{{ RABenchmarks.overallPoints }}</span
                 >
-              </p>
+              </div>
             </div>
             <div
               class="
@@ -113,7 +113,7 @@
             <progress-bar
               class="bg-slate-600 w-full h-5 rounded-sm"
               :value="bench.progress"
-              color="bg-blue-500"
+              color="bg-sky-700"
             ></progress-bar>
             <!-- colors: bg-grandmaster bg-nova bg-celestial bg-astra bg-iron bg-bronze bg-silver bg-gold bg-platinum bg-diamond bg-jade bg-master -->
           </div>
