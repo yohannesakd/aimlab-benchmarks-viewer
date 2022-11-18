@@ -171,7 +171,7 @@ export default {
       this.$router.push("/profile");
     },
     displayRoute() {
-      console.log(this.$route);
+      // console.log(this.$route);
     },
   },
   //Fetching the Player ID and Username again

@@ -3,7 +3,10 @@
     <!-- <div class="relative">
       
     </div> -->
-    <div class="flex justify-between">
+    <base-card v-if="headLoading" class="grid place-items-center max-w-3xl">
+      <loading-spinner></loading-spinner>
+    </base-card>
+    <div v-else class="flex justify-between">
       <base-card class="max-w-3xl flex flex-col gap-4">
         <div class="flex justify-between">
           <h1 class="text-2xl font-semibold">{{ currentTask.name }}</h1>
@@ -54,7 +57,13 @@
       </div>
     </div>
 
-    <section class="bg-slate-900 mt-10 p-3 rounded-lg">
+    <section
+      v-if="isLoading"
+      class="bg-slate-900 mt-10 p-3 rounded-lg grid place-items-center"
+    >
+      <loading-spinner></loading-spinner>
+    </section>
+    <section v-else class="bg-slate-900 mt-10 p-3 rounded-lg">
       <div class="grid grid-cols-7 bg-slate-800 p-2 text-lg rounded-t">
         <p class="ml-2">Rank</p>
         <p class="ml-2 col-span-2">Name</p>
@@ -118,7 +127,7 @@
             transition
             hover:bg-slate-600
           "
-          @click="switchPage(--currentPage)"
+          @click="--currentPage"
           :class="
             currentPage > 0 ? '' : 'disabled text-slate-500 pointer-events-none'
           "
@@ -148,7 +157,7 @@
             transition
             hover:bg-slate-600
           "
-          @click="switchPage(++currentPage)"
+          @click="++currentPage"
           :class="
             currentPage < pageCount
               ? ''
@@ -205,6 +214,8 @@ export default {
   props: ["taskId"],
   data() {
     return {
+      isLoading: false,
+      headLoading: false,
       currentPage: 0,
       goToPageInput: null,
       currentWindowIndex: 3,
@@ -249,6 +260,7 @@ export default {
   },
   watch: {
     async currentPage(newPage) {
+      this.isLoading = true;
       const ldb = await APIFetch(GET_TASK_LEADERBOARD, {
         leaderboardInput: {
           clientId: "aimlab",
@@ -261,6 +273,7 @@ export default {
       });
       ldb.aimlab.leaderboard.metadata.rows = this.perPage;
       this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
+      this.isLoading = false;
     },
     async currentWindowIndex(newWindow) {
       let date = new Date();
@@ -322,6 +335,8 @@ export default {
     },
   },
   async mounted() {
+    this.isLoading = true;
+    this.headLoading = true;
     const res = await APIFetch(GET_TASK_BY_ID, { slug: this.taskId });
 
     if (res.aimlab?.task) {
@@ -341,7 +356,8 @@ export default {
       this.$store.dispatch("setCurrentTask", res.aimlab.task);
       sessionStorage.setItem("currentTask", res.aimlab.task.id);
       this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
-      console.log(this.currentTaskLeaderboard);
+      this.headLoading = false;
+      this.isLoading = false;
     }
   },
 };

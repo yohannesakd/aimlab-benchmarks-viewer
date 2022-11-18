@@ -326,6 +326,8 @@ export function calculateRevosectBenchmarks(playerData, mode) {
     benchData.some((n2) => n.id == n2.id)
   );
 
+  console.log(JSON.parse(JSON.stringify(playedBenchmarks)));
+  console.log(JSON.parse(JSON.stringify(benchData)));
   //Computing the scores and ranks for each of the played benchmark scenarios
   let playerBenchmarks = getPlayerBenchmarkResults(
     playedBenchmarks,
@@ -613,54 +615,54 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
         index = i;
         break;
       }
+      playerList[task.id] = playerList[task.id].slice(0, index);
     }
-    playerList[task.id] = playerList[task.id].slice(0, index);
-  }
 
-  let allPlayers = [];
-  Object.entries(playerList).forEach((task) => {
-    allPlayers.push(...task[1]);
-  });
-
-  let uniquePlayers = [
-    ...new Map(allPlayers.map((item) => [item["user_id"], item])).values(),
-  ].map((player) => {
-    return {
-      id: player.user_id,
-      username: player.username,
-      scores: [],
-    };
-  });
-  uniquePlayers.forEach((player) => {
+    let allPlayers = [];
     Object.entries(playerList).forEach((task) => {
-      let foundPlay = task[1].find((task) => task.user_id == player.id);
-      if (foundPlay) {
-        player.scores.push({
-          id: foundPlay.task_id,
-          maxScore: foundPlay.score,
-          count: 1,
-        });
-      }
+      allPlayers.push(...task[1]);
     });
-  });
-  let leaderboard = [];
-  uniquePlayers.forEach((player) => {
-    leaderboard.push({
-      username: player.username,
-      ...calculateRevosectBenchmarks(
-        { tasks: player.scores, id: player.id },
-        mode
-      ),
+
+    let uniquePlayers = [
+      ...new Map(allPlayers.map((item) => [item["user_id"], item])).values(),
+    ].map((player) => {
+      return {
+        id: player.user_id,
+        username: player.username,
+        scores: [],
+      };
     });
-  });
-  leaderboard.forEach((player) => {
-    let points = {};
-    player.subCategoryPoints.forEach((item, index) => {
-      points[categories[index]] = item;
+    uniquePlayers.forEach((player) => {
+      Object.entries(playerList).forEach((task) => {
+        let foundPlay = task[1].find((task) => task.user_id == player.id);
+        if (foundPlay) {
+          player.scores.push({
+            id: foundPlay.task_id,
+            maxScore: foundPlay.score,
+            count: 1,
+          });
+        }
+      });
     });
-    player.subCategoryPoints = points;
-  });
-  leaderboard = leaderboard.sort((a, b) => b.overallPoints - a.overallPoints);
-  // localStorage.setItem(mode, JSON.stringify(leaderboard));
-  return leaderboard;
+    let leaderboard = [];
+    uniquePlayers.forEach((player) => {
+      leaderboard.push({
+        username: player.username,
+        ...calculateRevosectBenchmarks(
+          { tasks: player.scores, id: player.id },
+          mode
+        ),
+      });
+    });
+    leaderboard.forEach((player) => {
+      let points = {};
+      player.subCategoryPoints.forEach((item, index) => {
+        points[categories[index]] = item;
+      });
+      player.subCategoryPoints = points;
+    });
+    leaderboard = leaderboard.sort((a, b) => b.overallPoints - a.overallPoints);
+    // localStorage.setItem(mode, JSON.stringify(leaderboard));
+    return leaderboard;
+  }
 }
