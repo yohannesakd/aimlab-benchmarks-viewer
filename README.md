@@ -6,7 +6,7 @@ In addition to tracking Profiles the website also provides stat tracking for [Vo
 
 ## How to use:
 
--   Player Profile
+## Player Profile
 
 Navigate to the Profile Page and insert a player's username (_case sensitive_)
 
@@ -19,7 +19,7 @@ From here you can navigate to the [Voltaic](https://voltaic.gg) and [Revosect](h
 
 ![Player Profile](./public/guide/player-profile.png)
 
--   Task
+## Task
 
 Navigate to the Tasks Page and insert a task name to search
 
