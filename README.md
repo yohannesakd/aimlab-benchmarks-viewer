@@ -1,4 +1,4 @@
-#**Aimlab Stats Tracker**
+# Aimlab Stats Tracker
 
 This is a simple website I created to track Profiles on [Aimlab](https://aimlab.gg)
 
