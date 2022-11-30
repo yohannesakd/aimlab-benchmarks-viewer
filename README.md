@@ -4,7 +4,7 @@ This is a simple website I created to track Profiles on [Aimlab](https://aimlab.
 
 In addition to tracking Profiles the website also provides stat tracking for [Voltaic](https://voltaic.gg) and [Revosect](https://revosect.com) Benchmarks
 
-##How to use:
+## How to use:
 
 -   Player Profile
 
