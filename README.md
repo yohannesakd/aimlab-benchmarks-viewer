@@ -1,4 +1,4 @@
-# Aimlab Stats Tracker
+# [Aimlab Stats Tracker](aimlab-tracker.vercel.app)
 
 This is a simple website I created to track Profiles on [Aimlab](https://aimlab.gg)
 
