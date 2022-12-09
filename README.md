@@ -1,12 +1,12 @@
-#**Aimlab Stats Tracker**
+# [Aimlab Stats Tracker](aimlab-tracker.vercel.app)
 
 This is a simple website I created to track Profiles on [Aimlab](https://aimlab.gg)
 
 In addition to tracking Profiles the website also provides stat tracking for [Voltaic](https://voltaic.gg) and [Revosect](https://revosect.com) Benchmarks
 
-##How to use:
+## How to use:
 
--   Player Profile
+## Player Profile
 
 Navigate to the Profile Page and insert a player's username (_case sensitive_)
 
@@ -19,7 +19,7 @@ From here you can navigate to the [Voltaic](https://voltaic.gg) and [Revosect](h
 
 ![Player Profile](./public/guide/player-profile.png)
 
--   Task
+## Task
 
 Navigate to the Tasks Page and insert a task name to search
 
