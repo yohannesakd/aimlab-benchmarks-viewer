@@ -28,11 +28,13 @@ import {
 } from "./revosectData";
 import {
     APIFetch,
+    API_ENDPOINT,
     GET_TASK_LEADERBOARD,
     GET_TASK_BY_ID,
     GET_USER_PLAYS_AGG,
 } from "./queries.js";
 import _ from "lodash";
+import axios from "axios";
 
 //UTILITY FUNCTIONS
 
@@ -685,3 +687,82 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
         return leaderboard;
     }
 }
+
+// function fetchAimlabLeaderboard(variables) {
+//     const query = `
+//       query getAimlabLeaderboard($leaderboardInput: LeaderboardInput!) {
+//         aimlab {
+//           leaderboard(input: $leaderboardInput) {
+//             id
+//             source
+//             metadata {
+//               offset
+//               rows
+//               totalRows
+//             }
+//             schema {
+//               id
+//               fields
+//             }
+//             data
+//           }
+//         }
+//       }
+//     `;
+
+//     // wrap the variables object in another object with a property named
+//     // after the variable in the query (in this case, "leaderboardInput")
+//     const body = JSON.stringify({
+//         query,
+//         variables: {
+//             leaderboardInput: variables,
+//         },
+//     });
+
+//     return axios.post("https://api.aimlab.gg/graphql", body, {
+//         headers: {
+//             "Content-Type": "application/json",
+//         },
+//     });
+// }
+
+// const leaderboardData = [];
+
+// hardBench.forEach((benchmark) => {
+//     const benchmarkData = [];
+//     let offset = 0;
+//     // initialize a variable to store the last score
+//     let lastScore = null;
+//     // create a function to make an API request and update the lastScore variable
+//     const fetchLeaderboardData = async () => {
+//         const variables = {
+//             clientId: "aimlab",
+//             limit: 100,
+//             offset,
+//             taskId: benchmark.id,
+//             taskMode: 0,
+//             weaponId: benchmark.weapon,
+//         };
+//         const response = await fetchAimlabLeaderboard(variables);
+//         // save the response data in the leaderboardData array
+//         benchmarkData.push(response.data);
+//         console.log(response.data.data.aimlab.leaderboard);
+//         // update the lastScore variable with the score of the last item in the response data
+//         lastScore =
+//             response.data.data.aimlab.leaderboard.data[
+//                 response.data.data.aimlab.leaderboard.data.length - 1
+//             ].score;
+//     };
+//     // make the initial API request to get the first batch of data
+//     fetchLeaderboardData().then(() => {
+//         // while the last score is greater than or equal to the first entry in the scores array
+//         // and the last score is not null (this is to prevent infinite looping)
+//         while (lastScore >= benchmark.scores[0] && lastScore !== null) {
+//             // increment the offset and make another API request
+//             offset += 100;
+//             fetchLeaderboardData();
+//         }
+//     });
+//     console.log(benchmarkData);
+//     leaderboardData.push(benchmarkData);
+// });

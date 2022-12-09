@@ -128,61 +128,92 @@
                         ></chevron-icon>
                     </p>
                     <div
-                        class="col-span-12 mt-2 flex gap-10 border-t-2 border-t-slate-600 py-2 pl-4 text-slate-200 transition"
+                        class="col-span-12 mt-2 gap-10 border-t-2 border-t-slate-600 py-2 pl-4 text-slate-200 transition"
                         v-if="bench.detailsOpen"
                     >
-                        <div class="flex flex-col gap-2">
-                            <div class="grid grid-cols-2">
-                                <p v-if="bench.count">
-                                    PB Accuracy :
-                                    {{ Math.floor(bench.maxAcc) }}%
-                                </p>
-                                <p>Total Plays : {{ bench.count }}</p>
-                            </div>
-                            <div class="grid grid-cols-2">
-                                <p v-if="bench.count">
-                                    Avg. Score :
-                                    {{ Math.floor(bench.avgScore) }}
-                                </p>
-                                <p v-if="bench.count">
-                                    Avg. Accuracy :
-                                    {{ Math.floor(bench.avgAcc) }}%
-                                </p>
+                        <div class="pb-4">
+                            <div class="flex flex-col gap-0.5">
+                                <div
+                                    class="min-w-3/4 grid gap-0.5 text-center"
+                                    :class="scoreReqGrid"
+                                >
+                                    <span
+                                        v-for="(rank, index) in rankList"
+                                        :key="index"
+                                        class="bg-slate-700 px-8 py-2 text-center"
+                                        :class="colorLookup[rank]"
+                                        >{{ rank }}</span
+                                    >
+                                </div>
+                                <div
+                                    class="grid gap-0.5 text-center"
+                                    :class="scoreReqGrid"
+                                >
+                                    <span
+                                        v-for="(
+                                            score, index
+                                        ) in bench.scores.slice(1)"
+                                        :key="index"
+                                        class="bg-slate-700 px-8 py-2"
+                                        >{{ score }}</span
+                                    >
+                                </div>
                             </div>
                         </div>
-                        <div
-                            class="ml-auto mr-10 flex items-center gap-10 text-white"
-                        >
-                            <button
-                                class="flex items-center"
-                                :class="
-                                    bench.count == 0
-                                        ? 'disabled pointer-events-none text-slate-500'
-                                        : ''
-                                "
-                                @click="replayLink(bench.id, bench.weapon)"
+                        <div class="flex">
+                            <div class="flex flex-col gap-2">
+                                <div class="grid grid-cols-2">
+                                    <p v-if="bench.count">
+                                        PB Accuracy :
+                                        {{ Math.floor(bench.maxAcc) }}%
+                                    </p>
+                                    <p>Total Plays : {{ bench.count }}</p>
+                                </div>
+                                <div class="grid grid-cols-2">
+                                    <p v-if="bench.count">
+                                        Avg. Score :
+                                        {{ Math.floor(bench.avgScore) }}
+                                    </p>
+                                    <p v-if="bench.count">
+                                        Avg. Accuracy :
+                                        {{ Math.floor(bench.avgAcc) }}%
+                                    </p>
+                                </div>
+                            </div>
+                            <div
+                                class="ml-auto mr-10 flex items-center gap-10 text-white"
                             >
-                                <span v-if="replayLoading">Loading...</span>
-                                <span
-                                    v-else
-                                    class="transition hover:text-slate-400"
-                                    >Watch Replay</span
+                                <button
+                                    class="flex items-center"
+                                    :class="
+                                        bench.count == 0
+                                            ? 'disabled pointer-events-none text-slate-500'
+                                            : ''
+                                    "
+                                    @click="replayLink(bench.id, bench.weapon)"
                                 >
-                            </button>
-                            <button
-                                class="flex cursor-pointer items-center gap-1 transition hover:text-slate-400"
-                                @click="handlePlayScenario(bench.id)"
-                            >
-                                <play-icon
-                                    class="h-5 w-5 transition"
-                                ></play-icon
-                                >Play
-                            </button>
-                            <router-link
-                                class="transition hover:text-slate-400"
-                                :to="'/tasks/' + bench.id"
-                                >View Leaderboard</router-link
-                            >
+                                    <span v-if="replayLoading">Loading...</span>
+                                    <span
+                                        v-else
+                                        class="transition hover:text-slate-400"
+                                        >Watch Replay</span
+                                    >
+                                </button>
+                                <button
+                                    class="flex cursor-pointer items-center gap-1 transition hover:text-slate-400"
+                                    @click="handlePlayScenario(bench.id)"
+                                >
+                                    <play-icon
+                                        class="h-5 w-5 transition"
+                                    ></play-icon
+                                    >Play
+                                </button>
+                                <router-link
+                                    class="transition hover:text-slate-400"
+                                    :to="'/tasks/' + bench.id"
+                                    >View Leaderboard</router-link
+                                >
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -318,6 +349,21 @@ export default {
                 };
             });
         },
+        rankList() {
+            switch (this.currentTab.value) {
+                case "advanced":
+                    return ["Grandmaster", "Nova", "Astra", "Celestial"];
+
+                case "intermediate":
+                    return ["Platinum", "Diamond", "Jade", "Master"];
+
+                case "novice":
+                    return ["Iron", "Bronze", "Silver", "Gold"];
+            }
+        },
+        scoreReqGrid() {
+            return `grid-cols-${this.rankList.length}`;
+        },
     },
     methods: {
         getImagePath(rank, option) {
@@ -380,7 +426,6 @@ export default {
             );
             if (link) {
                 window.open(link, "_blank");
-                window.focus();
             }
             this.replayLoading = false;
         },
