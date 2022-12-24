@@ -26,7 +26,7 @@ export const advancedBench = [
     subCategory: "Dynamic",
     categoryID: 1,
     scenarioID: 2,
-    scores: [680, 880, 1050, 1140, 1200],
+    scores: [710, 880, 1050, 1140, 1200],
   },
   {
     id: "CsLevel.VT Empyrean.VT Arc 1.R7WRND",
