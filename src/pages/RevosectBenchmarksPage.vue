@@ -108,6 +108,7 @@
                     >
                         <span
                             class="absolute left-1/2 z-10 -translate-x-1/2 transform text-right"
+                            v-if="bench.points"
                             >{{ bench.points }}</span
                         >
                         <progress-bar

@@ -38,15 +38,15 @@ import axios from "axios";
 
 //UTILITY FUNCTIONS
 
-export function taskDeepLink(taskId) {
-    return `https://go.aimlab.gg/v1/redirects?link=aimlab://workshop?id=${taskId}&source=EEDCC708991834C0&link=steam://rungameid/714010`;
-}
-export function replayDeepLink(playId) {
-    return `https://go.aimlab.gg/v1/redirects?link=aimlab%3a%2f%2fcompare%3fid%3d${playId}%26source%3d84966503A24BD515&link=steam%3a%2f%2frungameid%2f714010`;
-}
 export async function findWorkshopId(taskId) {
     const task = await APIFetch(GET_TASK_BY_ID, { slug: taskId });
     return task.aimlab.task.workshop_id;
+}
+export function taskDeepLink(workshopId) {
+    return `https://go.aimlab.gg/v1/redirects?link=aimlab://workshop?id=${workshopId}&source=EEDCC708991834C0&link=steam://rungameid/714010`;
+}
+export function replayDeepLink(playId) {
+    return `https://go.aimlab.gg/v1/redirects?link=aimlab%3a%2f%2fcompare%3fid%3d${playId}%26source%3d84966503A24BD515&link=steam%3a%2f%2frungameid%2f714010`;
 }
 export async function findReplay(playerName, taskId, weapon) {
     let limit = 100;
@@ -457,7 +457,8 @@ function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
     // let currentPlayer = playerData.id;
     // let playerTasks = playerData;
     //Score Overrides section
-    benchData.forEach((bench) => {
+    let benchmark = JSON.parse(JSON.stringify(benchData))
+    benchmark.forEach((bench) => {
         bench.avgAcc = 0;
         bench.count = 0;
         bench.maxScore = 0;
@@ -466,15 +467,15 @@ function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
         bench.rank = "Unranked";
     });
     for (let i = 0; i < playerTasks.length; i++) {
-        for (let j = 0; j < benchData.length; j++) {
-            if (playerTasks[i].id == benchData[j].id) {
+        for (let j = 0; j < benchmark.length; j++) {
+            if (playerTasks[i].id == benchmark[j].id) {
                 let rankData = [0, 0, "Unranked"];
                 if (playerTasks[i].count) {
                     //calculate rank and points for different modes
                     switch (mode) {
                         case "hard":
                             rankData = calculateRankRA(
-                                benchData[j],
+                                benchmark[j],
                                 playerTasks[i],
                                 hardSubRanks,
                                 hardSubPoints
@@ -482,7 +483,7 @@ function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
                             break;
                         case "medium":
                             rankData = calculateRankRA(
-                                benchData[j],
+                                benchmark[j],
                                 playerTasks[i],
                                 mediumSubRanks,
                                 mediumSubPoints
@@ -490,7 +491,7 @@ function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
                             break;
                         case "easy":
                             rankData = calculateRankRA(
-                                benchData[j],
+                                benchmark[j],
                                 playerTasks[i],
                                 easySubRanks,
                                 easySubPoints
@@ -499,18 +500,18 @@ function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
                             break;
                     }
                 }
-                benchData[j] = {
-                    ...benchData[j],
-                    ...playerTasks[i],
+                benchmark[j] = {
+                    ...JSON.parse(JSON.stringify(benchmark[j])),
+                    ...JSON.parse(JSON.stringify(playerTasks[i])),
                 };
-                benchData[j].points = rankData[0];
-                benchData[j].progress = rankData[1];
-                benchData[j].rank = rankData[2];
+                benchmark[j].points = rankData[0];
+                benchmark[j].progress = rankData[1];
+                benchmark[j].rank = rankData[2];
             }
         }
     }
 
-    return benchData;
+    return benchmark;
 }
 
 function calculateRankRA(bench, userTask, benchRanks, benchPoints) {
