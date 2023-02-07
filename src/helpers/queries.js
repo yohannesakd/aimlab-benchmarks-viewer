@@ -21,121 +21,24 @@ export const GET_USER_PLAYS_AGG = `
   query GetAimlabProfileAgg($where: AimlabPlayWhere!) {
     aimlab {
       plays_agg(where: $where) {
-          group_by {
-              user_id
-              steam_id
-              weapon_id
-              task_id
-              task_name
-              ended_at(period: week )
-                  }
-          aggregate {
-              count
-              avg {
-                  score
-                  task_duration
-                  targets
-                  kills
-                  shots_fired
-                  shots_hit
-                  shots_hit_head
-                  shots_hit_body
-                  reaction_time
-                  accuracy
-                  shots_per_kill
-                  shots_missed
-                  kills_per_sec
-                  time_off_avg
-                  time_on_avg
-                  time_on_ratio
-                  settings_fov
-                  settings_sensitivity_x
-                  settings_sensitivity_y
-                  adv_crosshair_placement
-                  adv_movement_accuracy
-                  }
-              min {
-                  score
-                  task_duration
-                  targets
-                  kills
-                  shots_fired
-                  shots_hit
-                  shots_hit_head
-                  shots_hit_body
-                  reaction_time
-                  shots_missed
-                  created_at
-                  ended_at
-                  accuracy
-                  shots_per_kill
-                  kills_per_sec
-                  time_off_avg
-                  time_on_avg
-                  time_on_ratio
-                  adv_crosshair_placement
-                  adv_movement_accuracy     
-                  }
-              max{
-                  score
-                  task_duration
-                  targets
-                  kills
-                  shots_fired
-                  shots_hit
-                  shots_hit_head
-                  shots_hit_body
-                  reaction_time
-                  shots_missed
-                        ended_at
-                  accuracy
-                  shots_per_kill
-                  kills_per_sec
-                  time_off_avg
-                  time_on_avg
-                  time_on_ratio
-                  adv_crosshair_placement
-                  adv_movement_accuracy
-                  }
-              sum{
-                  score
-                  task_duration
-                  targets
-                  kills
-                  shots_fired
-                  shots_hit
-                  shots_hit_head
-                  shots_hit_body
-                  reaction_time
-                  shots_missed
-              }
-               stddev{
-                  score
-                  task_duration
-                  targets
-                  kills
-                  shots_fired
-                  shots_hit
-                  shots_hit_head
-                  shots_hit_body
-                  reaction_time
-                  accuracy
-                  shots_per_kill
-                  shots_missed
-                  kills_per_sec
-                  time_off_avg
-                  time_on_avg
-                  time_on_ratio
-               }
-               uniq{
-                  id
-                  play_id
-                  task
-                  weapon_id
-               }
-              }
+        group_by {
+          task_id
+          task_name
+        }
+        aggregate {
+          count
+          avg {
+            score
+            accuracy
           }
+          max {
+            score
+            accuracy
+            created_at
+          }
+        }
       }
+    }
   }
 `;
 //$slug = String! variable for task id

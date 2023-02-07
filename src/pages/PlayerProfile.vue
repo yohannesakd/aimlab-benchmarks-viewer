@@ -1,10 +1,15 @@
 <template>
   <div class="px-[8%] relative">
     <section class="py-8 flex items-start justify-between">
-      <base-card v-if="isLoading" class="grid place-items-center max-w-md py-5 px-10">
+      <base-card
+        v-if="isLoading"
+        class="grid place-items-center max-w-md py-5 px-10"
+      >
         <loading-spinner></loading-spinner>
       </base-card>
-      <base-card v-else class="
+      <base-card
+        v-else
+        class="
           bg-slate-700
           text-gray-900
           tracking-wide
@@ -12,27 +17,44 @@
           flex flex-1
           gap-10
           max-w-xl
-        ">
+        "
+      >
         <div class="flex flex-col gap-4 w-[40%]">
           <span class="block text-2xl font-semibold">{{
             currentPlayerInfo.username
           }}</span>
-          <span class="block">{{ currentPlayerInfo.rank }} -
-            {{ Math.floor(currentPlayerInfo.skill) }}</span>
+          <span class="block"
+            >{{ currentPlayerInfo.rank }} -
+            {{ Math.floor(currentPlayerInfo.skill) }}</span
+          >
 
-          <progress-bar class="w-40 h-5 bg-slate-200 rounded-sm" :value="playerSkill"
-            :color="'bg-mainCyan'"></progress-bar>
+          <progress-bar
+            class="w-40 h-5 bg-slate-200 rounded-sm"
+            :value="playerSkill"
+            :color="'bg-mainCyan'"
+          ></progress-bar>
         </div>
         <div class="flex flex-col text-lg">
           <span>Unique Tasks Played - {{ tasksPlayed }}</span>
           <span>Total Play Count - {{ totalPlays }}</span>
-          <span>VT Rank - {{ overallRankVT }}
-            <img :src="`../../rank-img/${imagePath(overallRankVT)}_badge.png`" class="h-5 inline" alt="" /></span>
-          <span>rA Rank - {{ overallRankRA }}
-            <img :src="`../../rank-img/ra/${imagePath(overallRankRA)}.png`" class="h-5 inline" alt="" /></span>
+          <span
+            >VT Rank - {{ overallRankVT }}
+            <img
+              :src="`../../rank-img/${imagePath(overallRankVT)}_badge.png`"
+              class="h-5 inline"
+              alt=""
+          /></span>
+          <span
+            >rA Rank - {{ overallRankRA }}
+            <img
+              :src="`../../rank-img/ra/${imagePath(overallRankRA)}.png`"
+              class="h-5 inline"
+              alt=""
+          /></span>
         </div>
       </base-card>
-      <button class="
+      <button
+        class="
           right-0
           border-2 border-slate-500
           px-6
@@ -40,7 +62,9 @@
           rounded
           transition
           hover:bg-slate-500
-        " @click="handleSwitchProfile">
+        "
+        @click="handleSwitchProfile"
+      >
         Switch Profile
       </button>
     </section>
@@ -48,20 +72,27 @@
     <div class="relative z-10" id="profile-nav">
       <ul class="flex">
         <li v-for="(tab, key) in tabs" :key="tab">
-          <router-link class="
+          <router-link
+            class="
               py-2
               px-4
               bg-slate-600
               inline-block
               border border-slate-600
               hover:bg-slate-500
-            " :to="{ name: tab }" @click="displayRoute">
+            "
+            :to="{ name: tab }"
+            @click="displayRoute"
+          >
             {{ key }}
           </router-link>
         </li>
       </ul>
     </div>
-    <router-view :isLoading="isLoading" class="border border-slate-600 bg-slate-900 rounded-b-md mb-10"></router-view>
+    <router-view
+      :isLoading="isLoading"
+      class="border border-slate-600 bg-slate-900 rounded-b-md mb-10"
+    ></router-view>
   </div>
 </template>
 
@@ -99,15 +130,15 @@ export default {
       return this.VTAdvanced.overallRank != "Unranked"
         ? this.VTAdvanced.overallRank
         : this.VTIntermediate.overallRank != "Unranked"
-          ? this.VTIntermediate.overallRank
-          : this.VTNovice.overallRank;
+        ? this.VTIntermediate.overallRank
+        : this.VTNovice.overallRank;
     },
     overallRankRA() {
       return this.RAHard.overallRank != "Unranked"
         ? this.RAHard.overallRank
         : this.RAMedium.overallRank != "Unranked"
-          ? this.RAMedium.overallRank
-          : this.RAEasy.overallRank;
+        ? this.RAMedium.overallRank
+        : this.RAEasy.overallRank;
     },
     playerSkill() {
       if (this.currentPlayerInfo.skill) {
@@ -133,7 +164,6 @@ export default {
   },
   methods: {
     imagePath(rank) {
-      if (!rank) return null
       return rank.replace(/ /g, "").toLowerCase();
     },
     handleSwitchProfile() {
@@ -205,7 +235,6 @@ export default {
 ul li:first-of-type a {
   border-top-left-radius: 0.25rem;
 }
-
 ul li:last-of-type a {
   border-top-right-radius: 0.25rem;
 }
