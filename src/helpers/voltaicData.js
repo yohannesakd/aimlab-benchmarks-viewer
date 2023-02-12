@@ -26,7 +26,7 @@ export const advancedBench = [
     subCategory: "Dynamic",
     categoryID: 1,
     scenarioID: 2,
-    scores: [710, 880, 1050, 1140, 1200],
+    scores: [690, 860, 1030, 1120, 1200],
   },
   {
     id: "CsLevel.VT Empyrean.VT Arc 1.R7WRND",
@@ -36,7 +36,7 @@ export const advancedBench = [
     subCategory: "Dynamic",
     categoryID: 1,
     scenarioID: 3,
-    scores: [750, 900, 1050, 1250, 1300],
+    scores: [750, 900, 1050, 1200, 1280],
   },
   {
     id: "CsLevel.VT Empyrean.VT Three.R7WSTK",
@@ -56,7 +56,7 @@ export const advancedBench = [
     subCategory: "Static",
     categoryID: 2,
     scenarioID: 5,
-    scores: [1150, 1250, 1350, 1500, 1580],
+    scores: [1150, 1250, 1350, 1450, 1530],
   },
   {
     id: "CsLevel.VT Empyrean.VT Multi.R7WTKS",
@@ -66,7 +66,7 @@ export const advancedBench = [
     subCategory: "Static",
     categoryID: 2,
     scenarioID: 6,
-    scores: [1400, 1500, 1600, 1700, 1750],
+    scores: [1400, 1490, 1580, 1670, 1720],
   },
   {
     id: "CsLevel.canner.VT Suave.R9N6JI",
@@ -76,7 +76,7 @@ export const advancedBench = [
     subCategory: "Precise",
     categoryID: 3,
     scenarioID: 7,
-    scores: [3100, 3600, 4100, 4300, 4550],
+    scores: [3060, 3530, 4000, 4150, 4330],
   },
   {
     id: "CsLevel.VT Empyrean.VT Preci.R7ZK29",
@@ -96,7 +96,7 @@ export const advancedBench = [
     subCategory: "Precise",
     categoryID: 3,
     scenarioID: 9,
-    scores: [2000, 2600, 3200, 3600, 3850],
+    scores: [1900, 2450, 3000, 3400, 3650],
   },
   {
     id: "CsLevel.zcr.VT React.R8CNGN",
@@ -106,7 +106,7 @@ export const advancedBench = [
     subCategory: "Reactive",
     categoryID: 4,
     scenarioID: 10,
-    scores: [2200, 2500, 2800, 3000, 3200],
+    scores: [2200, 2500, 2800, 3000, 3210],
   },
   {
     id: "CsLevel.zcr.VT Pillt.R8DF2N",
@@ -116,7 +116,7 @@ export const advancedBench = [
     subCategory: "Reactive",
     categoryID: 4,
     scenarioID: 11,
-    scores: [3000, 3300, 3600, 3900, 4000],
+    scores: [2900, 3200, 3500, 3800, 3900],
   },
   {
     id: "CsLevel.Lowgravity56.VT Axitr.RJE01M",
@@ -126,7 +126,7 @@ export const advancedBench = [
     subCategory: "Reactive",
     categoryID: 4,
     scenarioID: 12,
-    scores: [1950, 2250, 2550, 2800, 2900],
+    scores: [2000, 2250, 2500, 2750, 2850],
   },
   {
     id: "CsLevel.VT Empyrean.VT evaTS.R7YQ67",
@@ -136,7 +136,7 @@ export const advancedBench = [
     subCategory: "Speed",
     categoryID: 5,
     scenarioID: 13,
-    scores: [2500, 2700, 2900, 3100, 3250],
+    scores: [2470, 2670, 2870, 3070, 3220],
   },
   {
     id: "CsLevel.VT Empyrean.VT Spher.R89MOR",
@@ -146,7 +146,7 @@ export const advancedBench = [
     subCategory: "Speed",
     categoryID: 5,
     scenarioID: 14,
-    scores: [2200, 2400, 2600, 2750, 2900],
+    scores: [2170, 2370, 2570, 2650, 2800],
   },
   {
     id: "CsLevel.VT Empyrean.VT berry.R7ZWKV",
@@ -156,7 +156,7 @@ export const advancedBench = [
     subCategory: "Speed",
     categoryID: 5,
     scenarioID: 15,
-    scores: [2600, 2900, 3200, 3350, 3450],
+    scores: [2650, 2950, 3250, 3365, 3465],
   },
   {
     id: "CsLevel.VT Empyrean.VT evaTS.R7ZY84",
@@ -166,7 +166,7 @@ export const advancedBench = [
     subCategory: "Evasive",
     categoryID: 6,
     scenarioID: 16,
-    scores: [2550, 2750, 3050, 3200, 3250],
+    scores: [2380, 2680, 2980, 3130, 3200],
   },
   {
     id: "CsLevel.VT Empyrean.VT Angle.R8AH09",
@@ -186,7 +186,7 @@ export const advancedBench = [
     subCategory: "Evasive",
     categoryID: 6,
     scenarioID: 18,
-    scores: [1750, 2000, 2250, 2450, 2550],
+    scores: [1750, 2000, 2250, 2450, 2565],
   },
 ];
 
