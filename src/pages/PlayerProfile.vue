@@ -15,8 +15,9 @@
           tracking-wide
           p-8
           flex flex-1
+          justify-between
           gap-10
-          max-w-xl
+          max-w-2xl
         "
       >
         <div class="flex flex-col gap-4 w-[40%]">
@@ -135,7 +136,7 @@ export default {
     },
     overallRankRA() {
       return this.RAHard.overallRank != "Unranked"
-        ? this.RAHard.overallRank
+         ? this.RAHard.overallRank
         : this.RAMedium.overallRank != "Unranked"
         ? this.RAMedium.overallRank
         : this.RAEasy.overallRank;
@@ -214,7 +215,7 @@ export default {
       this.$store.dispatch("updateCurrentPlayerInfo", this.playerInfo);
       this.$store.dispatch(
         "updateCurrentPlayerTasks",
-        plays_agg.aimlab.plays_agg
+        plays_agg?.aimlab?.plays_agg
       );
       this.$store.dispatch("setVTBenches");
       this.$store.dispatch("setRABenches");

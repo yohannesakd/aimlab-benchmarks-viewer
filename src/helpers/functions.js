@@ -241,7 +241,7 @@ function calculateRankAdv(bench, userTask) {
         });
         energy += Math.floor(
             ((userTask.maxScore - bench.scores[i]) * 100) /
-                (bench.scores[i + 1] - bench.scores[i])
+            (bench.scores[i + 1] - bench.scores[i])
         );
     }
     let rank = advancedRanks[Math.floor(energy / 100) * 100] || "Unranked";
@@ -273,7 +273,7 @@ function calculateRankInt(bench, userTask) {
         });
         energy += Math.floor(
             ((userTask.maxScore - bench.scores[i]) * 100) /
-                (bench.scores[i + 1] - bench.scores[i])
+            (bench.scores[i + 1] - bench.scores[i])
         );
     }
     let rank = intermediateRanks[Math.floor(energy / 100) * 100] || "Unranked";
@@ -308,7 +308,7 @@ function calculateRankNov(bench, userTask) {
         });
         energy += Math.floor(
             ((userTask.maxScore - bench.scores[i]) * 100) /
-                (bench.scores[i + 1] - bench.scores[i])
+            (bench.scores[i + 1] - bench.scores[i])
         );
     }
     //Finding rank through rounding by 100 and looking up
@@ -633,7 +633,7 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
             }
             playerList[task.id] = playerList[task.id].slice(0, index);
         }
-
+        console.log(playerList);
         let allPlayers = [];
         Object.entries(playerList).forEach((task) => {
             allPlayers.push(...task[1]);
@@ -685,7 +685,7 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
             (a, b) => b.overallPoints - a.overallPoints
         );
         // localStorage.setItem(mode, JSON.stringify(leaderboard));
-        return leaderboard;
+        return leaderboard.filter(item => item.overallPoints > 0);
     }
 }
 
@@ -767,3 +767,46 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
 //     console.log(benchmarkData);
 //     leaderboardData.push(benchmarkData);
 // });
+
+// async function getHardLdb() {
+//     let playerList = {}
+//     for (let bench of hardBench) {
+//         let minScore = bench.scores[0];
+//         let scenScores = [];
+//         let offset = 0;
+//         while (true) {
+//             let ldb = await APIFetch(GET_TASK_LEADERBOARD, {
+//                 "leaderboardInput": {
+//                     clientId: "aimlab",
+//                     offset,
+//                     limit: 100,
+//                     taskId: bench.id,
+//                     taskMode: 0,
+//                     weaponId: bench.weapon
+//                 }
+//             })
+//             if (!ldb?.aimlab?.leaderboard.data) continue
+//             let scores = null;
+//             let scoreIndex = ldb?.aimlab?.leaderboard.data.findIndex(play => play.score < minScore)
+//             if (scoreIndex === -1) {
+//                 scores = ldb?.aimlab?.leaderboard.data
+//                 scenScores.push(...scores)
+//                 offset += 100
+//                 continue
+//             }
+//             scores = ldb?.aimlab?.leaderboard.data
+//             scenScores.push(...scores)
+//             break
+//         }
+//         playerList[bench.id] = scenScores;
+//     }
+
+//     if (Object.keys(playerList).length == hardBench.length) {
+//         return playerList
+//     }
+// }
+
+
+
+// const players = await getHardLdb();
+// console.log(organizeLeaderboard(players, hardBench, "hard"))
