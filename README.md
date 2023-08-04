@@ -10,7 +10,7 @@ In addition to tracking Profiles the website also provides stat tracking for [Vo
 
 Navigate to the Profile Page and insert a player's username (_case sensitive_)
 
--   You can use **thenoobsaibot** as an example.
+-   You can use **VTSaibot** as an example.
 
 ![Search Profile](./public/guide/profile-search.png)
 
