@@ -35,7 +35,7 @@
             :color="'bg-mainCyan'"
           ></progress-bar>
         </div>
-        <div class="flex flex-col text-lg">
+        <div class="flex flex-col flex-1 text-lg">
           <span>Unique Tasks Played - {{ tasksPlayed }}</span>
           <span>Total Play Count - {{ totalPlays }}</span>
           <span

@@ -1,11 +1,5 @@
 <template>
     <div class="relative min-h-max">
-        <!-- <div
-            v-if="!VTBenchmarks.overallEnergy"
-            class="grid place-items-center p-10"
-        >
-            <loading-spinner></loading-spinner>
-        </div> -->
         <div id="mode-wrapper">
             <!-- Overall Benchmark Stats -->
             <div
