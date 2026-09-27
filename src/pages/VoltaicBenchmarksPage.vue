@@ -1,7 +1,7 @@
 <template>
     <div class="relative min-h-max">
         <div id="mode-wrapper">
-            <!-- Overall Benchmark Stats -->
+
             <div
                 class="mt-4 flex max-h-96 w-full justify-center gap-4 font-oswald"
             >
@@ -69,7 +69,7 @@
             </div>
 
             <p v-if="actionError" class="px-4 text-center" role="alert">{{ actionError }}</p>
-            <!-- Benchmarks table -->
+
             <section class="relative p-4" id="benchmark-table">
                 <header class="grid grid-cols-12 bg-slate-700 py-2 pr-4 pl-16">
                     <p class="col-span-4 ml-2">Scenario</p>
@@ -213,29 +213,8 @@
                     </div>
                 </div>
 
-                <!-- Categories sidebar -->
-                <!-- <div
-          class="text-center origin-top-left absolute rotate-90"
-          id="category-bar"
-        >
-          <div class="grid grid-cols-6 gap-1" id="category-item">
-            <span
-              class="bg-slate-700"
-              v-for="item in subCategories"
-              :key="item"
-              >{{ item }}</span
-            >
-          </div>
-          <div class="grid grid-cols-6 gap-0.5 min-w-full">
-            <span
-              id="subcategory-item"
-              class="col-span-2 bg-slate-800"
-              v-for="category in categories"
-              :key="category"
-              >{{ category }}</span
-            >
-          </div>
-        </div> -->
+
+
             </section>
         </div>
     </div>

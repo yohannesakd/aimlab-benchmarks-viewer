@@ -1,11 +1,6 @@
 <template>
     <div class="min-h-max">
-        <!-- <div
-      v-if="!RABenchmarks.overallPoints"
-      class="grid place-items-center p-10"
-    >
-      <loading-spinner></loading-spinner>
-    </div> -->
+
         <div>
             <div
                 class="mt-4 flex max-h-96 w-full justify-center gap-4 font-oswald"
@@ -24,7 +19,7 @@
                     </li>
                 </dropdown>
                 <div class="my-2 mr-auto flex gap-20">
-                    <!--  -->
+
                     <div class="mr-auto flex gap-20">
                         <div
                             class="flex flex-col items-center justify-center text-center"
@@ -73,7 +68,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- <span class="font-bold">{{ item.energy }}</span> ({{ item.rank }}) -->
+
             </div>
 
             <p v-if="actionError" class="px-4 text-center" role="alert">{{ actionError }}</p>
@@ -218,30 +213,8 @@
                         </div>
                     </div>
                 </div>
-                <!-- Categories sidebar -->
-                <!-- <div
-          class="text-center origin-top-left absolute rotate-90"
-          id="category-bar"
-          v-if="RABenchmarks.overallPoints"
-        >
-          <div class="grid grid-cols-6 gap-1" id="category-item">
-            <span
-              class="bg-slate-700"
-              v-for="item in subCategories"
-              :key="item"
-              >{{ item }}</span
-            >
-          </div>
-          <div class="grid grid-cols-6 gap-0.5 min-w-full">
-            <span
-              id="subcategory-item"
-              class="col-span-2 bg-slate-800"
-              v-for="category in categories"
-              :key="category"
-              >{{ category }}</span
-            >
-          </div>
-        </div> -->
+
+
             </section>
         </div>
     </div>

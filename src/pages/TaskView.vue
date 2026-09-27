@@ -1,8 +1,6 @@
 <template>
   <div class="mt-10 px-[8%] mb-10">
-    <!-- <div class="relative">
-      
-    </div> -->
+
     <base-card v-if="headLoading" class="grid place-items-center max-w-3xl">
       <loading-spinner></loading-spinner>
     </base-card>
@@ -21,7 +19,7 @@
           </p>
         </div>
         <p>Description: {{ currentTask.description }}</p>
-        <!-- <img class="h-20" :src="currentTask.image_url" alt="" /> -->
+
         <a
           :href="taskLink"
           class="flex items-center gap-2 text-xl self-end"

@@ -109,7 +109,6 @@ export default {
       }
     },
     taskLeaderboardLink(id) {
-      // let fixedId = id.replace(/\s/g, "-_-");
       return this.$route.path + "/" + id;
     },
   },
