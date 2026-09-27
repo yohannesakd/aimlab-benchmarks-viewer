@@ -385,49 +385,36 @@ export function calculateRevosectBenchmarks(playerData, mode) {
         (acc, curr) => acc + curr
     );
 
-    //Check if player is valour/platinum to add excess points to the total
-    if (mode != "hard") {
-        let pointNormalizedData = checkExcessPoints(
-            playerBenchmarks,
-            subCategoryPointsList,
-            mode,
-            overallPoints,
-            aggregateSubCategoryPoints
-        );
-
-        playerBenchmarks = pointNormalizedData.playerBench;
-        overallPoints = pointNormalizedData.overallPoints;
-        aggregateSubCategoryPoints =
-            pointNormalizedData.aggregateSubCategoryPoints;
-    }
     //finding the player's overall rank
     let benchmarkPointsList = null;
     let benchmarkRankList = null;
-    let basePoints = 0;
+    let benchmarkSubPointsList = null;
     switch (mode) {
         case "hard":
             benchmarkPointsList = hardPoints;
             benchmarkRankList = hardRanks;
+            benchmarkSubPointsList = hardSubPoints;
             break;
         case "medium":
             benchmarkPointsList = mediumPoints;
             benchmarkRankList = mediumRanks;
+            benchmarkSubPointsList = mediumSubPoints;
             break;
         case "easy":
             benchmarkPointsList = easyPoints;
             benchmarkRankList = easyRanks;
+            benchmarkSubPointsList = easySubPoints;
             break;
     }
-    benchmarkPointsList.forEach((point) => {
-        if (overallPoints >= point) {
-            basePoints = point;
-        }
-    });
-
-    const hasPlayedAllSubCategories = !aggregateSubCategoryPoints.includes(0);
     let overallRank = "Unranked";
-    if (hasPlayedAllSubCategories) {
-        overallRank = benchmarkRankList[basePoints] || "Unranked";
+    const lowestSubCategoryPoints = Math.min(...aggregateSubCategoryPoints);
+    for (let i = 0; i < benchmarkPointsList.length; i++) {
+        if (
+            overallPoints >= benchmarkPointsList[i] &&
+            lowestSubCategoryPoints >= benchmarkSubPointsList[i]
+        ) {
+            overallRank = benchmarkRankList[benchmarkPointsList[i]];
+        }
     }
     //Checking for Divinity
     if (overallRank == "Divine") {
@@ -485,7 +472,8 @@ function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
                                 benchmark[j],
                                 playerTasks[i],
                                 hardSubRanks,
-                                hardSubPoints
+                                hardSubPoints,
+                                true
                             );
                             break;
                         case "medium":
@@ -521,7 +509,7 @@ function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
     return benchmark;
 }
 
-function calculateRankRA(bench, userTask, benchRanks, benchPoints) {
+function calculateRankRA(bench, userTask, benchRanks, benchPoints, extrapolate = false) {
     const arrSize = bench.scores.length - 1;
     let points = 0;
     let progress = 0;
@@ -532,11 +520,13 @@ function calculateRankRA(bench, userTask, benchRanks, benchPoints) {
         progress = Math.floor((userTask.maxScore * 100) / bench.scores[0]);
     } else if (userTask.maxScore >= bench.scores[arrSize]) {
         points = benchPoints[arrSize];
-        let playerDiff = userTask.maxScore - bench.scores[arrSize];
-        const pointDifference = benchPoints[arrSize] - benchPoints[arrSize - 1];
-        const scoreDifference = bench.scores[arrSize] - bench.scores[arrSize - 1];
         rank = benchRanks[points];
-        points += Math.floor((playerDiff * pointDifference) / scoreDifference);
+        if (extrapolate) {
+            const playerDiff = userTask.maxScore - bench.scores[arrSize];
+            const pointDifference = benchPoints[arrSize] - benchPoints[arrSize - 1];
+            const scoreDifference = bench.scores[arrSize] - bench.scores[arrSize - 1];
+            points += Math.floor((playerDiff * pointDifference) / scoreDifference);
+        }
         progress = 100;
     } else {
         let i = 0;
@@ -564,68 +554,6 @@ function checkDivinity(pointsList) {
             return point >= hardSubPoints[4];
         }).length == 18
     );
-}
-
-function checkExcessPoints(
-    playerBench,
-    categoryPointsList,
-    mode,
-    overallPoints,
-    aggregateSubCategoryPoints
-) {
-    // console.log(
-    //   playerBench,
-    //   categoryPointsList,
-    //   mode,
-    //   overallPoints,
-    //   categoryPoints
-    // );
-    let pointLimit = 0;
-    let rankPoints = 0;
-    if (mode == "easy") {
-        pointLimit = easySubPoints[3];
-        rankPoints = easyPoints[3];
-    } else {
-        pointLimit = mediumSubPoints[3];
-        rankPoints = mediumPoints[3];
-    }
-    let fixedPointsList = [];
-    categoryPointsList.forEach((category) => {
-        fixedPointsList.push(
-            category.map((point) => {
-                if (point > pointLimit) return pointLimit;
-                return point;
-            })
-        );
-    });
-    let fixedAggregatePoints = null;
-    if (mode == "easy") {
-        fixedAggregatePoints = fixedPointsList.map((item) => {
-            return item.reduce((acc, curr) => acc + curr);
-        });
-    } else {
-        fixedAggregatePoints = fixedPointsList.map((item) => {
-            return item.reduce((acc, curr) => acc + curr) - Math.min(...item);
-        });
-    }
-    let totalPoints = fixedAggregatePoints.reduce((acc, curr) => acc + curr);
-    let fixedBench = playerBench.map((bench) => {
-        if (bench.points > pointLimit) {
-            return {
-                ...bench,
-                points: pointLimit,
-            };
-        }
-        return bench;
-    });
-    if (!(totalPoints > rankPoints)) {
-        return {
-            playerBench: fixedBench,
-            overallPoints: totalPoints,
-            aggregateSubCategoryPoints: fixedAggregatePoints,
-        };
-    }
-    return { playerBench, overallPoints, aggregateSubCategoryPoints };
 }
 
 export function organizeLeaderboard(playerList, fullBench, mode) {

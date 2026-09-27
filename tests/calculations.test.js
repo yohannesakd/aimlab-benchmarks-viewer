@@ -5,7 +5,7 @@ import {
   caclulateVT,
   organizeLeaderboard,
 } from "../src/helpers/functions.js";
-import { easyBench, hardBench } from "../src/helpers/revosectData.js";
+import { easyBench, hardBench, mediumBench } from "../src/helpers/revosectData.js";
 import {
   advancedBench,
   intermediateBench,
@@ -47,6 +47,37 @@ test("Revosect leaves scores below the first overall rank unranked", () => {
   );
   assert.equal(result.overallPoints, 1800);
   assert.equal(result.overallRank, "Unranked");
+});
+
+test("Revosect overall rank also requires the matching subcategory threshold", () => {
+  const tasks = playsAt(easyBench, 3).map((play, index) =>
+    easyBench[index].categoryID === 1
+      ? { ...play, maxScore: easyBench[index].scores[0] }
+      : play
+  );
+  const result = calculateRevosectBenchmarks({ tasks, id: "uneven-player" }, "easy");
+  assert.ok(result.overallPoints >= 475);
+  assert.equal(result.subCategoryPoints[0], 40);
+  assert.equal(result.overallRank, "Silver");
+});
+
+test("Revosect caps easy and medium scenario points at their top sheet values", () => {
+  for (const [mode, benchmarks, cap] of [
+    ["easy", easyBench, 72],
+    ["medium", mediumBench, 145],
+  ]) {
+    const result = calculateRevosectBenchmarks(
+      {
+        tasks: benchmarks.map((bench) => ({
+          id: bench.id,
+          maxScore: bench.scores.at(-1) * 10,
+          count: 1,
+        })),
+      },
+      mode
+    );
+    assert.ok(result.allPoints.every((points) => points === cap));
+  }
 });
 
 test("Voltaic awards each level at its first rank threshold", () => {
