@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh Aimlab benchmark leaderboards
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/sai/apps/aimlab-viewer
+Environment=AIMLAB_DATA_DIR=/home/sai/.local/share/aimlab-viewer
+ExecStart=/usr/bin/node server/refresh-leaderboards.js
+TimeoutStartSec=190min
+Nice=10

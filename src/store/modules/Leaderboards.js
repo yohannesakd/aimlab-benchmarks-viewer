@@ -1,5 +1,3 @@
-import { organizeLeaderboard } from "../../helpers/functions";
-import { easyBench, hardBench, mediumBench } from "../../helpers/revosectData";
 export default {
   state() {
     return {
@@ -69,41 +67,19 @@ export default {
   },
   actions: {
     async fetchLeaderboard(context, payload) {
-      let ldb = null;
-      let fullBench = null;
-      switch (payload) {
-        case "hard":
-          fullBench = hardBench;
-          break;
-        case "medium":
-          fullBench = mediumBench;
-          break;
-        case "easy":
-          fullBench = easyBench;
-          break;
+      const response = await fetch(`/api/leaderboards/ra/${payload}`);
+      if (!response.ok) throw new Error(`Leaderboard request failed: ${response.status}`);
+      const snapshot = await response.json();
+      if (snapshot.mode !== payload || !Array.isArray(snapshot.players)) {
+        throw new Error("Invalid leaderboard response");
       }
-      let playerList = {};
-      for (let bench of fullBench) {
-        const worker = new Worker("/scripts/leaderboard-worker.js");
-        worker.onmessage = (event) => {
-          playerList[event.data[1]] = event.data[0];
-          if (Object.entries(playerList).length == fullBench.length) {
-            ldb = organizeLeaderboard(playerList, fullBench, payload);
-            switch (payload) {
-              case "hard":
-                context.commit("setHardLdb", ldb);
-                break;
-              case "medium":
-                context.commit("setMediumLdb", ldb);
-                break;
-              case "easy":
-                context.commit("setEasyLdb", ldb);
-                break;
-            }
-          }
-        };
-        worker.postMessage(bench);
-      }
+      const mutation = {
+        hard: "setHardLdb",
+        medium: "setMediumLdb",
+        easy: "setEasyLdb",
+      }[payload];
+      if (!mutation) throw new Error(`Unknown benchmark mode: ${payload}`);
+      context.commit(mutation, snapshot.players);
     },
   },
 };

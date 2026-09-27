@@ -30,3 +30,18 @@ Navigate to the Tasks Page and insert a task name to search
 The Task is Presented as such, the option to launch Aimlab and play as well as watch replays of players on the leaderboard is presented aswell.
 
 ![Task Search](./public/guide/task-overview.png)
+
+## Running on a VPS
+
+The Node server serves the built site and cached Revosect leaderboards. The refresh command fetches Aimlab leaderboard pages at most twice per second and writes one snapshot per benchmark mode. A failed refresh leaves the previous snapshot in place.
+
+```sh
+npm ci
+npm run build
+npm run refresh:leaderboards
+npm start
+```
+
+The server listens on `127.0.0.1:5180` by default. Set `PORT` and `AIMLAB_DATA_DIR` to change the port and snapshot directory. The systemd user units in `deploy/` run from `/home/sai/apps/aimlab-viewer`, store snapshots in `/home/sai/.local/share/aimlab-viewer`, and refresh at 04:00 local time. The VPS exposes port 5180 through its private Tailscale Serve route.
+
+The Revosect calculations use the [Aim Lab progression sheet](https://docs.google.com/spreadsheets/d/1JUTGiKU6u0csCWcmaMTof6Y2LNiZqLyCStH0OzzXYwI/edit?usp=sharing) for the benchmark set included in this repository.

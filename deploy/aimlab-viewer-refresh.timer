@@ -1,0 +1,9 @@
+[Unit]
+Description=Refresh Aimlab benchmark leaderboards daily
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+Unit=aimlab-viewer-refresh.service
+
+[Install]
+WantedBy=timers.target
