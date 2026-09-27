@@ -33,7 +33,6 @@ import {
 } from "./queries.js";
 import _ from "lodash";
 
-//UTILITY FUNCTIONS
 
 export async function findWorkshopId(taskId) {
     const task = await APIFetch(GET_TASK_BY_ID, { slug: taskId });
@@ -66,17 +65,13 @@ export async function findReplay(playerName, taskId, weapon) {
             let located = ldb.aimlab.leaderboard.data.filter(
                 (entry) => entry.username == playerName
             );
-            // console.log(located);
             if (_.isEmpty(located)) {
-                // console.log("not found on page", offset / limit + 1);
                 offset += limit;
                 if (offset >= ldb.aimlab.leaderboard.metadata.totalRows) {
-                    // console.log("Score not found");
                     return;
                 }
                 continue;
             } else {
-                // console.log("found on page", offset / limit + 1);
                 playerFound = true;
                 return replayDeepLink(located[0].play_id);
             }
@@ -114,8 +109,6 @@ export function cleanUpUserTasks(taskList) {
     );
     return data;
 }
-//Voltaic Functions
-//Take player full task list and the benchmark data
 export function caclulateVT(playerTasks, playerBench, mode) {
     playerBench.forEach((bench) => {
         bench.avgAcc = 0;
@@ -125,13 +118,11 @@ export function caclulateVT(playerTasks, playerBench, mode) {
         bench.energy = 0;
         bench.rank = "Unranked";
     });
-    // find the benchmark scenario within the player task list by matching IDs
     for (let i = 0; i < playerTasks.length; i++) {
         for (let j = 0; j < playerBench.length; j++) {
             if (playerTasks[i].id == playerBench[j].id) {
                 let rankData = [0, "Unranked"];
                 if (playerTasks[i].count > 0) {
-                    //calculate rank and energy for different modes
                     switch (mode) {
                         case "advanced":
                             rankData = calculateRankAdv(
@@ -169,7 +160,6 @@ export function caclulateVT(playerTasks, playerBench, mode) {
         }
     }
     playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
-    // calculating category energy
     const grouped = _.groupBy(playerBench, "categoryID");
     const allEnergyList = playerBench.map((bench) => bench.energy);
     const categoryEnergyList = Object.entries(grouped).map(([_, group]) => {
@@ -184,7 +174,6 @@ export function caclulateVT(playerTasks, playerBench, mode) {
             Number.EPSILON * Math.max(...categoryEnergyList) * categoryEnergyList.length;
         harmonicMean = Math.floor(mean + precision);
     }
-    //Calculating Overall rank
     const floorEnergy = Math.floor(harmonicMean / 100) * 100;
     let overallRank = null;
     switch (mode) {
@@ -201,7 +190,6 @@ export function caclulateVT(playerTasks, playerBench, mode) {
             overallRank = "Unranked";
             break;
     }
-    // Check complete rank scenario
     if (checkComplete(overallRank, allEnergyList, mode))
         overallRank += " Complete";
 
@@ -229,7 +217,6 @@ function checkComplete(rank, energyList, mode) {
 }
 
 function calculateRankAdv(bench, userTask) {
-    //lower scorelimit is 800
     let energy = 0;
     if (userTask.maxScore <= bench.scores[0]) {
         energy = Math.floor(
@@ -255,7 +242,6 @@ function calculateRankAdv(bench, userTask) {
 }
 
 function calculateRankInt(bench, userTask) {
-    //lower score limit is 300
     let energy = 0;
     if (userTask.maxScore <= bench.scores[0]) {
         energy = Math.floor(
@@ -284,19 +270,14 @@ function calculateRankInt(bench, userTask) {
         );
     }
     let rank = intermediateRanks[Math.floor(energy / 100) * 100] || "Unranked";
-    // console.log([energy, rank]);
     if (energy === 900) rank = intermediateRanks[800];
     return [energy, rank];
 }
 
-//Calculate Rank and Energy for a Scenario from the Novice Benches
-//Check scenarios if score is greater than the upper requirement or lower than the lower requirement and apply energy accordingly
 
 function calculateRankNov(bench, userTask) {
-    // lower limit is 0
     let energy = 0;
     if (userTask.maxScore >= bench.scores[4]) {
-        //calculating additional energy beyond the max requirement
         let userDiff = userTask.maxScore - bench.scores[4];
         let rankDiff = bench.scores[4] - bench.scores[3];
         let energyGain = Math.floor((userDiff / rankDiff) * 100);
@@ -305,7 +286,6 @@ function calculateRankNov(bench, userTask) {
         }
         energy = noviceEnergy[4] + energyGain;
     } else {
-        //calculating for energy between ranks
         let i = 0;
         bench.scores.forEach((score, index) => {
             if (userTask.maxScore > score) {
@@ -318,16 +298,11 @@ function calculateRankNov(bench, userTask) {
             (bench.scores[i + 1] - bench.scores[i])
         );
     }
-    //Finding rank through rounding by 100 and looking up
     let rank = noviceRanks[Math.floor(energy / 100) * 100] || "Unranked";
-    //When user has max energy
     if (energy === 500) rank = noviceRanks[400];
     return [energy, rank];
 }
 
-//End of Voltaic Section
-//Revosect section
-//Single function to handle all benchmark levels calculation
 export function calculateRevosectBenchmarks(playerData, mode) {
     let benchData = null;
     switch (mode) {
@@ -342,14 +317,10 @@ export function calculateRevosectBenchmarks(playerData, mode) {
             break;
     }
 
-    //Filtering out the benchmark scenarios the player has played from the provided full list of played scenarios
     let playedBenchmarks = playerData.tasks.filter((n) =>
         benchData.some((n2) => n.id == n2.id)
     );
 
-    // console.log(JSON.parse(JSON.stringify(playedBenchmarks)));
-    // console.log(JSON.parse(JSON.stringify(benchData)));
-    //Computing the scores and ranks for each of the played benchm  ark scenarios
     let playerBenchmarks = getPlayerBenchmarkResults(
         playedBenchmarks,
         benchData,
@@ -358,7 +329,6 @@ export function calculateRevosectBenchmarks(playerData, mode) {
 
     playerBenchmarks.sort((a, b) => a.scenarioID - b.scenarioID);
     const allPointsList = playerBenchmarks.map((bench) => bench.points);
-    //Grouping benchmark scenarios by subcategories
     const subCategoryGroupedBenchmarks = _.groupBy(
         playerBenchmarks,
         "categoryID"
@@ -370,7 +340,6 @@ export function calculateRevosectBenchmarks(playerData, mode) {
     });
 
     let aggregateSubCategoryPoints = null;
-    //different point calculation between easy benchmarks and med/hard benchmarks
     if (mode == "easy") {
         aggregateSubCategoryPoints = subCategoryPointsList.map((item) => {
             return item.reduce((acc, curr) => acc + curr);
@@ -380,12 +349,10 @@ export function calculateRevosectBenchmarks(playerData, mode) {
             return item.reduce((acc, curr) => acc + curr) - Math.min(...item);
         });
     }
-    //calculating overall points
     let overallPoints = aggregateSubCategoryPoints.reduce(
         (acc, curr) => acc + curr
     );
 
-    //finding the player's overall rank
     let benchmarkPointsList = null;
     let benchmarkRankList = null;
     let benchmarkSubPointsList = null;
@@ -406,37 +373,28 @@ export function calculateRevosectBenchmarks(playerData, mode) {
             benchmarkSubPointsList = easySubPoints;
             break;
     }
+    const hasRequiredScores =
+        mode === "easy" ||
+        Object.values(subCategoryGroupedBenchmarks).every(
+            (group) => group.filter(({ count }) => count > 0).length >= 2
+        );
     let overallRank = "Unranked";
     const lowestSubCategoryPoints = Math.min(...aggregateSubCategoryPoints);
     for (let i = 0; i < benchmarkPointsList.length; i++) {
         if (
+            hasRequiredScores &&
             overallPoints >= benchmarkPointsList[i] &&
             lowestSubCategoryPoints >= benchmarkSubPointsList[i]
         ) {
             overallRank = benchmarkRankList[benchmarkPointsList[i]];
         }
     }
-    //Checking for Divinity
     if (overallRank == "Divine") {
         if (checkDivinity(allPointsList)) {
             overallRank = "Divinity";
         }
     }
 
-    // if (playerData.id == "BF0D92146C9B39A0") {
-    //   console.log(
-    //     JSON.parse(
-    //       JSON.stringify({
-    //         overallPoints,
-    //         overallRank,
-    //         allPoints: allPointsList,
-    //         subCategoryPoints: categoryPoints,
-    //         benchmarks: playerBenchmarks,
-    //         detailsOpen: false,
-    //       })
-    //     )
-    //   );
-    // }
     return {
         overallPoints,
         overallRank,
@@ -446,11 +404,7 @@ export function calculateRevosectBenchmarks(playerData, mode) {
         detailsOpen: false,
     };
 }
-//Create a complete object with player scores, rank, points and scenario information
 function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
-    // let currentPlayer = playerData.id;
-    // let playerTasks = playerData;
-    //Score Overrides section
     let benchmark = JSON.parse(JSON.stringify(benchData))
     benchmark.forEach((bench) => {
         bench.avgAcc = 0;
@@ -465,7 +419,6 @@ function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
             if (playerTasks[i].id == benchmark[j].id) {
                 let rankData = [0, 0, "Unranked"];
                 if (playerTasks[i].count) {
-                    //calculate rank and points for different modes
                     switch (mode) {
                         case "hard":
                             rankData = calculateRankRA(

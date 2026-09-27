@@ -80,6 +80,20 @@ test("Revosect caps easy and medium scenario points at their top sheet values", 
   }
 });
 
+test("Revosect hard rank requires two played tasks in every subcategory", () => {
+  const tasks = playsAt(hardBench, 0)
+    .filter((_, index) => index !== 0 && index !== 1)
+    .map((play) =>
+      play.id === hardBench[2].id
+        ? { ...play, maxScore: hardBench[2].scores.at(-1) * 2 }
+        : play
+    );
+  const result = calculateRevosectBenchmarks({ tasks }, "hard");
+  assert.ok(result.overallPoints >= 1820);
+  assert.ok(Math.min(...result.subCategoryPoints) >= 150);
+  assert.equal(result.overallRank, "Unranked");
+});
+
 test("Voltaic awards each level at its first rank threshold", () => {
   for (const [mode, benchmarks, rank] of [
     ["novice", noviceBench, "Iron Complete"],
