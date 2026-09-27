@@ -33,8 +33,10 @@ export default {
       let fields = payload.schema.fields.map(({ name }) => name);
       let pagination = {
         ...payload.metadata,
-        pageCount:
-          Math.ceil(payload.metadata.totalRows / payload.metadata.rows) - 1,
+        pageCount: Math.max(
+          0,
+          Math.ceil(payload.metadata.totalRows / payload.metadata.rows) - 1
+        ),
       };
       let data = payload.data.map((data) => {
         return {

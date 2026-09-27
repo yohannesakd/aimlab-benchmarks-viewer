@@ -30,6 +30,7 @@
     </base-card>
     <base-card class="mx-auto mt-4 max-w-md" v-if="usernameInput">
       <p v-if="isLoading">Searching...</p>
+      <p v-else-if="searchError">Search is unavailable. Try again.</p>
       <p v-else-if="!playerInfo.username">User not found</p>
       <div v-else class="flex justify-between">
         <div>
@@ -68,29 +69,45 @@ export default {
       usernameInput: "",
       playerInfo: {},
       isLoading: false,
+      searchError: false,
     };
   },
   computed: {
     playerProfileLink() {
-      return this.$route.path + "/" + this.usernameInput;
+      return this.$route.path + "/" + this.playerInfo.username;
     },
+  },
+  beforeUnmount() {
+    this.searchUser.cancel();
   },
   methods: {
     searchUser: debounce(async function () {
+      const username = this.usernameInput;
       this.playerInfo = {};
+      this.searchError = false;
+      if (!username) {
+        this.isLoading = false;
+        return;
+      }
       this.isLoading = true;
-      let aimlabProfile = await queries.APIFetch(queries.GET_USER_INFO, {
-        username: this.usernameInput,
-      });
-      this.isLoading = false;
-      // Assigning the fetched data to our component
-      if (aimlabProfile?.aimlabProfile) {
-        this.playerInfo = {
-          username: aimlabProfile.aimlabProfile.username,
-          id: aimlabProfile.aimlabProfile.user.id,
-          rank: aimlabProfile.aimlabProfile.ranking.rank.displayName,
-          skill: aimlabProfile.aimlabProfile.ranking.skill,
-        };
+      try {
+        const data = await queries.APIFetch(queries.GET_USER_INFO, { username });
+        if (username !== this.usernameInput) return;
+        if (data.aimlabProfile) {
+          this.playerInfo = {
+            username: data.aimlabProfile.username,
+            id: data.aimlabProfile.user.id,
+            rank: data.aimlabProfile.ranking.rank.displayName,
+            skill: data.aimlabProfile.ranking.skill,
+          };
+        }
+      } catch (error) {
+        if (username === this.usernameInput) {
+          console.error(error);
+          this.searchError = true;
+        }
+      } finally {
+        if (username === this.usernameInput) this.isLoading = false;
       }
     }, 600),
   },

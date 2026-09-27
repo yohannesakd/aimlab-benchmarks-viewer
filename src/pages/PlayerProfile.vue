@@ -8,6 +8,10 @@
         <loading-spinner></loading-spinner>
       </base-card>
       <base-card
+        v-else-if="loadError"
+        class="max-w-md py-5 px-10"
+      >{{ loadError }}</base-card>
+      <base-card
         v-else
         class="
           bg-slate-700
@@ -70,7 +74,7 @@
       </button>
     </section>
 
-    <div class="relative z-10" id="profile-nav">
+    <div v-if="!loadError" class="relative z-10" id="profile-nav">
       <ul class="flex">
         <li v-for="(tab, key) in tabs" :key="tab">
           <router-link
@@ -83,7 +87,6 @@
               hover:bg-slate-500
             "
             :to="{ name: tab }"
-            @click="displayRoute"
           >
             {{ key }}
           </router-link>
@@ -91,6 +94,7 @@
       </ul>
     </div>
     <router-view
+      v-if="!isLoading && !loadError"
       :isLoading="isLoading"
       class="border border-slate-600 bg-slate-900 rounded-b-md mb-10"
     ></router-view>
@@ -98,7 +102,6 @@
 </template>
 
 <script>
-// import axios from "axios";
 import { mapGetters } from "vuex";
 import * as queries from "../helpers/queries.js";
 export default {
@@ -107,8 +110,9 @@ export default {
   },
   data() {
     return {
-      playerInfo: {},
       isLoading: false,
+      loadError: "",
+      requestVersion: 0,
       tabs: {
         Overview: "profile-overview",
         Voltaic: "vt-benches",
@@ -157,11 +161,10 @@ export default {
     },
   },
   watch: {
-    currentPlayerTasks(newArr) {
-      if (newArr.length) {
-        this.isLoading = false;
-      }
-    },
+    username: { immediate: true, handler: "loadPlayer" },
+  },
+  beforeUnmount() {
+    this.requestVersion++;
   },
   methods: {
     imagePath(rank) {
@@ -171,55 +174,53 @@ export default {
       sessionStorage.removeItem("currentPlayer");
       this.$router.push("/profile");
     },
-    displayRoute() {
-      // console.log(this.$route);
-    },
-  },
-  //Fetching the Player ID and Username again
-  // Assigning the fetched data to our component
-  // Fetching player Task History using ID from the previous request
-
-  async mounted() {
-    if (this.username == this.$store.getters.currentPlayerInfo.username) return;
-
-    this.playerInfo = {};
-    this.isLoading = true;
-    let aimlabProfile = await queries.APIFetch(queries.GET_USER_INFO, {
-      username: this.username,
-    });
-
-    if (aimlabProfile != null) {
-      this.playerInfo = {
-        username: aimlabProfile.aimlabProfile.username,
-        id: aimlabProfile.aimlabProfile.user.id,
-        rank: aimlabProfile.aimlabProfile.ranking.rank.displayName,
-        skill: aimlabProfile.aimlabProfile.ranking.skill,
-      };
-      let plays_agg = await queries.APIFetch(queries.GET_USER_PLAYS_AGG, {
-        where: {
-          is_practice: {
-            _eq: false,
-          },
-          score: {
-            _gt: 0,
-          },
-          user_id: {
-            _eq: this.playerInfo.id,
-          },
-        },
-      });
-      if (!plays_agg?.aimlab) {
-        this.$router.go();
+    async loadPlayer(username) {
+      const version = ++this.requestVersion;
+      if (username === this.currentPlayerInfo.username) {
+        this.isLoading = false;
+        this.loadError = "";
+        return;
       }
-      sessionStorage.setItem("currentPlayer", this.playerInfo.username);
-      this.$store.dispatch("updateCurrentPlayerInfo", this.playerInfo);
-      this.$store.dispatch(
-        "updateCurrentPlayerTasks",
-        plays_agg?.aimlab?.plays_agg
-      );
-      this.$store.dispatch("setVTBenches");
-      this.$store.dispatch("setRABenches");
-    }
+      this.isLoading = true;
+      this.loadError = "";
+
+      try {
+        const data = await queries.APIFetch(queries.GET_USER_INFO, { username });
+        if (!data.aimlabProfile) {
+          if (version === this.requestVersion) this.loadError = "Profile not found";
+          return;
+        }
+        const profile = data.aimlabProfile;
+        const playerInfo = {
+          username: profile.username,
+          id: profile.user.id,
+          rank: profile.ranking.rank.displayName,
+          skill: profile.ranking.skill,
+        };
+        const plays = await queries.APIFetch(queries.GET_USER_PLAYS_AGG, {
+          where: {
+            is_practice: { _eq: false },
+            score: { _gt: 0 },
+            user_id: { _eq: playerInfo.id },
+          },
+        });
+        if (!plays.aimlab?.plays_agg) throw new Error("Missing player history");
+        if (version !== this.requestVersion) return;
+
+        this.$store.dispatch("updateCurrentPlayerInfo", playerInfo);
+        this.$store.dispatch("updateCurrentPlayerTasks", plays.aimlab.plays_agg);
+        this.$store.dispatch("setVTBenches");
+        this.$store.dispatch("setRABenches");
+        sessionStorage.setItem("currentPlayer", playerInfo.username);
+      } catch (error) {
+        if (version === this.requestVersion) {
+          console.error(error);
+          this.loadError = "Could not load this profile. Try again.";
+        }
+      } finally {
+        if (version === this.requestVersion) this.isLoading = false;
+      }
+    },
   },
 };
 </script>

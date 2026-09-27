@@ -6,6 +6,9 @@
     <base-card v-if="headLoading" class="grid place-items-center max-w-3xl">
       <loading-spinner></loading-spinner>
     </base-card>
+    <base-card v-else-if="taskError" class="max-w-3xl">
+      {{ taskError }}
+    </base-card>
     <div v-else class="flex justify-between">
       <base-card class="max-w-3xl flex flex-col gap-4">
         <div class="flex justify-between">
@@ -43,27 +46,19 @@
         >
           Switch Task
         </button>
-        <!-- <dropdown class="" :selected-tab="currentWindow">
-          <li
-            class="px-4 py-1 hover:bg-slate-600 transition"
-            :class="currentWindowIndex == index ? 'bg-slate-700' : ''"
-            v-for="(element, index) in leaderboardWindows"
-            :key="index"
-            @click="handleWindowSelect(index)"
-          >
-            {{ element }}
-          </li>
-        </dropdown> -->
       </div>
     </div>
 
     <section
-      v-if="isLoading"
+      v-if="!taskError && isLoading"
       class="bg-slate-900 mt-10 p-3 rounded-lg grid place-items-center"
     >
       <loading-spinner></loading-spinner>
     </section>
-    <section v-else class="bg-slate-900 mt-10 p-3 rounded-lg">
+    <section v-else-if="!taskError && leaderboardError" class="bg-slate-900 mt-10 p-3 rounded-lg">
+      {{ leaderboardError }}
+    </section>
+    <section v-else-if="!taskError" class="bg-slate-900 mt-10 p-3 rounded-lg">
       <div class="grid grid-cols-7 bg-slate-800 p-2 text-lg rounded-t">
         <p class="ml-2">Rank</p>
         <p class="ml-2 col-span-2">Name</p>
@@ -216,9 +211,12 @@ export default {
     return {
       isLoading: false,
       headLoading: false,
+      taskError: "",
+      leaderboardError: "",
       currentPage: 0,
       goToPageInput: null,
-      currentWindowIndex: 3,
+      taskRequestVersion: 0,
+      leaderboardRequestVersion: 0,
       perPage: 25,
     };
   },
@@ -226,16 +224,9 @@ export default {
     ...mapGetters([
       "currentTask",
       "currentTaskLeaderboard",
-      "leaderboardWindows",
     ]),
     taskLink() {
       return taskDeepLink(this.currentTask.workshop_id);
-    },
-    currentWindow() {
-      return {
-        value: this.leaderboardWindows[this.currentWindowIndex].toLowerCase(),
-        label: this.leaderboardWindows[this.currentWindowIndex],
-      };
     },
     pageCount() {
       if (this.currentTaskLeaderboard?.pagination)
@@ -259,50 +250,16 @@ export default {
     },
   },
   watch: {
-    async currentPage(newPage) {
-      this.isLoading = true;
-      const ldb = await APIFetch(GET_TASK_LEADERBOARD, {
-        leaderboardInput: {
-          clientId: "aimlab",
-          limit: this.perPage,
-          offset: newPage * 25,
-          taskId: this.currentTask.id,
-          taskMode: 0,
-          weaponId: this.currentTask.weapon_id,
-        },
-      });
-      ldb.aimlab.leaderboard.metadata.rows = this.perPage;
-      this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
-      this.isLoading = false;
+    taskId: { immediate: true, handler: "loadTask" },
+    currentPage() {
+      if (!this.headLoading && !this.taskError && this.currentTask.id === this.taskId) {
+        this.loadLeaderboard(this.currentTask);
+      }
     },
-    async currentWindowIndex(newWindow) {
-      let date = new Date();
-      const window = {
-        week: `${date.getFullYear()}-${parseInt(
-          date.getMonth() + 1
-        )}-${date.getDate()}`,
-        month: `${date.getFullYear()}-${parseInt(date.getMonth() + 1)}`,
-        year: `${date.getFullYear()}`,
-        allTime: "",
-      };
-      const period = this.leaderboardWindows[this.newWindow];
-      const ldb = await APIFetch(GET_TASK_LEADERBOARD, {
-        leaderboardInput: {
-          clientId: "aimlab",
-          limit: this.perPage,
-          offset: this.currentPage,
-          taskId: this.currentTask.id,
-          taskMode: 0,
-          weaponId: this.currentTask.weapon_id,
-        },
-        window: {
-          period: period,
-          value: window[period],
-        },
-      });
-      ldb.aimlab.leaderboard.metadata.rows = this.perPage;
-      this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
-    },
+  },
+  beforeUnmount() {
+    this.taskRequestVersion++;
+    this.leaderboardRequestVersion++;
   },
   methods: {
     handlePageSelect(event) {
@@ -318,47 +275,77 @@ export default {
       sessionStorage.removeItem("currentTask");
       this.$router.push("/tasks");
     },
-    handleWindowSelect(index) {
-      this.currentWindowIndex = index;
-    },
     goToPage() {
-      if (this.goToPageInput) {
-        if (this.goToPageInput > this.pageCount + 1) {
-          this.currentPage = this.pageCount;
-        } else if (this.goToPageInput < 1) {
-          this.currentPage = 0;
-        } else {
-          this.currentPage = this.goToPageInput - 1;
-        }
+      if (Number.isInteger(this.goToPageInput)) {
+        this.currentPage = Math.min(
+          Math.max(this.goToPageInput - 1, 0),
+          this.pageCount
+        );
       }
       this.goToPageInput = null;
     },
-  },
-  async mounted() {
-    this.isLoading = true;
-    this.headLoading = true;
-    const res = await APIFetch(GET_TASK_BY_ID, { slug: this.taskId });
+    async loadTask(taskId) {
+      const version = ++this.taskRequestVersion;
+      this.leaderboardRequestVersion++;
+      this.headLoading = true;
+      this.isLoading = true;
+      this.taskError = "";
+      this.leaderboardError = "";
+      this.currentPage = 0;
 
-    if (res.aimlab?.task) {
-      const data = res.aimlab.task;
-      const ldb = await APIFetch(GET_TASK_LEADERBOARD, {
-        leaderboardInput: {
-          clientId: "aimlab",
-          limit: this.perPage,
-          offset: 0,
-          taskId: data.id,
-          taskMode: 0,
-          weaponId: data.weapon_id,
-        },
-      });
-      ldb.aimlab.leaderboard.metadata.rows = this.perPage;
-
-      this.$store.dispatch("setCurrentTask", res.aimlab.task);
-      sessionStorage.setItem("currentTask", res.aimlab.task.id);
-      this.$store.dispatch("setCurrentTaskLeaderboard", ldb.aimlab.leaderboard);
-      this.headLoading = false;
-      this.isLoading = false;
-    }
+      try {
+        const response = await APIFetch(GET_TASK_BY_ID, { slug: taskId });
+        if (version !== this.taskRequestVersion) return;
+        const task = response.aimlab?.task;
+        if (!task) {
+          this.taskError = "Task not found";
+          return;
+        }
+        this.$store.dispatch("setCurrentTask", task);
+        sessionStorage.setItem("currentTask", task.id);
+        this.headLoading = false;
+        await this.loadLeaderboard(task);
+      } catch (error) {
+        if (version === this.taskRequestVersion) {
+          console.error(error);
+          this.taskError = "Could not load this task. Try again.";
+        }
+      } finally {
+        if (version === this.taskRequestVersion) {
+          this.headLoading = false;
+          if (this.taskError) this.isLoading = false;
+        }
+      }
+    },
+    async loadLeaderboard(task) {
+      const version = ++this.leaderboardRequestVersion;
+      this.isLoading = true;
+      this.leaderboardError = "";
+      try {
+        const response = await APIFetch(GET_TASK_LEADERBOARD, {
+          leaderboardInput: {
+            clientId: "aimlab",
+            limit: this.perPage,
+            offset: this.currentPage * this.perPage,
+            taskId: task.id,
+            taskMode: 0,
+            weaponId: task.weapon_id,
+          },
+        });
+        const leaderboard = response.aimlab?.leaderboard;
+        if (!leaderboard) throw new Error("Missing task leaderboard");
+        if (version !== this.leaderboardRequestVersion || task.id !== this.taskId) return;
+        leaderboard.metadata.rows = this.perPage;
+        this.$store.dispatch("setCurrentTaskLeaderboard", leaderboard);
+      } catch (error) {
+        if (version === this.leaderboardRequestVersion) {
+          console.error(error);
+          this.leaderboardError = "Could not load the leaderboard. Try again.";
+        }
+      } finally {
+        if (version === this.leaderboardRequestVersion) this.isLoading = false;
+      }
+    },
   },
 };
 </script>

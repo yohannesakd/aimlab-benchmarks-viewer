@@ -39,6 +39,9 @@
         >
       </form>
     </base-card>
+    <base-card class="mx-auto mt-4 max-w-2xl" v-if="searchStatus">
+      <p>{{ searchStatus }}</p>
+    </base-card>
     <base-card class="mx-auto mt-4 max-w-2xl" v-if="taskList.length">
       <router-link
         class="
@@ -78,18 +81,31 @@ export default {
     return {
       taskNameInput: "",
       taskList: [],
+      searchStatus: "",
+      requestVersion: 0,
     };
+  },
+  beforeUnmount() {
+    this.requestVersion++;
   },
   methods: {
     async searchTask() {
+      const name = this.taskNameInput;
+      if (!name) return;
+      const version = ++this.requestVersion;
       this.taskList = [];
-      const searchedTasks = await APIFetch(GET_TASKS_BY_NAME, {
-        name: this.taskNameInput,
-      });
-      if (searchedTasks.aimlab.tasks.length) {
-        this.taskList = searchedTasks.aimlab.tasks;
-      } else {
-        console.log("task not found");
+      this.searchStatus = "Searching...";
+      try {
+        const data = await APIFetch(GET_TASKS_BY_NAME, { name });
+        if (version !== this.requestVersion) return;
+        if (!data.aimlab?.tasks) throw new Error("Missing task search results");
+        this.taskList = data.aimlab.tasks;
+        this.searchStatus = this.taskList.length ? "" : "No tasks found";
+      } catch (error) {
+        if (version === this.requestVersion) {
+          console.error(error);
+          this.searchStatus = "Search is unavailable. Try again.";
+        }
       }
     },
     taskLeaderboardLink(id) {

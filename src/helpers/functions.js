@@ -37,6 +37,7 @@ import _ from "lodash";
 
 export async function findWorkshopId(taskId) {
     const task = await APIFetch(GET_TASK_BY_ID, { slug: taskId });
+    if (!task.aimlab?.task?.workshop_id) throw new Error("Task has no workshop ID");
     return task.aimlab.task.workshop_id;
 }
 export function taskDeepLink(workshopId) {
@@ -61,8 +62,8 @@ export async function findReplay(playerName, taskId, weapon) {
             },
         });
 
-        if (ldb?.aimlab.leaderboard) {
-            let located = [...ldb.aimlab.leaderboard.data].filter(
+        if (ldb.aimlab?.leaderboard) {
+            let located = ldb.aimlab.leaderboard.data.filter(
                 (entry) => entry.username == playerName
             );
             // console.log(located);
@@ -79,7 +80,9 @@ export async function findReplay(playerName, taskId, weapon) {
                 playerFound = true;
                 return replayDeepLink(located[0].play_id);
             }
-        } else continue;
+        } else {
+            throw new Error("Missing Aimlab leaderboard");
+        }
     }
 }
 

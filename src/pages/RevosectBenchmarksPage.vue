@@ -76,6 +76,7 @@
                 <!-- <span class="font-bold">{{ item.energy }}</span> ({{ item.rank }}) -->
             </div>
 
+            <p v-if="actionError" class="px-4 text-center" role="alert">{{ actionError }}</p>
             <section class="relative p-4" id="benchmark-table">
                 <header class="grid grid-cols-12 bg-slate-700 py-2 pr-4 pl-16">
                     <p class="col-span-4 ml-2">Scenario</p>
@@ -257,6 +258,7 @@ export default {
     data() {
         return {
             replayLoading: false,
+            actionError: "",
             currentTabIndex: 2,
             categories: ["Clicking", "Tracking", "Switching"],
             subCategories: [
@@ -359,22 +361,32 @@ export default {
             });
         },
         async handlePlayScenario(taskId) {
-            const workshopId = await findWorkshopId(taskId);
-            const taskLink = taskDeepLink(workshopId);
-            window.open(taskLink, "_blank");
+            this.actionError = "";
+            try {
+                const workshopId = await findWorkshopId(taskId);
+                window.open(taskDeepLink(workshopId), "_blank");
+            } catch (error) {
+                console.error(error);
+                this.actionError = "Could not open this task. Try again.";
+            }
         },
         async replayLink(taskId, weapon) {
+            this.actionError = "";
             this.replayLoading = true;
-            let link = await findReplay(
-                this.currentPlayerInfo.username,
-                taskId,
-                weapon
-            );
-            if (link) {
-                window.open(link, "_blank");
-                window.focus();
+            try {
+                const link = await findReplay(
+                    this.currentPlayerInfo.username,
+                    taskId,
+                    weapon
+                );
+                if (link) window.open(link, "_blank");
+                else this.actionError = "Replay not found.";
+            } catch (error) {
+                console.error(error);
+                this.actionError = "Could not find this replay. Try again.";
+            } finally {
+                this.replayLoading = false;
             }
-            this.replayLoading = false;
         },
     },
 };

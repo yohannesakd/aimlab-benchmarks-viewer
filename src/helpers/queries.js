@@ -115,20 +115,18 @@ export const GET_TASK_LEADERBOARD = `
 `;
 
 export async function APIFetch(query, variables) {
-  try {
-    const response = await axios({
-      method: "POST",
-      url: API_ENDPOINT,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: {
-        query: query,
-        variables: variables,
-      },
-    });
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
+  const response = await axios({
+    method: "POST",
+    url: API_ENDPOINT,
+    timeout: 20000,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: { query, variables },
+  });
+  if (response.data.errors?.length) {
+    throw new Error(response.data.errors.map((error) => error.message).join("; "));
   }
+  if (!response.data.data) throw new Error("Aimlab returned no data");
+  return response.data.data;
 }

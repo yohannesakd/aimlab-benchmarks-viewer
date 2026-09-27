@@ -29,7 +29,7 @@ const router = createRouter({
           return;
         }
         if (sessionStorage.getItem("currentPlayer")) {
-          router.push("/profile/" + sessionStorage.getItem("currentPlayer"));
+          return "/profile/" + encodeURIComponent(sessionStorage.getItem("currentPlayer"));
         }
       },
     },
@@ -68,7 +68,7 @@ const router = createRouter({
           return;
         }
         if (sessionStorage.getItem("currentTask")) {
-          router.push("/tasks/" + sessionStorage.getItem("currentTask"));
+          return "/tasks/" + encodeURIComponent(sessionStorage.getItem("currentTask"));
         }
       },
     },
