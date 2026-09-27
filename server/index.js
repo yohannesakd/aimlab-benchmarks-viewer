@@ -28,7 +28,9 @@ const server = createServer(async (request, response) => {
 
   let pathname;
   try {
-    pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
+    pathname = decodeURIComponent(
+      new URL(request.url, "http://localhost").pathname
+    );
   } catch {
     send(response, 400, "Invalid path", "text/plain");
     return;
@@ -39,19 +41,32 @@ const server = createServer(async (request, response) => {
     return;
   }
 
-  const leaderboardMatch = pathname.match(/^\/api\/leaderboards\/ra\/(hard|medium|easy)$/);
+  const leaderboardMatch = pathname.match(
+    /^\/api\/leaderboards\/ra\/(hard|medium|easy)$/
+  );
   if (leaderboardMatch) {
     try {
-      const body = await readFile(resolve(dataDir, `${leaderboardMatch[1]}.json`), "utf8");
+      const body = await readFile(
+        resolve(dataDir, `${leaderboardMatch[1]}.json`),
+        "utf8"
+      );
       const snapshot = JSON.parse(body);
-      if (snapshot.mode !== leaderboardMatch[1] || !Array.isArray(snapshot.players)) {
+      if (
+        snapshot.mode !== leaderboardMatch[1] ||
+        !Array.isArray(snapshot.players)
+      ) {
         throw new Error("Invalid leaderboard snapshot");
       }
       response.setHeader("Cache-Control", "public, max-age=300");
       send(response, 200, body, "application/json");
     } catch (error) {
-      console.error(error);
-      send(response, 503, JSON.stringify({ error: "Leaderboard is unavailable" }), "application/json");
+      if (error.code !== "ENOENT") console.error(error);
+      send(
+        response,
+        503,
+        JSON.stringify({ error: "Leaderboard is unavailable" }),
+        "application/json"
+      );
     }
     return;
   }
@@ -74,7 +89,12 @@ const server = createServer(async (request, response) => {
   const file = spaRoute ? resolve(distDir, "index.html") : requested;
   try {
     const body = await readFile(file);
-    send(response, 200, body, contentTypes[extname(file)] || "application/octet-stream");
+    send(
+      response,
+      200,
+      body,
+      contentTypes[extname(file)] || "application/octet-stream"
+    );
   } catch (error) {
     if (error.code !== "ENOENT") console.error(error);
     send(response, 404, "Not found", "text/plain");

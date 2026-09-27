@@ -291,7 +291,10 @@ export default {
             } catch (error) {
                 if (version === this.requestVersion) {
                     console.error(error);
-                    this.leaderboardError = "Could not load the leaderboard. Try again later.";
+                    this.leaderboardError =
+                        mode === "easy"
+                            ? "The Easy leaderboard is unavailable. Easy benchmark results still appear on player profiles."
+                            : "Could not load the leaderboard. Try again later.";
                 }
             } finally {
                 if (version === this.requestVersion) this.leaderboardLoading = false;

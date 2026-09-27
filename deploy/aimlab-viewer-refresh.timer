@@ -1,5 +1,5 @@
 [Unit]
-Description=Refresh Aimlab benchmark leaderboards daily
+Description=Refresh hard and medium Aimlab leaderboards daily
 
 [Timer]
 OnCalendar=*-*-* 04:00:00

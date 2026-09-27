@@ -1,5 +1,5 @@
 [Unit]
-Description=Refresh Aimlab benchmark leaderboards
+Description=Refresh hard and medium Aimlab benchmark leaderboards
 After=network-online.target
 Wants=network-online.target
 

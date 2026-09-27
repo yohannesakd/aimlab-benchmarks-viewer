@@ -2,22 +2,34 @@ import { mkdir, rename, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { organizeLeaderboard } from "../src/helpers/functions.js";
-import { easyBench, hardBench, mediumBench } from "../src/helpers/revosectData.js";
+import {
+  easyBench,
+  hardBench,
+  mediumBench,
+} from "../src/helpers/revosectData.js";
 
 const benchmarks = { easy: easyBench, medium: mediumBench, hard: hardBench };
 const dataDir = resolve(process.env.AIMLAB_DATA_DIR || "data");
 const pageSize = 100;
+const pagesPerRequest = 10;
+const batchSize = pageSize * pagesPerRequest;
 const refreshLimitMs = 60 * 60 * 1000;
-const query = `
-  query getAimlabLeaderboard($leaderboardInput: LeaderboardInput!) {
-    aimlab {
-      leaderboard(input: $leaderboardInput) {
-        metadata { totalRows }
-        data
-      }
-    }
+const pageNames = Array.from(
+  { length: pagesPerRequest },
+  (_, index) => `page${index}`
+);
+const query = `query getAimlabLeaderboards(${pageNames
+  .map((name) => `$${name}: LeaderboardInput!`)
+  .join(", ")}) {
+  aimlab {
+    ${pageNames
+      .map(
+        (name) =>
+          `${name}: leaderboard(input: $${name}) { metadata { totalRows } data }`
+      )
+      .join("\n    ")}
   }
-`;
+}`;
 
 let nextRequestAt = 0;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -38,48 +50,83 @@ export async function fetchLeaderboardPage(bench, offset) {
       },
       body: JSON.stringify({
         query,
-        variables: {
-          leaderboardInput: {
-            clientId: "aimlab",
-            limit: pageSize,
-            offset,
-            taskId: bench.id,
-            taskMode: 0,
-            weaponId: bench.weapon,
-          },
-        },
+        variables: Object.fromEntries(
+          pageNames.map((name, index) => [
+            name,
+            {
+              clientId: "aimlab",
+              limit: pageSize,
+              offset: offset + index * pageSize,
+              taskId: bench.id,
+              taskMode: 0,
+              weaponId: bench.weapon,
+            },
+          ])
+        ),
       }),
       signal: AbortSignal.timeout(20000),
     });
 
     if (response.status === 429 && attempt < 3) {
       const retryAfter = Number(response.headers.get("retry-after"));
-      await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 10000);
+      await sleep(
+        Number.isFinite(retryAfter) && retryAfter > 0
+          ? retryAfter * 1000
+          : 10000
+      );
       continue;
     }
-    if (!response.ok) throw new Error(`Aimlab returned HTTP ${response.status} for ${bench.name}`);
+    if (!response.ok)
+      throw new Error(
+        `Aimlab returned HTTP ${response.status} for ${bench.name}`
+      );
 
     const body = await response.json();
     if (body.errors?.length) {
       throw new Error(body.errors.map((error) => error.message).join("; "));
     }
-    const leaderboard = body.data?.aimlab?.leaderboard;
-    if (!Array.isArray(leaderboard?.data) || !Number.isInteger(leaderboard.metadata?.totalRows)) {
-      throw new Error(`Aimlab returned an invalid leaderboard for ${bench.name}`);
+    const first = body.data?.aimlab?.[pageNames[0]];
+    if (
+      !Array.isArray(first?.data) ||
+      !Number.isInteger(first.metadata?.totalRows)
+    ) {
+      throw new Error(
+        `Aimlab returned an invalid leaderboard for ${bench.name}`
+      );
     }
-    return leaderboard;
+    const totalRows = first.metadata.totalRows;
+    const data = [];
+    for (const [index, name] of pageNames.entries()) {
+      if (offset + index * pageSize >= totalRows) break;
+      const page = body.data.aimlab[name];
+      if (
+        !Array.isArray(page?.data) ||
+        !Number.isInteger(page.metadata?.totalRows)
+      ) {
+        throw new Error(`Aimlab returned an invalid page for ${bench.name}`);
+      }
+      data.push(...page.data);
+    }
+    return { metadata: { totalRows }, data };
   }
   throw new Error(`Aimlab rate limited ${bench.name}`);
 }
 
-export async function collectScenario(bench, getPage = fetchLeaderboardPage, deadline = Date.now() + refreshLimitMs) {
+export async function collectScenario(
+  bench,
+  getPage = fetchLeaderboardPage,
+  deadline = Date.now() + refreshLimitMs
+) {
   const qualified = [];
   let offset = 0;
   let previousScore = Infinity;
 
   while (Date.now() < deadline) {
     const page = await getPage(bench, offset);
-    if (!Array.isArray(page.data) || !Number.isInteger(page.metadata?.totalRows)) {
+    if (
+      !Array.isArray(page.data) ||
+      !Number.isInteger(page.metadata?.totalRows)
+    ) {
       throw new Error(`Invalid page for ${bench.name}`);
     }
     for (const entry of page.data) {
@@ -91,7 +138,8 @@ export async function collectScenario(bench, getPage = fetchLeaderboardPage, dea
       qualified.push(entry);
     }
     if (offset + page.data.length >= page.metadata.totalRows) return qualified;
-    if (page.data.length !== pageSize) throw new Error(`Incomplete page for ${bench.name}`);
+    if (page.data.length !== batchSize)
+      throw new Error(`Incomplete page for ${bench.name}`);
     offset += page.data.length;
   }
   throw new Error(`Refresh timed out for ${bench.name}`);
@@ -104,16 +152,22 @@ export async function refreshMode(mode, options = {}) {
   const playerList = {};
   const deadline = Date.now() + refreshLimitMs;
   for (const bench of fullBench) {
-    playerList[bench.id] = await collectScenario(bench, options.getPage || fetchLeaderboardPage, deadline);
+    playerList[bench.id] = await collectScenario(
+      bench,
+      options.getPage || fetchLeaderboardPage,
+      deadline
+    );
     options.onProgress?.(mode, bench.name, playerList[bench.id].length);
   }
 
-  const players = organizeLeaderboard(playerList, fullBench, mode).map((player) => ({
-    username: player.username,
-    overallPoints: player.overallPoints,
-    overallRank: player.overallRank,
-    subCategoryPoints: player.subCategoryPoints,
-  }));
+  const players = organizeLeaderboard(playerList, fullBench, mode).map(
+    (player) => ({
+      username: player.username,
+      overallPoints: player.overallPoints,
+      overallRank: player.overallRank,
+      subCategoryPoints: player.subCategoryPoints,
+    })
+  );
   const snapshot = { mode, generatedAt: new Date().toISOString(), players };
   const destination = resolve(options.dataDir || dataDir, `${mode}.json`);
   const temporary = `${destination}.${process.pid}.tmp`;
@@ -123,14 +177,21 @@ export async function refreshMode(mode, options = {}) {
   return snapshot;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
-  const modes = process.argv[2] ? [process.argv[2]] : ["hard", "medium", "easy"];
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === resolve(process.argv[1])
+) {
+  const modes = process.argv.slice(2);
+  if (!modes.length) modes.push("hard", "medium");
   for (const mode of modes) {
     try {
       const snapshot = await refreshMode(mode, {
-        onProgress: (name, bench, count) => console.log(`${name}: ${bench}: ${count} scores`),
+        onProgress: (name, bench, count) =>
+          console.log(`${name}: ${bench}: ${count} scores`),
       });
-      console.log(`${mode}: ${snapshot.players.length} players at ${snapshot.generatedAt}`);
+      console.log(
+        `${mode}: ${snapshot.players.length} players at ${snapshot.generatedAt}`
+      );
     } catch (error) {
       console.error(`${mode}: ${error.message}`);
       process.exitCode = 1;

@@ -1,4 +1,4 @@
-# [Aimlab Stats Tracker](aimlab-tracker.vercel.app)
+# Aimlab Stats Tracker
 
 This is a simple website I created to track Profiles on [Aimlab](https://aimlab.gg)
 
@@ -33,7 +33,7 @@ The Task is Presented as such, the option to launch Aimlab and play as well as w
 
 ## Running on a VPS
 
-The Node server serves the built site and cached Revosect leaderboards. The refresh command fetches Aimlab leaderboard pages at most twice per second and writes one snapshot per benchmark mode. A failed refresh leaves the previous snapshot in place.
+The Node server serves the built site and cached Revosect leaderboards. The refresh command fetches ten Aimlab leaderboard pages per request, at most two requests per second, and writes separate Hard and Medium snapshots. A failed refresh leaves the previous snapshot in place. Easy profile calculations work, but the Easy leaderboard has no snapshot: its first task alone has about 850,000 qualifying scores.
 
 ```sh
 npm ci
