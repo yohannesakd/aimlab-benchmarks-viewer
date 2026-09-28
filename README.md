@@ -33,6 +33,8 @@ The Task is Presented as such, the option to launch Aimlab and play as well as w
 
 ## Running on a VPS
 
+The private VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is the supported deployment. It requires access to the owner's tailnet. The older public Vercel site does not have the leaderboard API used by this version.
+
 The Node server serves the built site and cached Revosect leaderboards. The refresh command fetches ten Aimlab leaderboard pages per request, at most two requests per second, and writes separate Hard and Medium snapshots. A failed refresh leaves the previous snapshot in place. Easy profile calculations work, but the Easy leaderboard has no snapshot: its first task alone has about 850,000 qualifying scores.
 
 ```sh
