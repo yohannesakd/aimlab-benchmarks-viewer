@@ -35,7 +35,7 @@ export default {
 <style scoped>
 .site-header { background: var(--header); border-bottom: 1px solid var(--line); }
 .site-header-inner { width: min(100% - 48px, 1240px); min-height: 72px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-.site-brand { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; font-size: 1.35rem; font-weight: 700; letter-spacing: -.035em; }
+.site-brand { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; font-size: 1.3rem; font-weight: 600; letter-spacing: -.02em; }
 .site-brand-icon { width: 28px; height: 28px; object-fit: contain; }
 .brand-accent { color: var(--accent); }
 .site-nav { display: flex; align-items: stretch; gap: 24px; align-self: stretch; }

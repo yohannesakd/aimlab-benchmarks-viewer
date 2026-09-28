@@ -47,7 +47,7 @@
 .task-summary .btn-primary { flex: 0 0 auto; }
 .task-score-row { display: grid; grid-template-columns: 70px minmax(0, 1.5fr) 95px 80px 95px 85px; align-items: center; gap: 12px; min-height: 50px; padding: 9px 20px; border-bottom: 1px solid var(--line); font-size: .88rem; }
 .task-score-head { min-height: 40px; color: var(--muted); font-size: .78rem; }
-.task-score-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+.task-score-value { font-weight: 600; font-variant-numeric: tabular-nums; }
 .task-replay { display: inline-flex; align-items: center; gap: 5px; }
 .task-score-row .player-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 800px) {

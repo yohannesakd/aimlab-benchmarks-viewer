@@ -59,7 +59,7 @@ export default {
 <style scoped>
 .home-page { padding-top: 64px; }
 .home-hero { max-width: 1050px; margin-bottom: 30px; }
-.home-title { margin-top: 14px; font-size: clamp(2.8rem, 6vw, 4.5rem); }
+.home-title { margin-top: 14px; font-size: clamp(2.4rem, 5vw, 3.6rem); }
 .home-description { max-width: 630px; font-size: 1rem; }
 .home-search { display: flex; gap: 10px; margin-top: 27px; max-width: 930px; }
 .home-search .text-field { flex: 1; min-width: 0; min-height: 54px; }
@@ -67,7 +67,7 @@ export default {
 .home-benchmarks, .home-bottom { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .benchmark-card { min-height: 270px; padding: 25px; }
 .benchmark-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
-.benchmark-mark { display: inline-flex; width: 34px; height: 34px; align-items: center; justify-content: center; border: 1px solid var(--line); color: var(--accent); font-family: Oswald, sans-serif; font-size: 1.05rem; }
+.benchmark-mark { display: inline-flex; width: 34px; height: 34px; align-items: center; justify-content: center; border: 1px solid var(--line); color: var(--accent); font-size: .9rem; font-weight: 500; }
 .benchmark-card .muted { max-width: 440px; margin: 8px 0 20px; font-size: .85rem; line-height: 1.6; }
 .level-list { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 20px; }
 .level-list span { min-width: 78px; padding: 6px 11px; border: 1px solid var(--line); color: var(--muted); font-size: .8rem; text-align: center; }
