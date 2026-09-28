@@ -1,225 +1,68 @@
 <template>
-    <div class="min-h-max">
-
-        <div>
-            <div
-                class="mt-4 flex max-h-96 w-full justify-center gap-4 font-oswald"
-            >
-                <dropdown
-                    class="ml-4 mr-auto self-start"
-                    :selected-tab="currentTab"
-                >
-                    <li
-                        class="px-4 py-1 transition hover:bg-slate-600"
-                        v-for="(element, index) in dropdownElements"
-                        :key="index"
-                        @click="handleDropdownSelect(index)"
-                    >
-                        {{ element }}
-                    </li>
-                </dropdown>
-                <div class="my-2 mr-auto flex gap-20">
-
-                    <div class="mr-auto flex gap-20">
-                        <div
-                            class="flex flex-col items-center justify-center text-center"
-                        >
-                            <img
-                                class="h-36 self-center"
-                                :src="
-                                    getImagePath(
-                                        RABenchmarks.overallRank,
-                                        'medal'
-                                    )
-                                "
-                                alt=""
-                            />
-                            <p
-                                class="font-bold uppercase tracking-widest"
-                                :class="colorLookup[RABenchmarks.overallRank]"
-                            >
-                                {{ RABenchmarks.overallRank }}
-                            </p>
-                            <div class="flex items-center gap-1">
-                                <span class="-mt-1">Overall Points :</span>
-                                <span
-                                    class="font-bold tracking-wider"
-                                    :class="
-                                        colorLookup[RABenchmarks.overallRank]
-                                    "
-                                    >{{ RABenchmarks.overallPoints }}</span
-                                >
-                            </div>
-                        </div>
-                        <div
-                            class="flex flex-col items-center justify-center tracking-wide text-slate-200"
-                        >
-                            <p class="text-lg font-bold">SubCategories</p>
-                            <ul class="mt-4 grid grid-cols-2 gap-1">
-                                <li
-                                    v-for="(item, index) in subCategoryPoints"
-                                    :key="index"
-                                    class="flex items-center gap-2 pr-4"
-                                >
-                                    {{ displaySubCategories[index] }} :
-                                    <span class="font-bold">{{ item }}</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <p v-if="actionError" class="px-4 text-center" role="alert">{{ actionError }}</p>
-            <section class="relative p-4" id="benchmark-table">
-                <header class="grid grid-cols-12 bg-slate-700 py-2 pr-4 pl-16">
-                    <p class="col-span-4 ml-2">Scenario</p>
-                    <p>Score</p>
-                    <p class="col-span-3">Rank</p>
-                    <p class="col-span-2">Points</p>
-                </header>
-                <div
-                    v-for="(bench, index) in RABenchmarks.benchmarks"
-                    :key="index"
-                    class="mt-1 ml-14 grid grid-cols-12 bg-slate-800 px-4 py-2 text-slate-200"
-                >
-                    <p class="col-span-4">{{ bench.name }}</p>
-                    <p class="font-semibold tracking-wide">
-                        {{ bench.maxScore }}
-                    </p>
-                    <p
-                        class="col-span-3 flex gap-2"
-                        :class="colorLookup[bench.rank]"
-                    >
-                        <img
-                            class="h-5 self-center"
-                            :src="getImagePath(bench.rank)"
-                            alt=""
-                        />
-                        {{ bench.rank }}
-                    </p>
-                    <div
-                        class="relative col-span-3 flex items-center justify-between"
-                    >
-                        <span
-                            class="absolute left-1/2 z-10 -translate-x-1/2 transform text-right"
-                            v-if="bench.points"
-                            >{{ bench.points }}</span
-                        >
-                        <progress-bar
-                            class="h-5 w-full rounded-sm bg-slate-600"
-                            :value="bench.progress"
-                            color="bg-sky-700"
-                        ></progress-bar>
-                        <!-- colors: bg-grandmaster bg-nova bg-celestial bg-astra bg-iron bg-bronze bg-silver bg-gold bg-platinum bg-diamond bg-jade bg-master -->
-                    </div>
-                    <p
-                        class="relative col-start-12 ml-4 flex items-center justify-center"
-                    >
-                        <chevron-icon
-                            direction="down"
-                            class="absolute h-full w-12 transition hover:translate-y-0.5 hover:text-slate-400"
-                            :class="bench.detailsOpen ? 'rotate-180' : ''"
-                            @click="toggleBenchDetails(bench)"
-                        ></chevron-icon>
-                    </p>
-                    <div
-                        class="col-span-12 mt-2 border-t-2 border-t-slate-600 py-2 text-slate-200 transition"
-                        v-if="bench.detailsOpen"
-                    >
-                        <div class="pb-4">
-                            <div class="flex flex-col gap-0.5">
-                                <div
-                                    class="min-w-3/4 grid gap-0.5 text-center"
-                                    :class="scoreReqGrid"
-                                >
-                                    <span
-                                        v-for="(rank, index) in rankList"
-                                        :key="index"
-                                        class="bg-slate-700 px-8 py-2 text-center"
-                                        :class="colorLookup[rank]"
-                                        >{{ rank }}</span
-                                    >
-                                </div>
-                                <div
-                                    class="grid gap-0.5 text-center"
-                                    :class="scoreReqGrid"
-                                >
-                                    <span
-                                        v-for="(score, index) in bench.scores"
-                                        :key="index"
-                                        class="bg-slate-700 px-8 py-2"
-                                        >{{ score }}</span
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex gap-10 pl-4">
-                            <div class="flex flex-col gap-2">
-                                <div class="grid grid-cols-2">
-                                    <p v-if="bench.count">
-                                        PB Accuracy :
-                                        {{ Math.floor(bench.maxAcc) }}%
-                                    </p>
-                                    <p>Total Plays : {{ bench.count }}</p>
-                                </div>
-                                <div class="grid grid-cols-2">
-                                    <p v-if="bench.count">
-                                        Avg. Score :
-                                        {{ Math.floor(bench.avgScore) }}
-                                    </p>
-                                    <p v-if="bench.count">
-                                        Avg. Accuracy :
-                                        {{ Math.floor(bench.avgAcc) }}%
-                                    </p>
-                                </div>
-                            </div>
-                            <div
-                                class="ml-auto mr-10 flex items-center gap-10 text-white"
-                            >
-                                <button
-                                    class="flex cursor-pointer items-center gap-1 transition hover:text-slate-300"
-                                    @click="handlePlayScenario(bench.id)"
-                                >
-                                    <play-icon
-                                        class="h-5 w-5 transition"
-                                    ></play-icon
-                                    >Play
-                                </button>
-                                <button
-                                    class="flex items-center"
-                                    :class="
-                                        bench.count == 0
-                                            ? 'disabled pointer-events-none text-slate-500'
-                                            : ''
-                                    "
-                                    @click="replayLink(bench.id, bench.weapon)"
-                                >
-                                    <span v-if="replayLoading">Loading...</span>
-                                    <span
-                                        v-else
-                                        class="cursor-pointer transition hover:text-slate-300"
-                                        >Watch Replay</span
-                                    >
-                                </button>
-
-                                <router-link
-                                    class="cursor-pointer transition hover:text-slate-300"
-                                    :to="'/tasks/' + bench.id"
-                                    >View Leaderboard</router-link
-                                >
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-            </section>
+  <section class="benchmark-view">
+    <div class="bench-overview">
+      <div class="panel bench-overview-main">
+        <dropdown :selected-tab="currentTab">
+          <li v-for="(element, index) in dropdownElements" :key="element" @click="handleDropdownSelect(index)">{{ element }}</li>
+        </dropdown>
+        <div class="bench-medal">
+          <img :src="getImagePath(RABenchmarks.overallRank)" alt="" />
+          <div>
+            <small>Overall rank</small>
+            <strong :class="colorLookup[RABenchmarks.overallRank]">{{ RABenchmarks.overallRank }}</strong>
+            <small>{{ RABenchmarks.overallPoints }} points</small>
+          </div>
         </div>
+      </div>
+      <div class="panel bench-categories">
+        <h2>Category points</h2>
+        <div class="bench-categories-grid">
+          <div v-for="(item, index) in subCategoryPoints" :key="index"><span>{{ displaySubCategories[index] }}</span><strong>{{ item }}</strong></div>
+        </div>
+      </div>
     </div>
-    <!-- text-mythic bg-mythic grid-cols-5 grid-cols-4 -->
+
+    <p v-if="actionError" class="panel status-panel mb-4" role="alert">{{ actionError }}</p>
+    <section id="benchmark-table" class="panel bench-table">
+      <h2 class="panel-header section-title">Scenario results</h2>
+      <div class="bench-table-head"><span>Scenario</span><span>Score</span><span>Rank</span><span>Points</span><span></span></div>
+      <div v-for="(bench, index) in RABenchmarks.benchmarks" :key="index" class="bench-row">
+        <div class="bench-main">
+          <span class="bench-name">{{ bench.name }}</span>
+          <span class="bench-score">{{ bench.maxScore }}</span>
+          <span class="bench-rank" :class="colorLookup[bench.rank]"><img :src="getImagePath(bench.rank)" alt="" />{{ bench.rank }}</span>
+          <span class="bench-points">{{ bench.points }}<progress-bar class="progress-bar" :value="bench.progress" color="bg-mainCyan"></progress-bar></span>
+          <button type="button" class="bench-expand" :aria-expanded="!!bench.detailsOpen" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
+            <chevron-icon direction="down" class="h-4 w-4" :class="{ 'rotate-180': bench.detailsOpen }"></chevron-icon>
+          </button>
+        </div>
+        <div v-if="bench.detailsOpen" class="bench-details">
+          <p class="field-label">Rank score requirements</p>
+          <div class="bench-threshold-wrap">
+            <div class="bench-thresholds" :style="{ gridTemplateColumns: 'repeat(' + rankList.length + ', minmax(90px, 1fr))' }">
+              <span v-for="rank in rankList" :key="rank" :class="colorLookup[rank]">{{ rank }}</span>
+              <span v-for="(score, scoreIndex) in bench.scores" :key="scoreIndex">{{ score }}</span>
+            </div>
+          </div>
+          <div class="bench-extra">
+            <div class="bench-stats">
+              <span>Total plays: {{ bench.count }}</span>
+              <span v-if="bench.count">PB accuracy: {{ Math.floor(bench.maxAcc) }}%</span>
+              <span v-if="bench.count">Average score: {{ Math.floor(bench.avgScore) }}</span>
+              <span v-if="bench.count">Average accuracy: {{ Math.floor(bench.avgAcc) }}%</span>
+            </div>
+            <div class="bench-actions">
+              <button type="button" @click="handlePlayScenario(bench.id)"><play-icon class="h-4 w-4"></play-icon>Play</button>
+              <button type="button" :disabled="!bench.count || replayLoading" @click="replayLink(bench.id, bench.weapon)">{{ replayLoading ? "Loading…" : "Watch replay" }}</button>
+              <router-link :to="'/tasks/' + bench.id">View leaderboard</router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
 </template>
+
 <script>
 import * as ra from "../helpers/revosectData.js";
 import {
@@ -297,9 +140,6 @@ export default {
                     return this.$store.getters.RAHard;
             }
         },
-        scoreReqGrid() {
-            return `grid-cols-${this.rankList.length}`;
-        },
         colorLookup() {
             return {
                 Iron: "text-iron",
@@ -325,18 +165,13 @@ export default {
     },
     methods: {
         getImagePath(rank) {
-            return `../../rank-img/ra/${rank.toLowerCase()}.png`;
+            return `/rank-img/ra/${rank.toLowerCase()}.png`;
         },
         handleDropdownSelect(index) {
             this.currentTabIndex = index;
         },
         toggleBenchDetails(bench) {
             bench.detailsOpen = !bench.detailsOpen;
-        },
-        collapseBenchDetails() {
-            this.VTBenchmarks.forEach((element) => {
-                element.detailsOpen = false;
-            });
         },
         async handlePlayScenario(taskId) {
             this.actionError = "";

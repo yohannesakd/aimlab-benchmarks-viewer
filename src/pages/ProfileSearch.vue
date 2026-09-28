@@ -1,63 +1,30 @@
 <template>
-  <div>
-    <base-card class="mt-10 mx-auto max-w-md">
-      <form
-        @submit.prevent="null"
-        class="flex flex-col gap-3 items-center py-2"
-      >
-        <input
-          class="
-            border-2
-            block
-            rounded
-            py-1
-            px-2
-            w-3/4
-            text-black
-            outline-2 outline-blue-500
-          "
-          type="text"
-          id="username"
-          autocomplete="off"
-          v-model.trim="usernameInput"
-          @input="searchUser"
-        />
-        <label class="block" for="username"
-          >Enter your Aimlab Username (<span class="italic">Case Sensitive</span
-          >)</label
-        >
-      </form>
-    </base-card>
-    <base-card class="mx-auto mt-4 max-w-md" v-if="usernameInput">
-      <p v-if="isLoading">Searching...</p>
-      <p v-else-if="searchError">Search is unavailable. Try again.</p>
-      <p v-else-if="!playerInfo.username">User not found</p>
-      <div v-else class="flex justify-between">
-        <div>
-          <h2 class="text-slate-300">Profile Found</h2>
-          <h2>
-            <span class="text-slate-300">Username :</span>
-            {{ playerInfo.username }}
-          </h2>
-          <p>
-            <span class="text-slate-300">Rank :</span> {{ playerInfo.rank }}
-          </p>
-        </div>
-        <router-link
-          :to="playerProfileLink"
-          class="
-            self-center
-            border-2 border-gray-500
-            p-2
-            rounded-md
-            transition
-            hover:bg-gray-800 hover:text-gray-200
-          "
-          >Go to Profile</router-link
-        >
+  <main class="page-shell">
+    <div class="search-layout">
+      <div class="page-intro">
+        <p class="eyebrow">Player lookup</p>
+        <h1 class="page-title">Find a profile</h1>
+        <p class="page-subtitle">Search by Aimlab username to see tasks played and benchmark ranks.</p>
       </div>
-    </base-card>
-  </div>
+      <div class="panel panel-body">
+        <label class="field-label" for="username">Aimlab username · case sensitive</label>
+        <input id="username" class="text-field" type="text" autocomplete="off" placeholder="Enter a username" v-model.trim="usernameInput" @input="searchUser" />
+      </div>
+      <div v-if="usernameInput" class="panel search-result">
+        <p v-if="isLoading" class="status-panel">Searching…</p>
+        <p v-else-if="searchError" class="status-panel" role="alert">Search is unavailable. Try again.</p>
+        <p v-else-if="!playerInfo.username" class="status-panel">User not found.</p>
+        <div v-else class="result-row">
+          <div>
+            <p class="eyebrow">Profile found</p>
+            <h2 class="result-title">{{ playerInfo.username }}</h2>
+            <p class="result-meta">Aimlab rank · {{ playerInfo.rank }}</p>
+          </div>
+          <router-link :to="playerProfileLink" class="btn-primary">View profile <span aria-hidden="true">→</span></router-link>
+        </div>
+      </div>
+    </div>
+  </main>
 </template>
 
 <script>

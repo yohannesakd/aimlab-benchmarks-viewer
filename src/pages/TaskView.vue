@@ -1,199 +1,66 @@
 <template>
-  <div class="mt-10 px-[8%] mb-10">
+  <main class="page-shell">
+    <div v-if="headLoading" class="panel status-panel"><loading-spinner></loading-spinner></div>
+    <div v-else-if="taskError" class="panel status-panel" role="alert">{{ taskError }}</div>
+    <template v-else>
+      <div class="page-intro task-intro">
+        <div><p class="eyebrow">Task leaderboard</p><h1 class="page-title">{{ currentTask.name }}</h1><p class="page-subtitle">Created by {{ currentTask.author?.username || "Unknown creator" }}</p></div>
+        <button type="button" class="btn-secondary" @click="handleSwitchTask">Switch task</button>
+      </div>
+      <div class="panel task-summary">
+        <div><h2 class="section-title">About this task</h2><p class="muted">{{ currentTask.description || "No description available." }}</p></div>
+        <a :href="taskLink" class="btn-primary" target="_blank" rel="noopener noreferrer"><play-icon class="h-5 w-5"></play-icon>Play task</a>
+      </div>
 
-    <base-card v-if="headLoading" class="grid place-items-center max-w-3xl">
-      <loading-spinner></loading-spinner>
-    </base-card>
-    <base-card v-else-if="taskError" class="max-w-3xl">
-      {{ taskError }}
-    </base-card>
-    <div v-else class="flex justify-between">
-      <base-card class="max-w-3xl flex flex-col gap-4">
-        <div class="flex justify-between">
-          <h1 class="text-2xl font-semibold">{{ currentTask.name }}</h1>
-          <p>
-            Created by:
-            {{
-              currentTask.author?.username ? currentTask.author.username : ""
-            }}
-          </p>
+      <div v-if="isLoading" class="panel status-panel mt-4"><loading-spinner></loading-spinner></div>
+      <div v-else-if="leaderboardError" class="panel status-panel mt-4" role="alert">{{ leaderboardError }}</div>
+      <section v-else class="panel task-leaderboard mt-4">
+        <h2 class="leaderboard-heading">Task scores</h2>
+        <div class="task-score-row task-score-head" aria-hidden="true"><span>Rank</span><span>Player</span><span>Score</span><span>Hits</span><span>Accuracy</span><span>Replay</span></div>
+        <div v-for="(task, index) in currentTaskLeaderboard.data" :key="index" class="task-score-row">
+          <span class="task-score-rank">{{ task.rank }}</span>
+          <router-link class="player-name" :to="'/profile/' + task.username">{{ task.username }}</router-link>
+          <span class="task-score-value">{{ task.score }}</span>
+          <span class="task-score-hits">{{ task.shotsHit }}</span>
+          <span class="task-score-accuracy">{{ task.accuracy }}</span>
+          <a class="task-replay text-link" :href="replayLink(task.playId)" target="_blank" rel="noopener noreferrer"><play-icon class="h-4 w-4"></play-icon>Replay</a>
         </div>
-        <p>Description: {{ currentTask.description }}</p>
-
-        <a
-          :href="taskLink"
-          class="flex items-center gap-2 text-xl self-end"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <play-icon class="h-8 w-8"></play-icon> Play Task</a
-        >
-      </base-card>
-
-      <div class="flex flex-col justify-between relative">
-        <button
-          class="
-            border-2 border-slate-500
-            px-6
-            py-2
-            rounded
-            transition
-            hover:bg-slate-500
-          "
-          @click="handleSwitchTask"
-        >
-          Switch Task
-        </button>
-      </div>
-    </div>
-
-    <section
-      v-if="!taskError && isLoading"
-      class="bg-slate-900 mt-10 p-3 rounded-lg grid place-items-center"
-    >
-      <loading-spinner></loading-spinner>
-    </section>
-    <section v-else-if="!taskError && leaderboardError" class="bg-slate-900 mt-10 p-3 rounded-lg">
-      {{ leaderboardError }}
-    </section>
-    <section v-else-if="!taskError" class="bg-slate-900 mt-10 p-3 rounded-lg">
-      <div class="grid grid-cols-7 bg-slate-800 p-2 text-lg rounded-t">
-        <p class="ml-2">Rank</p>
-        <p class="ml-2 col-span-2">Name</p>
-        <p>Score</p>
-        <p>Hits</p>
-        <p>Accuracy</p>
-      </div>
-      <div>
-        <div
-          class="
-            grid grid-cols-7
-            px-4
-            py-2
-            my-2
-            rounded-sm
-            text-lg
-            bg-slate-700
-          "
-          v-for="(task, index) in currentTaskLeaderboard.data"
-          :key="index"
-        >
-          <p class="ml-2">{{ task.rank }}</p>
-          <router-link
-            :to="'/profile/' + task.username"
-            class="col-span-2 hover:text-slate-300"
-            >{{ task.username }}</router-link
-          >
-          <p>{{ task.score }}</p>
-          <p>{{ task.shotsHit }}</p>
-          <p>{{ task.accuracy }}</p>
-          <div class="flex gap-4 items-center">
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              :href="replayLink(task.playId)"
-              class="flex items-center gap-2 transition hover:text-slate-400"
-            >
-              <play-icon class="h-5 w-5"></play-icon> Replay</a
-            >
-            <div
-              class="
-                w-20
-                h-full
-                flex
-                justify-center
-                items-center
-                transition
-                hover:text-slate-400 hover:translate-y-0.5
-              "
-            ></div>
+        <div class="pagination">
+          <span>Page {{ currentPage + 1 }} of {{ pageCount + 1 }}</span>
+          <div class="pagination-controls">
+            <button type="button" class="page-button" :disabled="currentPage <= 0" aria-label="Previous page" @click="currentPage--"><chevron-icon direction="left" class="h-4 w-4"></chevron-icon></button>
+            <button v-for="(page, index) in pageNumbers" :key="index" type="button" class="page-button page-number" :class="{ active: page === currentPage + 1 }" :disabled="page === '...'" @click="handlePageSelect($event)">{{ page }}</button>
+            <button type="button" class="page-button" :disabled="currentPage >= pageCount" aria-label="Next page" @click="currentPage++"><chevron-icon direction="right" class="h-4 w-4"></chevron-icon></button>
+            <span class="page-status">Page {{ currentPage + 1 }} / {{ pageCount + 1 }}</span>
+            <input class="page-input" type="number" min="1" :max="pageCount + 1" aria-label="Go to page" v-model.number="goToPageInput" @keydown.enter="goToPage" />
+            <button type="button" class="page-button" @click="goToPage">Go</button>
           </div>
         </div>
-      </div>
-      <div class="flex max-w-max gap-2 mx-auto mt-4">
-        <button
-          class="
-            px-3
-            py-2.5
-            inline-block
-            bg-slate-700
-            transition
-            hover:bg-slate-600
-          "
-          @click="--currentPage"
-          :class="
-            currentPage > 0 ? '' : 'disabled text-slate-500 pointer-events-none'
-          "
-        >
-          <chevron-icon class="h-5 w-5" direction="left"></chevron-icon>
-        </button>
-        <div class="flex gap-1">
-          <div
-            class="py-2 px-4 bg-slate-700 transition flex items-center"
-            v-for="page in pageNumbers"
-            :key="page"
-            :class="{
-              'bg-slate-600 pointer-events-none': this.currentPage == page - 1,
-              ' hover:bg-slate-600': !!parseInt(page),
-            }"
-            @click="handlePageSelect($event)"
-          >
-            <span class="pointer-events-none">{{ page }}</span>
-          </div>
-        </div>
-        <button
-          class="
-            px-3
-            py-2.5
-            inline-block
-            bg-slate-700
-            transition
-            hover:bg-slate-600
-          "
-          @click="++currentPage"
-          :class="
-            currentPage < pageCount
-              ? ''
-              : 'disabled text-slate-500 pointer-events-none'
-          "
-        >
-          <chevron-icon class="h-5 w-5" direction="right"></chevron-icon>
-        </button>
-        <input
-          type="text"
-          v-model.number="goToPageInput"
-          @keydown.enter="goToPage"
-          @blur="goToPage"
-          class="
-            bg-slate-600
-            text-center
-            w-10
-            py-2
-            outline-none
-            ml-2
-            transition
-            focus:ring-2
-            ring-inset ring-slate-300
-          "
-        />
-        <button
-          class="
-            text-center
-            bg-slate-600
-            w-10
-            py-2
-            outline-none
-            transition
-            hover:bg-slate-500
-          "
-          @click="goToPage"
-        >
-          Go
-        </button>
-      </div>
-    </section>
-  </div>
+      </section>
+    </template>
+  </main>
 </template>
+<style scoped>
+.task-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
+.task-summary { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px; }
+.task-summary p { margin-top: 6px; font-size: .86rem; line-height: 1.6; }
+.task-summary .btn-primary { flex: 0 0 auto; }
+.task-score-row { display: grid; grid-template-columns: 70px minmax(0, 1.5fr) 95px 80px 95px 85px; align-items: center; gap: 12px; min-height: 50px; padding: 9px 20px; border-bottom: 1px solid var(--line); font-size: .88rem; }
+.task-score-head { min-height: 40px; color: var(--muted); font-size: .78rem; }
+.task-score-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+.task-replay { display: inline-flex; align-items: center; gap: 5px; }
+.task-score-row .player-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 800px) {
+  .task-score-row { grid-template-columns: 42px minmax(0, 1fr) auto; gap: 4px 10px; }
+  .task-score-head { display: none; }
+  .task-score-rank { grid-column: 1; grid-row: 1 / 3; }
+  .task-score-row .player-name { grid-column: 2; grid-row: 1; }
+  .task-score-value { grid-column: 3; grid-row: 1; text-align: right; }
+  .task-score-hits, .task-score-accuracy { display: none; }
+  .task-replay { grid-column: 2 / 4; grid-row: 2; font-size: .78rem; }
+}
+@media (max-width: 620px) { .task-intro, .task-summary { align-items: start; flex-direction: column; } .task-score-row { padding: 12px 14px; } }
+</style>
 
 <script>
 import { mapGetters } from "vuex";
