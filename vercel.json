@@ -1,3 +1,9 @@
 {
-  "rewrites": [{ "source": "/:path*", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/api/leaderboards/:path*",
+      "destination": "https://aimlab-api.saibot.site/api/leaderboards/:path*"
+    },
+    { "source": "/:path*", "destination": "/index.html" }
+  ]
 }

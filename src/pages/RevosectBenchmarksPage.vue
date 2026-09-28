@@ -1,11 +1,6 @@
 <template>
     <div class="min-h-max">
-        <!-- <div
-      v-if="!RABenchmarks.overallPoints"
-      class="grid place-items-center p-10"
-    >
-      <loading-spinner></loading-spinner>
-    </div> -->
+
         <div>
             <div
                 class="mt-4 flex max-h-96 w-full justify-center gap-4 font-oswald"
@@ -24,7 +19,7 @@
                     </li>
                 </dropdown>
                 <div class="my-2 mr-auto flex gap-20">
-                    <!--  -->
+
                     <div class="mr-auto flex gap-20">
                         <div
                             class="flex flex-col items-center justify-center text-center"
@@ -66,16 +61,17 @@
                                     :key="index"
                                     class="flex items-center gap-2 pr-4"
                                 >
-                                    {{ subCategories[index] }} :
+                                    {{ displaySubCategories[index] }} :
                                     <span class="font-bold">{{ item }}</span>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
-                <!-- <span class="font-bold">{{ item.energy }}</span> ({{ item.rank }}) -->
+
             </div>
 
+            <p v-if="actionError" class="px-4 text-center" role="alert">{{ actionError }}</p>
             <section class="relative p-4" id="benchmark-table">
                 <header class="grid grid-cols-12 bg-slate-700 py-2 pr-4 pl-16">
                     <p class="col-span-4 ml-2">Scenario</p>
@@ -217,30 +213,8 @@
                         </div>
                     </div>
                 </div>
-                <!-- Categories sidebar -->
-                <!-- <div
-          class="text-center origin-top-left absolute rotate-90"
-          id="category-bar"
-          v-if="RABenchmarks.overallPoints"
-        >
-          <div class="grid grid-cols-6 gap-1" id="category-item">
-            <span
-              class="bg-slate-700"
-              v-for="item in subCategories"
-              :key="item"
-              >{{ item }}</span
-            >
-          </div>
-          <div class="grid grid-cols-6 gap-0.5 min-w-full">
-            <span
-              id="subcategory-item"
-              class="col-span-2 bg-slate-800"
-              v-for="category in categories"
-              :key="category"
-              >{{ category }}</span
-            >
-          </div>
-        </div> -->
+
+
             </section>
         </div>
     </div>
@@ -257,6 +231,7 @@ export default {
     data() {
         return {
             replayLoading: false,
+            actionError: "",
             currentTabIndex: 2,
             categories: ["Clicking", "Tracking", "Switching"],
             subCategories: [
@@ -342,6 +317,11 @@ export default {
         subCategoryPoints() {
             return this.RABenchmarks.subCategoryPoints;
         },
+        displaySubCategories() {
+            return this.currentTab.value === "easy"
+                ? ["Static", "Dynamic", "Precise", "Flick"]
+                : this.subCategories;
+        },
     },
     methods: {
         getImagePath(rank) {
@@ -359,22 +339,32 @@ export default {
             });
         },
         async handlePlayScenario(taskId) {
-            const workshopId = await findWorkshopId(taskId);
-            const taskLink = taskDeepLink(workshopId);
-            window.open(taskLink, "_blank");
+            this.actionError = "";
+            try {
+                const workshopId = await findWorkshopId(taskId);
+                window.open(taskDeepLink(workshopId), "_blank");
+            } catch (error) {
+                console.error(error);
+                this.actionError = "Could not open this task. Try again.";
+            }
         },
         async replayLink(taskId, weapon) {
+            this.actionError = "";
             this.replayLoading = true;
-            let link = await findReplay(
-                this.currentPlayerInfo.username,
-                taskId,
-                weapon
-            );
-            if (link) {
-                window.open(link, "_blank");
-                window.focus();
+            try {
+                const link = await findReplay(
+                    this.currentPlayerInfo.username,
+                    taskId,
+                    weapon
+                );
+                if (link) window.open(link, "_blank");
+                else this.actionError = "Replay not found.";
+            } catch (error) {
+                console.error(error);
+                this.actionError = "Could not find this replay. Try again.";
+            } finally {
+                this.replayLoading = false;
             }
-            this.replayLoading = false;
         },
     },
 };

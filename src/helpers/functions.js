@@ -6,7 +6,7 @@ import {
     intermediateRanks,
     noviceEnergy,
     noviceRanks,
-} from "./voltaicData";
+} from "./voltaicData.js";
 
 import {
     hardSubPoints,
@@ -24,22 +24,18 @@ import {
     hardBench,
     mediumBench,
     easyBench,
-    categories,
-} from "./revosectData";
+} from "./revosectData.js";
 import {
     APIFetch,
-    API_ENDPOINT,
     GET_TASK_LEADERBOARD,
     GET_TASK_BY_ID,
-    GET_USER_PLAYS_AGG,
 } from "./queries.js";
 import _ from "lodash";
-import axios from "axios";
 
-//UTILITY FUNCTIONS
 
 export async function findWorkshopId(taskId) {
     const task = await APIFetch(GET_TASK_BY_ID, { slug: taskId });
+    if (!task.aimlab?.task?.workshop_id) throw new Error("Task has no workshop ID");
     return task.aimlab.task.workshop_id;
 }
 export function taskDeepLink(workshopId) {
@@ -64,25 +60,23 @@ export async function findReplay(playerName, taskId, weapon) {
             },
         });
 
-        if (ldb?.aimlab.leaderboard) {
-            let located = [...ldb.aimlab.leaderboard.data].filter(
+        if (ldb.aimlab?.leaderboard) {
+            let located = ldb.aimlab.leaderboard.data.filter(
                 (entry) => entry.username == playerName
             );
-            // console.log(located);
             if (_.isEmpty(located)) {
-                // console.log("not found on page", offset / limit + 1);
                 offset += limit;
                 if (offset >= ldb.aimlab.leaderboard.metadata.totalRows) {
-                    // console.log("Score not found");
                     return;
                 }
                 continue;
             } else {
-                // console.log("found on page", offset / limit + 1);
                 playerFound = true;
                 return replayDeepLink(located[0].play_id);
             }
-        } else continue;
+        } else {
+            throw new Error("Missing Aimlab leaderboard");
+        }
     }
 }
 
@@ -114,8 +108,6 @@ export function cleanUpUserTasks(taskList) {
     );
     return data;
 }
-//Voltaic Functions
-//Take player full task list and the benchmark data
 export function caclulateVT(playerTasks, playerBench, mode) {
     playerBench.forEach((bench) => {
         bench.avgAcc = 0;
@@ -125,13 +117,11 @@ export function caclulateVT(playerTasks, playerBench, mode) {
         bench.energy = 0;
         bench.rank = "Unranked";
     });
-    // find the benchmark scenario within the player task list by matching IDs
     for (let i = 0; i < playerTasks.length; i++) {
         for (let j = 0; j < playerBench.length; j++) {
             if (playerTasks[i].id == playerBench[j].id) {
                 let rankData = [0, "Unranked"];
                 if (playerTasks[i].count > 0) {
-                    //calculate rank and energy for different modes
                     switch (mode) {
                         case "advanced":
                             rankData = calculateRankAdv(
@@ -169,16 +159,20 @@ export function caclulateVT(playerTasks, playerBench, mode) {
         }
     }
     playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
-    // calculating category energy
     const grouped = _.groupBy(playerBench, "categoryID");
     const allEnergyList = playerBench.map((bench) => bench.energy);
     const categoryEnergyList = Object.entries(grouped).map(([_, group]) => {
         return Math.max(...group.map(({ energy }) => energy));
     });
-    const harmonicMean = Math.floor(
-        6 / categoryEnergyList.reduce((acc, curr) => acc + 1 / curr, 0)
-    );
-    //Calculating Overall rank
+    let harmonicMean = 0;
+    if (!categoryEnergyList.includes(0)) {
+        const mean =
+            categoryEnergyList.length /
+            categoryEnergyList.reduce((sum, energy) => sum + 1 / energy, 0);
+        const precision =
+            Number.EPSILON * Math.max(...categoryEnergyList) * categoryEnergyList.length;
+        harmonicMean = Math.floor(mean + precision);
+    }
     const floorEnergy = Math.floor(harmonicMean / 100) * 100;
     let overallRank = null;
     switch (mode) {
@@ -195,7 +189,6 @@ export function caclulateVT(playerTasks, playerBench, mode) {
             overallRank = "Unranked";
             break;
     }
-    // Check complete rank scenario
     if (checkComplete(overallRank, allEnergyList, mode))
         overallRank += " Complete";
 
@@ -223,7 +216,6 @@ function checkComplete(rank, energyList, mode) {
 }
 
 function calculateRankAdv(bench, userTask) {
-    //lower scorelimit is 800
     let energy = 0;
     if (userTask.maxScore <= bench.scores[0]) {
         energy = Math.floor(
@@ -249,7 +241,6 @@ function calculateRankAdv(bench, userTask) {
 }
 
 function calculateRankInt(bench, userTask) {
-    //lower score limit is 300
     let energy = 0;
     if (userTask.maxScore <= bench.scores[0]) {
         energy = Math.floor(
@@ -266,30 +257,26 @@ function calculateRankInt(bench, userTask) {
     } else {
         let i = 0;
         bench.scores.forEach((score, index) => {
-            if (userTask.maxScore > score) {
+            if (userTask.maxScore >= score) {
                 energy = intermediateEnergy[index];
                 i = index;
             }
         });
         energy += Math.floor(
-            ((userTask.maxScore - bench.scores[i]) * 100) /
+            ((userTask.maxScore - bench.scores[i]) *
+                (intermediateEnergy[i + 1] - intermediateEnergy[i])) /
             (bench.scores[i + 1] - bench.scores[i])
         );
     }
     let rank = intermediateRanks[Math.floor(energy / 100) * 100] || "Unranked";
-    // console.log([energy, rank]);
     if (energy === 900) rank = intermediateRanks[800];
     return [energy, rank];
 }
 
-//Calculate Rank and Energy for a Scenario from the Novice Benches
-//Check scenarios if score is greater than the upper requirement or lower than the lower requirement and apply energy accordingly
 
 function calculateRankNov(bench, userTask) {
-    // lower limit is 0
     let energy = 0;
     if (userTask.maxScore >= bench.scores[4]) {
-        //calculating additional energy beyond the max requirement
         let userDiff = userTask.maxScore - bench.scores[4];
         let rankDiff = bench.scores[4] - bench.scores[3];
         let energyGain = Math.floor((userDiff / rankDiff) * 100);
@@ -298,7 +285,6 @@ function calculateRankNov(bench, userTask) {
         }
         energy = noviceEnergy[4] + energyGain;
     } else {
-        //calculating for energy between ranks
         let i = 0;
         bench.scores.forEach((score, index) => {
             if (userTask.maxScore > score) {
@@ -311,16 +297,11 @@ function calculateRankNov(bench, userTask) {
             (bench.scores[i + 1] - bench.scores[i])
         );
     }
-    //Finding rank through rounding by 100 and looking up
     let rank = noviceRanks[Math.floor(energy / 100) * 100] || "Unranked";
-    //When user has max energy
     if (energy === 500) rank = noviceRanks[400];
     return [energy, rank];
 }
 
-//End of Voltaic Section
-//Revosect section
-//Single function to handle all benchmark levels calculation
 export function calculateRevosectBenchmarks(playerData, mode) {
     let benchData = null;
     switch (mode) {
@@ -335,14 +316,10 @@ export function calculateRevosectBenchmarks(playerData, mode) {
             break;
     }
 
-    //Filtering out the benchmark scenarios the player has played from the provided full list of played scenarios
     let playedBenchmarks = playerData.tasks.filter((n) =>
         benchData.some((n2) => n.id == n2.id)
     );
 
-    // console.log(JSON.parse(JSON.stringify(playedBenchmarks)));
-    // console.log(JSON.parse(JSON.stringify(benchData)));
-    //Computing the scores and ranks for each of the played benchm  ark scenarios
     let playerBenchmarks = getPlayerBenchmarkResults(
         playedBenchmarks,
         benchData,
@@ -351,7 +328,6 @@ export function calculateRevosectBenchmarks(playerData, mode) {
 
     playerBenchmarks.sort((a, b) => a.scenarioID - b.scenarioID);
     const allPointsList = playerBenchmarks.map((bench) => bench.points);
-    //Grouping benchmark scenarios by subcategories
     const subCategoryGroupedBenchmarks = _.groupBy(
         playerBenchmarks,
         "categoryID"
@@ -363,7 +339,6 @@ export function calculateRevosectBenchmarks(playerData, mode) {
     });
 
     let aggregateSubCategoryPoints = null;
-    //different point calculation between easy benchmarks and med/hard benchmarks
     if (mode == "easy") {
         aggregateSubCategoryPoints = subCategoryPointsList.map((item) => {
             return item.reduce((acc, curr) => acc + curr);
@@ -373,76 +348,52 @@ export function calculateRevosectBenchmarks(playerData, mode) {
             return item.reduce((acc, curr) => acc + curr) - Math.min(...item);
         });
     }
-    //calculating overall points
     let overallPoints = aggregateSubCategoryPoints.reduce(
         (acc, curr) => acc + curr
     );
 
-    //Check if player is valour/platinum to add excess points to the total
-    if (mode != "hard") {
-        let pointNormalizedData = checkExcessPoints(
-            playerBenchmarks,
-            subCategoryPointsList,
-            mode,
-            overallPoints,
-            aggregateSubCategoryPoints
-        );
-
-        playerBenchmarks = pointNormalizedData.playerBench;
-        overallPoints = pointNormalizedData.overallPoints;
-        aggregateSubCategoryPoints =
-            pointNormalizedData.aggregateSubCategoryPoints;
-    }
-    //finding the player's overall rank
     let benchmarkPointsList = null;
     let benchmarkRankList = null;
-    let basePoints = 0;
+    let benchmarkSubPointsList = null;
     switch (mode) {
         case "hard":
             benchmarkPointsList = hardPoints;
             benchmarkRankList = hardRanks;
+            benchmarkSubPointsList = hardSubPoints;
             break;
         case "medium":
             benchmarkPointsList = mediumPoints;
             benchmarkRankList = mediumRanks;
+            benchmarkSubPointsList = mediumSubPoints;
             break;
         case "easy":
             benchmarkPointsList = easyPoints;
             benchmarkRankList = easyRanks;
+            benchmarkSubPointsList = easySubPoints;
             break;
     }
-    benchmarkPointsList.forEach((point) => {
-        if (overallPoints > point) {
-            basePoints = point;
-        }
-    });
-
-    const hasPlayedAllSubCategories = !aggregateSubCategoryPoints.includes(0);
+    const hasRequiredScores =
+        mode === "easy" ||
+        Object.values(subCategoryGroupedBenchmarks).every(
+            (group) => group.filter(({ count }) => count > 0).length >= 2
+        );
     let overallRank = "Unranked";
-    if (hasPlayedAllSubCategories) {
-        overallRank = benchmarkRankList[basePoints];
+    const lowestSubCategoryPoints = Math.min(...aggregateSubCategoryPoints);
+    for (let i = 0; i < benchmarkPointsList.length; i++) {
+        if (
+            hasRequiredScores &&
+            overallPoints >= benchmarkPointsList[i] &&
+            lowestSubCategoryPoints >= benchmarkSubPointsList[i]
+        ) {
+            overallRank = benchmarkRankList[benchmarkPointsList[i]];
+        }
     }
-    //Checking for Divinity
     if (overallRank == "Divine") {
         if (checkDivinity(allPointsList)) {
             overallRank = "Divinity";
         }
     }
 
-    // if (playerData.id == "BF0D92146C9B39A0") {
-    //   console.log(
-    //     JSON.parse(
-    //       JSON.stringify({
-    //         overallPoints,
-    //         overallRank,
-    //         allPoints: allPointsList,
-    //         subCategoryPoints: categoryPoints,
-    //         benchmarks: playerBenchmarks,
-    //         detailsOpen: false,
-    //       })
-    //     )
-    //   );
-    // }
     return {
         overallPoints,
         overallRank,
@@ -452,11 +403,7 @@ export function calculateRevosectBenchmarks(playerData, mode) {
         detailsOpen: false,
     };
 }
-//Create a complete object with player scores, rank, points and scenario information
 function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
-    // let currentPlayer = playerData.id;
-    // let playerTasks = playerData;
-    //Score Overrides section
     let benchmark = JSON.parse(JSON.stringify(benchData))
     benchmark.forEach((bench) => {
         bench.avgAcc = 0;
@@ -471,14 +418,14 @@ function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
             if (playerTasks[i].id == benchmark[j].id) {
                 let rankData = [0, 0, "Unranked"];
                 if (playerTasks[i].count) {
-                    //calculate rank and points for different modes
                     switch (mode) {
                         case "hard":
                             rankData = calculateRankRA(
                                 benchmark[j],
                                 playerTasks[i],
                                 hardSubRanks,
-                                hardSubPoints
+                                hardSubPoints,
+                                true
                             );
                             break;
                         case "medium":
@@ -514,7 +461,7 @@ function getPlayerBenchmarkResults(playerTasks, benchData, mode) {
     return benchmark;
 }
 
-function calculateRankRA(bench, userTask, benchRanks, benchPoints) {
+function calculateRankRA(bench, userTask, benchRanks, benchPoints, extrapolate = false) {
     const arrSize = bench.scores.length - 1;
     let points = 0;
     let progress = 0;
@@ -525,12 +472,13 @@ function calculateRankRA(bench, userTask, benchRanks, benchPoints) {
         progress = Math.floor((userTask.maxScore * 100) / bench.scores[0]);
     } else if (userTask.maxScore >= bench.scores[arrSize]) {
         points = benchPoints[arrSize];
-        let playerDiff = userTask.maxScore - bench.scores[arrSize];
-        let perPoint =
-            (benchPoints[arrSize] - benchPoints[arrSize - 1]) /
-            (bench.scores[arrSize] - bench.scores[arrSize - 1]);
         rank = benchRanks[points];
-        points += Math.floor(playerDiff * perPoint);
+        if (extrapolate) {
+            const playerDiff = userTask.maxScore - bench.scores[arrSize];
+            const pointDifference = benchPoints[arrSize] - benchPoints[arrSize - 1];
+            const scoreDifference = bench.scores[arrSize] - bench.scores[arrSize - 1];
+            points += Math.floor((playerDiff * pointDifference) / scoreDifference);
+        }
         progress = 100;
     } else {
         let i = 0;
@@ -542,10 +490,9 @@ function calculateRankRA(bench, userTask, benchRanks, benchPoints) {
         points = benchPoints[i];
         rank = benchRanks[points];
         let playerDiff = userTask.maxScore - bench.scores[i];
-        let perPoint =
-            (benchPoints[i + 1] - benchPoints[i]) /
-            (bench.scores[i + 1] - bench.scores[i]);
-        points += Math.floor(playerDiff * perPoint);
+        const pointDifference = benchPoints[i + 1] - benchPoints[i];
+        const scoreDifference = bench.scores[i + 1] - bench.scores[i];
+        points += Math.floor((playerDiff * pointDifference) / scoreDifference);
         progress = Math.floor(
             (playerDiff * 100) / (bench.scores[i + 1] - bench.scores[i])
         );
@@ -560,253 +507,3 @@ function checkDivinity(pointsList) {
         }).length == 18
     );
 }
-
-function checkExcessPoints(
-    playerBench,
-    categoryPointsList,
-    mode,
-    overallPoints,
-    aggregateSubCategoryPoints
-) {
-    // console.log(
-    //   playerBench,
-    //   categoryPointsList,
-    //   mode,
-    //   overallPoints,
-    //   categoryPoints
-    // );
-    let pointLimit = 0;
-    let rankPoints = 0;
-    if (mode == "easy") {
-        pointLimit = easySubPoints[3];
-        rankPoints = easyPoints[3];
-    } else {
-        pointLimit = mediumSubPoints[3];
-        rankPoints = mediumPoints[3];
-    }
-    let fixedPointsList = [];
-    categoryPointsList.forEach((category) => {
-        fixedPointsList.push(
-            category.map((point) => {
-                if (point > pointLimit) return pointLimit;
-                return point;
-            })
-        );
-    });
-    let fixedAggregatePoints = null;
-    if (mode == "easy") {
-        fixedAggregatePoints = fixedPointsList.map((item) => {
-            return item.reduce((acc, curr) => acc + curr);
-        });
-    } else {
-        fixedAggregatePoints = fixedPointsList.map((item) => {
-            return item.reduce((acc, curr) => acc + curr) - Math.min(...item);
-        });
-    }
-    let totalPoints = fixedAggregatePoints.reduce((acc, curr) => acc + curr);
-    let fixedBench = playerBench.map((bench) => {
-        if (bench.points > pointLimit) {
-            return {
-                ...bench,
-                points: pointLimit,
-            };
-        }
-        return bench;
-    });
-    if (!(totalPoints > rankPoints)) {
-        return {
-            playerBench: fixedBench,
-            overallPoints: totalPoints,
-            aggregateSubCategoryPoints: fixedAggregatePoints,
-        };
-    }
-    return { playerBench, overallPoints, aggregateSubCategoryPoints };
-}
-
-export function organizeLeaderboard(playerList, fullBench, mode) {
-    for (let task of fullBench) {
-        let index = playerList[task.id].length;
-        for (let i = 0; i < playerList[task.id].length; i++) {
-            if (playerList[task.id][i]?.score < task.scores[0]) {
-                index = i;
-                break;
-            }
-            playerList[task.id] = playerList[task.id].slice(0, index);
-        }
-        console.log(playerList);
-        let allPlayers = [];
-        Object.entries(playerList).forEach((task) => {
-            allPlayers.push(...task[1]);
-        });
-
-        let uniquePlayers = [
-            ...new Map(
-                allPlayers.map((item) => [item["user_id"], item])
-            ).values(),
-        ].map((player) => {
-            return {
-                id: player.user_id,
-                username: player.username,
-                scores: [],
-            };
-        });
-        uniquePlayers.forEach((player) => {
-            Object.entries(playerList).forEach((task) => {
-                let foundPlay = task[1].find(
-                    (task) => task.user_id == player.id
-                );
-                if (foundPlay) {
-                    player.scores.push({
-                        id: foundPlay.task_id,
-                        maxScore: foundPlay.score,
-                        count: 1,
-                    });
-                }
-            });
-        });
-        let leaderboard = [];
-        uniquePlayers.forEach((player) => {
-            leaderboard.push({
-                username: player.username,
-                ...calculateRevosectBenchmarks(
-                    { tasks: player.scores, id: player.id },
-                    mode
-                ),
-            });
-        });
-        leaderboard.forEach((player) => {
-            let points = {};
-            player.subCategoryPoints.forEach((item, index) => {
-                points[categories[index]] = item;
-            });
-            player.subCategoryPoints = points;
-        });
-        leaderboard = leaderboard.sort(
-            (a, b) => b.overallPoints - a.overallPoints
-        );
-        // localStorage.setItem(mode, JSON.stringify(leaderboard));
-        return leaderboard.filter(item => item.overallPoints > 0);
-    }
-}
-
-// function fetchAimlabLeaderboard(variables) {
-//     const query = `
-//       query getAimlabLeaderboard($leaderboardInput: LeaderboardInput!) {
-//         aimlab {
-//           leaderboard(input: $leaderboardInput) {
-//             id
-//             source
-//             metadata {
-//               offset
-//               rows
-//               totalRows
-//             }
-//             schema {
-//               id
-//               fields
-//             }
-//             data
-//           }
-//         }
-//       }
-//     `;
-
-//     // wrap the variables object in another object with a property named
-//     // after the variable in the query (in this case, "leaderboardInput")
-//     const body = JSON.stringify({
-//         query,
-//         variables: {
-//             leaderboardInput: variables,
-//         },
-//     });
-
-//     return axios.post("https://api.aimlab.gg/graphql", body, {
-//         headers: {
-//             "Content-Type": "application/json",
-//         },
-//     });
-// }
-
-// const leaderboardData = [];
-
-// hardBench.forEach((benchmark) => {
-//     const benchmarkData = [];
-//     let offset = 0;
-//     // initialize a variable to store the last score
-//     let lastScore = null;
-//     // create a function to make an API request and update the lastScore variable
-//     const fetchLeaderboardData = async () => {
-//         const variables = {
-//             clientId: "aimlab",
-//             limit: 100,
-//             offset,
-//             taskId: benchmark.id,
-//             taskMode: 0,
-//             weaponId: benchmark.weapon,
-//         };
-//         const response = await fetchAimlabLeaderboard(variables);
-//         // save the response data in the leaderboardData array
-//         benchmarkData.push(response.data);
-//         console.log(response.data.data.aimlab.leaderboard);
-//         // update the lastScore variable with the score of the last item in the response data
-//         lastScore =
-//             response.data.data.aimlab.leaderboard.data[
-//                 response.data.data.aimlab.leaderboard.data.length - 1
-//             ].score;
-//     };
-//     // make the initial API request to get the first batch of data
-//     fetchLeaderboardData().then(() => {
-//         // while the last score is greater than or equal to the first entry in the scores array
-//         // and the last score is not null (this is to prevent infinite looping)
-//         while (lastScore >= benchmark.scores[0] && lastScore !== null) {
-//             // increment the offset and make another API request
-//             offset += 100;
-//             fetchLeaderboardData();
-//         }
-//     });
-//     console.log(benchmarkData);
-//     leaderboardData.push(benchmarkData);
-// });
-
-// async function getHardLdb() {
-//     let playerList = {}
-//     for (let bench of hardBench) {
-//         let minScore = bench.scores[0];
-//         let scenScores = [];
-//         let offset = 0;
-//         while (true) {
-//             let ldb = await APIFetch(GET_TASK_LEADERBOARD, {
-//                 "leaderboardInput": {
-//                     clientId: "aimlab",
-//                     offset,
-//                     limit: 100,
-//                     taskId: bench.id,
-//                     taskMode: 0,
-//                     weaponId: bench.weapon
-//                 }
-//             })
-//             if (!ldb?.aimlab?.leaderboard.data) continue
-//             let scores = null;
-//             let scoreIndex = ldb?.aimlab?.leaderboard.data.findIndex(play => play.score < minScore)
-//             if (scoreIndex === -1) {
-//                 scores = ldb?.aimlab?.leaderboard.data
-//                 scenScores.push(...scores)
-//                 offset += 100
-//                 continue
-//             }
-//             scores = ldb?.aimlab?.leaderboard.data
-//             scenScores.push(...scores)
-//             break
-//         }
-//         playerList[bench.id] = scenScores;
-//     }
-
-//     if (Object.keys(playerList).length == hardBench.length) {
-//         return playerList
-//     }
-// }
-
-
-
-// const players = await getHardLdb();
-// console.log(organizeLeaderboard(players, hardBench, "hard"))

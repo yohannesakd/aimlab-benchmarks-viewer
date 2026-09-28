@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-//Pages
 import HomePage from "./pages/HomePage.vue";
 import ProfileSearch from "./pages/ProfileSearch.vue";
 import TaskSearch from "./pages/TaskSearch.vue";
@@ -13,7 +12,6 @@ import VoltaicLeaderboardsPage from "./pages/VoltaicLeaderboardsPage.vue";
 import RevosectLeaderboardsPage from "./pages/RevosectLeaderboardsPage.vue";
 import TaskView from "./pages/TaskView.vue";
 import AboutPage from "./pages/AboutPage.vue";
-// import TaskLeaderboard from "./pages/TaskLeaderboard.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -29,7 +27,7 @@ const router = createRouter({
           return;
         }
         if (sessionStorage.getItem("currentPlayer")) {
-          router.push("/profile/" + sessionStorage.getItem("currentPlayer"));
+          return "/profile/" + encodeURIComponent(sessionStorage.getItem("currentPlayer"));
         }
       },
     },
@@ -68,7 +66,7 @@ const router = createRouter({
           return;
         }
         if (sessionStorage.getItem("currentTask")) {
-          router.push("/tasks/" + sessionStorage.getItem("currentTask"));
+          return "/tasks/" + encodeURIComponent(sessionStorage.getItem("currentTask"));
         }
       },
     },

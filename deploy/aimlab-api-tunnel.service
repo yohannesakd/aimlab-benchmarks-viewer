@@ -1,0 +1,13 @@
+[Unit]
+Description=Cloudflare tunnel for public Aimlab leaderboard API
+After=aimlab-api.service network-online.target
+Wants=aimlab-api.service network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/cloudflared tunnel --config /home/sai/.cloudflared/aimlab-api.yml run aimlab-api
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

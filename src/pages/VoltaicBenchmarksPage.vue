@@ -1,7 +1,7 @@
 <template>
     <div class="relative min-h-max">
         <div id="mode-wrapper">
-            <!-- Overall Benchmark Stats -->
+
             <div
                 class="mt-4 flex max-h-96 w-full justify-center gap-4 font-oswald"
             >
@@ -68,7 +68,8 @@
                 </div>
             </div>
 
-            <!-- Benchmarks table -->
+            <p v-if="actionError" class="px-4 text-center" role="alert">{{ actionError }}</p>
+
             <section class="relative p-4" id="benchmark-table">
                 <header class="grid grid-cols-12 bg-slate-700 py-2 pr-4 pl-16">
                     <p class="col-span-4 ml-2">Scenario</p>
@@ -212,29 +213,8 @@
                     </div>
                 </div>
 
-                <!-- Categories sidebar -->
-                <!-- <div
-          class="text-center origin-top-left absolute rotate-90"
-          id="category-bar"
-        >
-          <div class="grid grid-cols-6 gap-1" id="category-item">
-            <span
-              class="bg-slate-700"
-              v-for="item in subCategories"
-              :key="item"
-              >{{ item }}</span
-            >
-          </div>
-          <div class="grid grid-cols-6 gap-0.5 min-w-full">
-            <span
-              id="subcategory-item"
-              class="col-span-2 bg-slate-800"
-              v-for="category in categories"
-              :key="category"
-              >{{ category }}</span
-            >
-          </div>
-        </div> -->
+
+
             </section>
         </div>
     </div>
@@ -252,13 +232,13 @@ import {
 import { findReplay } from "@/helpers/functions.js";
 import {
     findWorkshopId,
-    replayDeepLink,
     taskDeepLink,
 } from "../helpers/functions";
 export default {
     data() {
         return {
             replayLoading: false,
+            actionError: "",
             currentTabIndex: 2,
             categories: ["Clicking", "Tracking", "Switching"],
             subCategories: [
@@ -407,21 +387,32 @@ export default {
             });
         },
         async handlePlayScenario(taskId) {
-            const workshopId = await findWorkshopId(taskId);
-            const taskLink = taskDeepLink(workshopId);
-            window.open(taskLink, "_blank");
+            this.actionError = "";
+            try {
+                const workshopId = await findWorkshopId(taskId);
+                window.open(taskDeepLink(workshopId), "_blank");
+            } catch (error) {
+                console.error(error);
+                this.actionError = "Could not open this task. Try again.";
+            }
         },
         async replayLink(taskId, weapon) {
+            this.actionError = "";
             this.replayLoading = true;
-            let link = await findReplay(
-                this.currentPlayerInfo.username,
-                taskId,
-                weapon
-            );
-            if (link) {
-                window.open(link, "_blank");
+            try {
+                const link = await findReplay(
+                    this.currentPlayerInfo.username,
+                    taskId,
+                    weapon
+                );
+                if (link) window.open(link, "_blank");
+                else this.actionError = "Replay not found.";
+            } catch (error) {
+                console.error(error);
+                this.actionError = "Could not find this replay. Try again.";
+            } finally {
+                this.replayLoading = false;
             }
-            this.replayLoading = false;
         },
     },
 };

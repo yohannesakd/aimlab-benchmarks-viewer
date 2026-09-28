@@ -1,0 +1,16 @@
+[Unit]
+Description=Aimlab Benchmarks Viewer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/sai/apps/aimlab-viewer
+Environment=PORT=5180
+Environment=AIMLAB_DATA_DIR=/home/sai/.local/share/aimlab-viewer
+ExecStart=/home/sai/.nvm/versions/node/v24.16.0/bin/node server/index.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

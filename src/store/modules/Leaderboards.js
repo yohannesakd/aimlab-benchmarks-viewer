@@ -1,5 +1,3 @@
-import { organizeLeaderboard } from "../../helpers/functions";
-import { easyBench, hardBench, mediumBench } from "../../helpers/revosectData";
 export default {
   state() {
     return {
@@ -13,21 +11,9 @@ export default {
         Tracking: ["Precise", "Reactive", "Overall"],
         Switching: ["Flick", "Track", "Overall"],
       },
-      hardLdb: [],
-      mediumLdb: [],
-      easyLdb: [],
     };
   },
   getters: {
-    hardLdb(state) {
-      return state.hardLdb;
-    },
-    mediumLdb(state) {
-      return state.mediumLdb;
-    },
-    easyLdb(state) {
-      return state.easyLdb;
-    },
     selectedBenchmarkRA(state) {
       return state.selectedBenchmarkRA;
     },
@@ -48,15 +34,6 @@ export default {
     },
   },
   mutations: {
-    setHardLdb(state, payload) {
-      state.hardLdb = payload;
-    },
-    setMediumLdb(state, payload) {
-      state.mediumLdb = payload;
-    },
-    setEasyLdb(state, payload) {
-      state.easyLdb = payload;
-    },
     setSelectedBenchmarkRA(state, payload) {
       state.selectedBenchmarkRA = payload;
     },
@@ -65,45 +42,6 @@ export default {
     },
     setSelectedSubCategoryRA(state, payload) {
       state.selectedSubCategoryRA = payload;
-    },
-  },
-  actions: {
-    async fetchLeaderboard(context, payload) {
-      let ldb = null;
-      let fullBench = null;
-      switch (payload) {
-        case "hard":
-          fullBench = hardBench;
-          break;
-        case "medium":
-          fullBench = mediumBench;
-          break;
-        case "easy":
-          fullBench = easyBench;
-          break;
-      }
-      let playerList = {};
-      for (let bench of fullBench) {
-        const worker = new Worker("/scripts/leaderboard-worker.js");
-        worker.onmessage = (event) => {
-          playerList[event.data[1]] = event.data[0];
-          if (Object.entries(playerList).length == fullBench.length) {
-            ldb = organizeLeaderboard(playerList, fullBench, payload);
-            switch (payload) {
-              case "hard":
-                context.commit("setHardLdb", ldb);
-                break;
-              case "medium":
-                context.commit("setMediumLdb", ldb);
-                break;
-              case "easy":
-                context.commit("setEasyLdb", ldb);
-                break;
-            }
-          }
-        };
-        worker.postMessage(bench);
-      }
     },
   },
 };

@@ -56,12 +56,7 @@
                     </li>
                 </dropdown>
             </div>
-            <!-- <button
-        class="border-2 border-slate-500 px-6 py-2 rounded hover:bg-slate-500"
-        @click="handleLeaderboardChange"
-      >
-        Show Leaderboard
-      </button> -->
+
         </base-card>
 
         <div
@@ -69,6 +64,9 @@
             class="mb-16 flex items-center justify-center rounded-sm border border-slate-600 bg-slate-900 py-10"
         >
             <loading-spinner></loading-spinner>
+        </div>
+        <div v-else-if="leaderboardError" class="rounded-sm border border-slate-600 bg-slate-900 p-4" role="alert">
+            {{ leaderboardError }}
         </div>
         <div v-else class="rounded-sm border border-slate-600 bg-slate-900">
             <div class="mx-2 mt-2 grid grid-cols-4 bg-slate-600 px-6 py-2">
@@ -94,18 +92,8 @@
                     />
                     <span>{{ player.overallRank }}</span>
                 </p>
-                <!-- <span>
-          <chevron-icon class="h-5 w-5" direction="down"></chevron-icon>
-        </span> -->
-                <!-- <div class="col-span-5 flex">
-          <p
-            class="inline-block mr-2"
-            v-for="(benchmark, index) in player.benchmarks"
-            :key="index"
-          >
-            {{ benchmark.maxScore }}
-          </p>
-        </div> -->
+
+
             </router-link>
 
             <div class="mx-auto my-4 flex max-w-max items-center gap-1">
@@ -125,7 +113,7 @@
                     ></chevron-icon>
                 </button>
 
-                <!-- Center Buttons -->
+
                 <div class="flex gap-1">
                     <p
                         class="border border-slate-700 bg-slate-700 py-2 px-4 hover:cursor-pointer"
@@ -141,7 +129,7 @@
                         {{ page }}
                     </p>
                 </div>
-                <!-- Center Buttons -->
+
 
                 <button
                     type="button"
@@ -185,7 +173,10 @@ export default {
         return {
             currentPage: 0,
             goToPageInput: null,
+            pageData: { players: [], pageCount: 0 },
             leaderboardLoading: false,
+            leaderboardError: "",
+            requestVersion: 0,
             benchmark: ["Easy", "Medium", "Hard"],
             category: ["Clicking", "Tracking", "Switching", "Overall"],
             subCategory: {
@@ -196,18 +187,17 @@ export default {
         };
     },
     watch: {
-        selectedBenchmarkRA(newIndex) {
-            let bench = this.benchmark[newIndex].toLowerCase();
-            if (bench == "hard" && this.$store.getters.hardLdb != 0) return;
-            if (bench == "medium" && this.$store.getters.mediumLdb != 0) return;
-            if (bench == "easy" && this.$store.getters.easyLdb != 0) return;
-            this.leaderboardLoading = true;
-            this.$store.dispatch("fetchLeaderboard", bench);
+        selectedBenchmarkRA() {
+            this.resetAndLoad();
         },
-        selectedLeaderboard(newArr) {
-            if (newArr.length) {
-                this.leaderboardLoading = false;
-            }
+        selectedCategoryRA() {
+            this.resetAndLoad();
+        },
+        selectedSubCategoryRA() {
+            this.resetAndLoad();
+        },
+        currentPage() {
+            this.loadLeaderboard();
         },
     },
     computed: {
@@ -220,49 +210,24 @@ export default {
             "categoriesRA",
         ]),
         selectedLeaderboard() {
-            let ldb = null;
-            switch (this.selectedBenchmarkRA) {
-                case 0:
-                    ldb = this.$store.getters.easyLdb;
-                    break;
-                case 1:
-                    ldb = this.$store.getters.mediumLdb;
-                    break;
-                case 2:
-                    ldb = this.$store.getters.hardLdb;
-                    break;
+            return this.pageData.players;
+        },
+        selectedSort() {
+            if (this.selectedCategoryRA === 3) return "overall";
+            if (this.selectedSubCategoryRA === 2) {
+                return ["clicking", "tracking", "switching"][this.selectedCategoryRA];
             }
-            ldb.forEach((player) => {
-                player.selectedPoints = 0;
-                let cat =
-                    this.subCategory[this.category[this.selectedCategoryRA]];
-                if (this.selectedCategoryRA == 3) {
-                    player.selectedPoints = player.overallPoints;
-                    return;
-                }
-                if (this.selectedSubCategoryRA == 2) {
-                    player.selectedPoints =
-                        player.subCategoryPoints[cat[0]] +
-                        player.subCategoryPoints[cat[1]];
-                    return;
-                }
-                player.selectedPoints =
-                    player.subCategoryPoints[cat[this.selectedSubCategoryRA]];
-            });
-            return ldb.sort((a, b) => b.selectedPoints - a.selectedPoints);
+            return [
+                ["first", "second"],
+                ["third", "fourth"],
+                ["fifth", "sixth"],
+            ][this.selectedCategoryRA][this.selectedSubCategoryRA];
         },
         paginatedPlayerList() {
-            let perPage = 25;
-            let playerList = [...this.selectedLeaderboard];
-            let pageCount = Math.ceil(playerList.length / perPage) - 1;
-            let start = this.currentPage * perPage;
-            let end = this.currentPage * perPage + perPage;
             return {
-                data: playerList.slice(start, end),
-                start: start,
-                end: end,
-                perPage: perPage,
-                pageCount: pageCount,
+                data: this.selectedLeaderboard,
+                start: this.currentPage * 25,
+                pageCount: Math.max(0, this.pageData.pageCount - 1),
             };
         },
         pageNumbers() {
@@ -295,6 +260,36 @@ export default {
             this.$store.commit("setSelectedSubCategoryRA", index);
         },
 
+        resetAndLoad() {
+            if (this.currentPage === 0) this.loadLeaderboard();
+            else this.currentPage = 0;
+        },
+
+        async loadLeaderboard() {
+            const version = ++this.requestVersion;
+            const mode = this.benchmark[this.selectedBenchmarkRA].toLowerCase();
+            this.leaderboardError = "";
+            this.leaderboardLoading = true;
+            try {
+                const response = await fetch(`/api/leaderboards/ra/${mode}/page?page=${this.currentPage + 1}&sort=${this.selectedSort}`);
+                if (response.status === 503) {
+                    if (version === this.requestVersion) this.leaderboardError = "The leaderboard is being prepared. Check back after the first refresh.";
+                    return;
+                }
+                if (!response.ok) throw new Error(`Leaderboard request failed: ${response.status}`);
+                const page = await response.json();
+                if (page.mode !== `ra-${mode}` || !Array.isArray(page.players)) throw new Error("Invalid leaderboard response");
+                if (version === this.requestVersion) this.pageData = page;
+            } catch (error) {
+                if (version === this.requestVersion) {
+                    console.error(error);
+                    this.leaderboardError = "Could not load the leaderboard. Try again later.";
+                }
+            } finally {
+                if (version === this.requestVersion) this.leaderboardLoading = false;
+            }
+        },
+
         handlePageSelect(event) {
             let value = parseInt(event.target.textContent);
             if (value) {
@@ -302,17 +297,11 @@ export default {
             }
         },
         goToPage() {
-            if (this.goToPageInput) {
-                if (
-                    this.goToPageInput >
-                    this.paginatedPlayerList.pageCount + 1
-                ) {
-                    this.currentPage = this.paginatedPlayerList.pageCount;
-                } else if (this.goToPageInput < 1) {
-                    this.currentPage = 0;
-                } else {
-                    this.currentPage = this.goToPageInput - 1;
-                }
+            if (Number.isInteger(this.goToPageInput)) {
+                this.currentPage = Math.min(
+                    Math.max(this.goToPageInput - 1, 0),
+                    this.paginatedPlayerList.pageCount
+                );
             }
             this.goToPageInput = null;
         },
@@ -322,12 +311,10 @@ export default {
     },
 
     mounted() {
-        let bench = this.benchmark[this.selectedBenchmarkRA].toLowerCase();
-        if (bench == "hard" && this.$store.getters.hardLdb != 0) return;
-        if (bench == "medium" && this.$store.getters.mediumLdb != 0) return;
-        if (bench == "easy" && this.$store.getters.easyLdb != 0) return;
-        this.leaderboardLoading = true;
-        this.$store.dispatch("fetchLeaderboard", bench);
+        this.loadLeaderboard();
+    },
+    beforeUnmount() {
+        this.requestVersion++;
     },
 };
 </script>

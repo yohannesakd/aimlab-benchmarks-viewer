@@ -41,7 +41,6 @@ export const GET_USER_PLAYS_AGG = `
     }
   }
 `;
-//$slug = String! variable for task id
 export const GET_TASK_BY_ID = `
   query getTasksById($slug: String!) {
     aimlab {
@@ -78,21 +77,6 @@ export const GET_TASKS_BY_NAME = `
     }
   }
 `;
-// leaderboardInput => {
-//     "leaderboardInput":{
-//       "clientId": "aimlab",
-//       "limit":200,
-//       "offset":0,
-//       "taskId":"id",
-//       "taskMode": 0,
-//       "weaponId":"weapon"
-//   },
-//   "window":
-//   {
-//       "period":"month/week/year",
-//       "value":"yr-mo-day"
-//   }
-// }
 export const GET_TASK_LEADERBOARD = `
   query getAimlabLeaderboard($leaderboardInput:LeaderboardInput!){
     aimlab{
@@ -115,20 +99,18 @@ export const GET_TASK_LEADERBOARD = `
 `;
 
 export async function APIFetch(query, variables) {
-  try {
-    const response = await axios({
-      method: "POST",
-      url: API_ENDPOINT,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: {
-        query: query,
-        variables: variables,
-      },
-    });
-    return response.data.data;
-  } catch (error) {
-    console.error(error);
+  const response = await axios({
+    method: "POST",
+    url: API_ENDPOINT,
+    timeout: 20000,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: { query, variables },
+  });
+  if (response.data.errors?.length) {
+    throw new Error(response.data.errors.map((error) => error.message).join("; "));
   }
+  if (!response.data.data) throw new Error("Aimlab returned no data");
+  return response.data.data;
 }
