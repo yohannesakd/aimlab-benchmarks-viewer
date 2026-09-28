@@ -1,0 +1,36 @@
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:3.4.0
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5181:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD}@db:5432/umami
+      APP_SECRET: ${UMAMI_APP_SECRET}
+      TWO_FACTOR_ENCRYPTION_KEY: ${UMAMI_TWO_FACTOR_KEY}
+      DISABLE_TELEMETRY: "1"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/api/heartbeat >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD}
+      TZ: UTC
+    volumes:
+      - /home/sai/.local/share/aimlab-analytics/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami -d umami"]
+      interval: 15s
+      timeout: 5s
+      retries: 8

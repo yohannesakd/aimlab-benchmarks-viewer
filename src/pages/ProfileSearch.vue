@@ -101,10 +101,14 @@ export default {
             skill: data.aimlabProfile.ranking.skill,
           };
         }
+        window.umami?.track("profile-search", {
+          result: data.aimlabProfile ? "found" : "missing",
+        });
       } catch (error) {
         if (username === this.usernameInput) {
           console.error(error);
           this.searchError = true;
+          window.umami?.track("profile-search", { result: "error" });
         }
       } finally {
         if (username === this.usernameInput) this.isLoading = false;

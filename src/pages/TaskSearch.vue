@@ -101,10 +101,14 @@ export default {
         if (!data.aimlab?.tasks) throw new Error("Missing task search results");
         this.taskList = data.aimlab.tasks;
         this.searchStatus = this.taskList.length ? "" : "No tasks found";
+        window.umami?.track("task-search", {
+          result: this.taskList.length ? "found" : "missing",
+        });
       } catch (error) {
         if (version === this.requestVersion) {
           console.error(error);
           this.searchStatus = "Search is unavailable. Try again.";
+          window.umami?.track("task-search", { result: "error" });
         }
       }
     },

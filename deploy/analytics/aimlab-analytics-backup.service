@@ -1,0 +1,6 @@
+[Unit]
+Description=Back up Aimlab analytics database
+
+[Service]
+Type=oneshot
+ExecStart=/home/sai/apps/aimlab-analytics/backup.sh

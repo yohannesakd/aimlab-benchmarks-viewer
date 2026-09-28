@@ -46,4 +46,8 @@ npm start
 
 The server listens on `127.0.0.1:5180` by default. Set `PORT` and `AIMLAB_DATA_DIR` to change the port and snapshot directory. The systemd user units in `deploy/` run from `/home/sai/apps/aimlab-viewer`, store snapshots in `/home/sai/.local/share/aimlab-viewer`, and refresh at 04:00 local time. The VPS exposes port 5180 through its private Tailscale Serve route.
 
+## Analytics
+
+The private [analytics dashboard](https://vps.snapper-cod.ts.net:5181/websites/101682cb-3775-497a-b68a-b59a22ad10a5) runs Umami 3.4.0 and PostgreSQL from `deploy/analytics/compose.yaml`. It records page visits, navigation, referrers, devices, and search outcomes without sending search terms or usernames. The dashboard and tracker are available only on the tailnet. Its database is stored at `/home/sai/.local/share/aimlab-analytics/postgres`; the deployed Compose file and private `.env` are in `/home/sai/apps/aimlab-analytics`. Run `docker compose up -d` there after updating the Compose file. The admin login is stored locally in `/home/sai/apps/aimlab-analytics/admin-credentials` with owner-only permissions. The backup timer in `deploy/analytics/` writes daily database dumps to `/home/sai/.local/share/aimlab-analytics/backups`. Analytics begins with this deployment; historical Vercel analytics are not copied into Umami.
+
 The Revosect calculations use the [Aim Lab progression sheet](https://docs.google.com/spreadsheets/d/1JUTGiKU6u0csCWcmaMTof6Y2LNiZqLyCStH0OzzXYwI/edit?usp=sharing) for the benchmark set included in this repository.
