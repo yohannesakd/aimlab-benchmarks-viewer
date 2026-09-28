@@ -8,7 +8,7 @@
       </div>
       <div class="panel panel-body">
         <label class="field-label" for="username">Aimlab username · case sensitive</label>
-        <input id="username" class="text-field" type="text" autocomplete="off" placeholder="Enter a username" v-model.trim="usernameInput" @input="searchUser" />
+        <input id="username" class="text-field" type="text" autocomplete="off" placeholder="Enter a username" v-model.trim="usernameInput" @input="debouncedSearch" />
       </div>
       <div v-if="usernameInput" class="panel search-result">
         <p v-if="isLoading" class="status-panel">Searching…</p>
@@ -37,6 +37,7 @@ export default {
       playerInfo: {},
       isLoading: false,
       searchError: false,
+      debouncedSearch: null,
     };
   },
   computed: {
@@ -44,11 +45,14 @@ export default {
       return this.$route.path + "/" + this.playerInfo.username;
     },
   },
+  created() {
+    this.debouncedSearch = debounce(() => this.searchUser(), 600);
+  },
   beforeUnmount() {
-    this.searchUser.cancel();
+    this.debouncedSearch.cancel();
   },
   methods: {
-    searchUser: debounce(async function () {
+    async searchUser() {
       const username = this.usernameInput;
       this.playerInfo = {};
       this.searchError = false;
@@ -80,7 +84,7 @@ export default {
       } finally {
         if (username === this.usernameInput) this.isLoading = false;
       }
-    }, 600),
+    },
   },
 };
 </script>
