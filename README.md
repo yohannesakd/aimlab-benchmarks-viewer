@@ -44,7 +44,7 @@ npm run refresh:database
 npm start
 ```
 
-The private site listens on `127.0.0.1:5180` and is published through Tailscale Serve. The read-only API listens on `127.0.0.1:5182` and is published through its own Cloudflare Tunnel; its local configuration and credentials stay under `/home/sai/.cloudflared/`. The systemd user units in `deploy/` run from `/home/sai/apps/aimlab-viewer`, store databases in `/home/sai/.local/share/aimlab-viewer`, and refresh at 04:00 local time. Set `AIMLAB_DATA_DIR` to use another data directory.
+The private site listens on `127.0.0.1:5180` and is published through Tailscale Serve. The read-only API listens on `127.0.0.1:5182` and is published through its own Cloudflare Tunnel; its local configuration and credentials stay under `/home/sai/.cloudflared/`. The systemd user units in `deploy/` run from `/home/sai/apps/aimlab-viewer`, store databases in `/home/sai/.local/share/aimlab-viewer`, and refresh at 04:00 local time. The enabled `aimlab-easy-backfill.service` resumes the initial Easy crawl after a reboot and skips itself once the first Easy database is published. Set `AIMLAB_DATA_DIR` to use another data directory.
 
 ## Analytics
 
