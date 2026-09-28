@@ -23,4 +23,4 @@ const server = createServer(async (request, response) => {
 });
 server.headersTimeout = 10000;
 server.requestTimeout = 10000;
-server.listen(port, "0.0.0.0", () => console.log(`Public Aimlab leaderboard API listening on ${port}`));
+server.listen(port, "127.0.0.1", () => console.log(`Aimlab leaderboard API listening on 127.0.0.1:${port}`));

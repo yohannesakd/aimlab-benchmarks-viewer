@@ -58,34 +58,29 @@ async function collectAll(db, benchmarks, getPage, onProgress) {
     `);
     const update = db.prepare("UPDATE progress SET offset = ?, previous_score = ?, complete = ? WHERE scenario = ?");
     let offset = progress.offset;
-    let previousScore = progress.previous_score ?? Infinity;
     while (true) {
       const page = await getPage(bench, offset);
       if (!Array.isArray(page.data) || !Number.isInteger(page.metadata?.totalRows)) {
         throw new Error(`Invalid Aimlab page for ${bench.name}`);
       }
-      let reachedCutoff = false;
+      let highestScore = -Infinity;
+      let lowestScore = Infinity;
       db.exec("BEGIN");
       try {
         for (const entry of page.data) {
-          if (!Number.isFinite(entry.score) || entry.score > previousScore) {
-            throw new Error(`Unsorted Aimlab scores for ${bench.name} at offset ${offset}`);
-          }
-          previousScore = entry.score;
-          if (entry.score < bench.scores[0]) {
-            reachedCutoff = true;
-            break;
-          }
-          if (entry.user_id && entry.username) {
+          if (!Number.isFinite(entry.score)) throw new Error(`Invalid Aimlab score for ${bench.name} at offset ${offset}`);
+          highestScore = Math.max(highestScore, entry.score);
+          lowestScore = Math.min(lowestScore, entry.score);
+          if (entry.score >= bench.scores[0] && entry.user_id && entry.username) {
             upsert.run(entry.user_id, index, entry.username, entry.score);
           }
         }
-        const done = reachedCutoff || offset + page.data.length >= page.metadata.totalRows;
+        const done = highestScore < bench.scores[0] || offset + page.data.length >= page.metadata.totalRows;
         if (!done && page.data.length !== 1000) {
           throw new Error(`Incomplete Aimlab page for ${bench.name} at offset ${offset}`);
         }
         offset += page.data.length;
-        update.run(offset, Number.isFinite(previousScore) ? previousScore : null, done ? 1 : 0, index);
+        update.run(offset, Number.isFinite(lowestScore) ? lowestScore : null, done ? 1 : 0, index);
         db.exec("COMMIT");
         onProgress?.(bench.name, offset, page.metadata.totalRows, done);
         if (done) break;
