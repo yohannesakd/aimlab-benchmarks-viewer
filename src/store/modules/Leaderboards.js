@@ -11,21 +11,9 @@ export default {
         Tracking: ["Precise", "Reactive", "Overall"],
         Switching: ["Flick", "Track", "Overall"],
       },
-      hardLdb: [],
-      mediumLdb: [],
-      easyLdb: [],
     };
   },
   getters: {
-    hardLdb(state) {
-      return state.hardLdb;
-    },
-    mediumLdb(state) {
-      return state.mediumLdb;
-    },
-    easyLdb(state) {
-      return state.easyLdb;
-    },
     selectedBenchmarkRA(state) {
       return state.selectedBenchmarkRA;
     },
@@ -46,15 +34,6 @@ export default {
     },
   },
   mutations: {
-    setHardLdb(state, payload) {
-      state.hardLdb = payload;
-    },
-    setMediumLdb(state, payload) {
-      state.mediumLdb = payload;
-    },
-    setEasyLdb(state, payload) {
-      state.easyLdb = payload;
-    },
     setSelectedBenchmarkRA(state, payload) {
       state.selectedBenchmarkRA = payload;
     },
@@ -63,23 +42,6 @@ export default {
     },
     setSelectedSubCategoryRA(state, payload) {
       state.selectedSubCategoryRA = payload;
-    },
-  },
-  actions: {
-    async fetchLeaderboard(context, payload) {
-      const response = await fetch(`/api/leaderboards/ra/${payload}`);
-      if (!response.ok) throw new Error(`Leaderboard request failed: ${response.status}`);
-      const snapshot = await response.json();
-      if (snapshot.mode !== payload || !Array.isArray(snapshot.players)) {
-        throw new Error("Invalid leaderboard response");
-      }
-      const mutation = {
-        hard: "setHardLdb",
-        medium: "setMediumLdb",
-        easy: "setEasyLdb",
-      }[payload];
-      if (!mutation) throw new Error(`Unknown benchmark mode: ${payload}`);
-      context.commit(mutation, snapshot.players);
     },
   },
 };

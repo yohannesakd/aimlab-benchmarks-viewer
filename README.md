@@ -33,21 +33,21 @@ The Task is Presented as such, the option to launch Aimlab and play as well as w
 
 ## Running on a VPS
 
-The private VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is the supported deployment. It requires access to the owner's tailnet. The older public Vercel site does not have the leaderboard API used by this version.
+The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The public Vercel site uses the same leaderboard data through the read-only API at `aimlab-api.saibot.site`. `vercel.json` proxies only leaderboard requests to that API; other API paths are not exposed.
 
-The Node server serves the built site and cached Revosect leaderboards. The refresh command fetches ten Aimlab leaderboard pages per request, at most two requests per second, and writes separate Hard and Medium snapshots. A failed refresh leaves the previous snapshot in place. Easy profile calculations work, but the Easy leaderboard has no snapshot: its first task alone has about 850,000 qualifying scores.
+The Node server serves the built site and paged Revosect and Voltaic leaderboards. The refresh command collects Aimlab scores into a resumable SQLite staging database, calculates ranks using the same benchmark functions as player profiles, then atomically publishes one database per benchmark level. It keeps the previous published database if Aimlab fails. Large levels take longer to backfill; until one completes, its API returns 503 and the site shows an error.
 
 ```sh
 npm ci
 npm run build
-npm run refresh:leaderboards
+npm run refresh:database
 npm start
 ```
 
-The server listens on `127.0.0.1:5180` by default. Set `PORT` and `AIMLAB_DATA_DIR` to change the port and snapshot directory. The systemd user units in `deploy/` run from `/home/sai/apps/aimlab-viewer`, store snapshots in `/home/sai/.local/share/aimlab-viewer`, and refresh at 04:00 local time. The VPS exposes port 5180 through its private Tailscale Serve route.
+The private site listens on `127.0.0.1:5180` and is published through Tailscale Serve. The read-only API listens on `127.0.0.1:5182` and is published through its own Cloudflare Tunnel; its local configuration and credentials stay under `/home/sai/.cloudflared/`. The systemd user units in `deploy/` run from `/home/sai/apps/aimlab-viewer`, store databases in `/home/sai/.local/share/aimlab-viewer`, and refresh at 04:00 local time. Set `AIMLAB_DATA_DIR` to use another data directory.
 
 ## Analytics
 
-The private [analytics dashboard](https://vps.snapper-cod.ts.net:5181/websites/101682cb-3775-497a-b68a-b59a22ad10a5) runs Umami 3.4.0 and PostgreSQL from `deploy/analytics/compose.yaml`. It records page visits, navigation, referrers, devices, and search outcomes without sending search terms or usernames. The dashboard and tracker are available only on the tailnet. Its database is stored at `/home/sai/.local/share/aimlab-analytics/postgres`; the deployed Compose file and private `.env` are in `/home/sai/apps/aimlab-analytics`. Run `docker compose up -d` there after updating the Compose file. The admin login is stored locally in `/home/sai/apps/aimlab-analytics/admin-credentials` with owner-only permissions. The backup timer in `deploy/analytics/` writes daily database dumps to `/home/sai/.local/share/aimlab-analytics/backups`. Analytics begins with this deployment; historical Vercel analytics are not copied into Umami.
+The private [analytics dashboard](https://vps.snapper-cod.ts.net:5181/websites/101682cb-3775-497a-b68a-b59a22ad10a5) runs Umami 3.4.0 and PostgreSQL from `deploy/analytics/compose.yaml`. It records page visits, navigation, referrers, devices, and search outcomes without sending search terms or usernames. The public tracker host `aimlab-analytics.saibot.site` exposes only `/script.js` and `/api/send` through the Cloudflare Tunnel; the dashboard remains tailnet-only. Its database is stored at `/home/sai/.local/share/aimlab-analytics/postgres`; the deployed Compose file and private `.env` are in `/home/sai/apps/aimlab-analytics`. Run `docker compose up -d` there after updating the Compose file. The admin login is stored locally in `/home/sai/apps/aimlab-analytics/admin-credentials` with owner-only permissions. The backup timer in `deploy/analytics/` writes daily database dumps to `/home/sai/.local/share/aimlab-analytics/backups`. Vercel's available 30-day aggregate CSV exports are archived in `/home/sai/.local/share/aimlab-analytics/vercel-export-2026-09-28-30d/`; they cannot reconstruct historical Umami sessions.
 
 The Revosect calculations use the [Aim Lab progression sheet](https://docs.google.com/spreadsheets/d/1JUTGiKU6u0csCWcmaMTof6Y2LNiZqLyCStH0OzzXYwI/edit?usp=sharing) for the benchmark set included in this repository.

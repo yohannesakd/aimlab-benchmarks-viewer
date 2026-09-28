@@ -87,6 +87,10 @@ export default {
             this.error = "";
             try {
                 const response = await fetch(`/api/leaderboards/vt/${mode}/page?page=${this.page}&sort=${this.sort}`);
+                if (response.status === 503) {
+                    if (version === this.requestVersion) this.error = "The leaderboard is being prepared. Check back after the first refresh.";
+                    return;
+                }
                 if (!response.ok) throw new Error(`Leaderboard request failed: ${response.status}`);
                 const result = await response.json();
                 if (result.mode !== `vt-${mode}` || !Array.isArray(result.players)) throw new Error("Invalid leaderboard response");

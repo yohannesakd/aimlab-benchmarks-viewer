@@ -37,11 +37,3 @@
   @apply bg-slate-500 text-white;
 }
 </style>
-
-<script>
-export default {
-  mounted() {
-    // this.$store.dispatch("fetchLeaderboard");
-  },
-};
-</script>

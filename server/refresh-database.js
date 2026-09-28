@@ -5,7 +5,7 @@ import { DatabaseSync } from "node:sqlite";
 import { calculateRevosectBenchmarks, caclulateVT } from "../src/helpers/functions.js";
 import { categories as raCategories, easyBench, mediumBench, hardBench } from "../src/helpers/revosectData.js";
 import { categories as vtCategories, noviceBench, intermediateBench, advancedBench } from "../src/helpers/voltaicData.js";
-import { fetchLeaderboardPage } from "./refresh-leaderboards.js";
+import { fetchLeaderboardPage } from "./aimlab-pages.js";
 
 export const benchmarkSets = {
   "ra-easy": easyBench,
@@ -25,7 +25,7 @@ function openStaging(path, mode, benchmarks) {
     CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS progress (
       scenario INTEGER PRIMARY KEY, offset INTEGER NOT NULL DEFAULT 0,
-      previous_score REAL, complete INTEGER NOT NULL DEFAULT 0
+      complete INTEGER NOT NULL DEFAULT 0
     );
     CREATE TABLE IF NOT EXISTS scores (
       user_id TEXT NOT NULL, scenario INTEGER NOT NULL, username TEXT NOT NULL,
@@ -48,7 +48,7 @@ function openStaging(path, mode, benchmarks) {
 async function collectAll(db, benchmarks, getPage, onProgress) {
   for (let index = 0; index < benchmarks.length; index++) {
     const bench = benchmarks[index];
-    const progress = db.prepare("SELECT offset, previous_score, complete FROM progress WHERE scenario = ?").get(index);
+    const progress = db.prepare("SELECT offset, complete FROM progress WHERE scenario = ?").get(index);
     if (progress.complete) continue;
     const upsert = db.prepare(`
       INSERT INTO scores (user_id, scenario, username, score) VALUES (?, ?, ?, ?)
@@ -56,7 +56,7 @@ async function collectAll(db, benchmarks, getPage, onProgress) {
         score = max(scores.score, excluded.score),
         username = CASE WHEN excluded.score >= scores.score THEN excluded.username ELSE scores.username END
     `);
-    const update = db.prepare("UPDATE progress SET offset = ?, previous_score = ?, complete = ? WHERE scenario = ?");
+    const update = db.prepare("UPDATE progress SET offset = ?, complete = ? WHERE scenario = ?");
     let offset = progress.offset;
     while (true) {
       const page = await getPage(bench, offset);
@@ -64,23 +64,21 @@ async function collectAll(db, benchmarks, getPage, onProgress) {
         throw new Error(`Invalid Aimlab page for ${bench.name}`);
       }
       let highestScore = -Infinity;
-      let lowestScore = Infinity;
       db.exec("BEGIN");
       try {
         for (const entry of page.data) {
           if (!Number.isFinite(entry.score)) throw new Error(`Invalid Aimlab score for ${bench.name} at offset ${offset}`);
           highestScore = Math.max(highestScore, entry.score);
-          lowestScore = Math.min(lowestScore, entry.score);
           if (entry.score >= bench.scores[0] && entry.user_id && entry.username) {
             upsert.run(entry.user_id, index, entry.username, entry.score);
           }
         }
         const done = highestScore < bench.scores[0] || offset + page.data.length >= page.metadata.totalRows;
-        if (!done && page.data.length !== 1000) {
+        if (!done && page.data.length !== 2000) {
           throw new Error(`Incomplete Aimlab page for ${bench.name} at offset ${offset}`);
         }
         offset += page.data.length;
-        update.run(offset, Number.isFinite(lowestScore) ? lowestScore : null, done ? 1 : 0, index);
+        update.run(offset, done ? 1 : 0, index);
         db.exec("COMMIT");
         onProgress?.(bench.name, offset, page.metadata.totalRows, done);
         if (done) break;

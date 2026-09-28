@@ -272,6 +272,10 @@ export default {
             this.leaderboardLoading = true;
             try {
                 const response = await fetch(`/api/leaderboards/ra/${mode}/page?page=${this.currentPage + 1}&sort=${this.selectedSort}`);
+                if (response.status === 503) {
+                    if (version === this.requestVersion) this.leaderboardError = "The leaderboard is being prepared. Check back after the first refresh.";
+                    return;
+                }
                 if (!response.ok) throw new Error(`Leaderboard request failed: ${response.status}`);
                 const page = await response.json();
                 if (page.mode !== `ra-${mode}` || !Array.isArray(page.players)) throw new Error("Invalid leaderboard response");
