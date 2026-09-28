@@ -188,16 +188,13 @@ export default {
     },
     watch: {
         selectedBenchmarkRA() {
-            this.currentPage = 0;
-            this.loadLeaderboard();
+            this.resetAndLoad();
         },
         selectedCategoryRA() {
-            this.currentPage = 0;
-            this.loadLeaderboard();
+            this.resetAndLoad();
         },
         selectedSubCategoryRA() {
-            this.currentPage = 0;
-            this.loadLeaderboard();
+            this.resetAndLoad();
         },
         currentPage() {
             this.loadLeaderboard();
@@ -257,12 +254,15 @@ export default {
             this.$store.commit("setSelectedBenchmarkRA", index);
         },
         changeCategory(index) {
-            this.currentPage = 0;
             this.$store.commit("setSelectedCategoryRA", index);
         },
         changeSubCategory(index) {
-            this.currentPage = 0;
             this.$store.commit("setSelectedSubCategoryRA", index);
+        },
+
+        resetAndLoad() {
+            if (this.currentPage === 0) this.loadLeaderboard();
+            else this.currentPage = 0;
         },
 
         async loadLeaderboard() {
