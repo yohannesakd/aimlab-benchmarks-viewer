@@ -157,8 +157,6 @@ function scorePlayers(db, mode, benchmarks, onProgress) {
     CREATE INDEX IF NOT EXISTS players_c4 ON players (c4 DESC, username);
     CREATE INDEX IF NOT EXISTS players_c5 ON players (c5 DESC, username);
     CREATE INDEX IF NOT EXISTS players_c6 ON players (c6 DESC, username);
-    DROP TABLE scores;
-    DROP TABLE progress;
   `);
   db.prepare("INSERT OR REPLACE INTO metadata VALUES ('generatedAt', ?)").run(new Date().toISOString());
   db.prepare("INSERT OR REPLACE INTO metadata VALUES ('mode', ?)").run(mode);

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { copyFile, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -29,6 +29,15 @@ test("database refresh scores Easy Flick and Voltaic Novice without publishing p
       }
       db.close();
     }
+
+    await copyFile(
+      join(dataDir, "vt-novice.sqlite"),
+      join(dataDir, "vt-novice.staging.sqlite")
+    );
+    await refreshDatabase("vt-novice", {
+      dataDir,
+      getPage: () => { throw new Error("Completed crawl should not repeat"); },
+    });
 
     const old = new DatabaseSync(join(dataDir, "ra-easy.sqlite"), { readOnly: true });
     const oldPoints = old.prepare("SELECT overall FROM players").get().overall;
