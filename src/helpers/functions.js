@@ -24,7 +24,6 @@ import {
     hardBench,
     mediumBench,
     easyBench,
-    categories,
 } from "./revosectData.js";
 import {
     APIFetch,
@@ -507,54 +506,4 @@ function checkDivinity(pointsList) {
             return point >= hardSubPoints[4];
         }).length == 18
     );
-}
-
-export function organizeLeaderboard(playerList, fullBench, mode) {
-    const players = new Map();
-
-    for (const bench of fullBench) {
-        const entries = playerList[bench.id];
-        if (!entries) throw new Error(`Missing leaderboard for ${bench.name}`);
-
-        for (const entry of entries) {
-            if (entry.score < bench.scores[0] || !entry.user_id) continue;
-
-            if (!players.has(entry.user_id)) {
-                players.set(entry.user_id, {
-                    id: entry.user_id,
-                    username: entry.username,
-                    scores: new Map(),
-                });
-            }
-            const player = players.get(entry.user_id);
-            const previous = player.scores.get(bench.id);
-            if (!previous || entry.score > previous.maxScore) {
-                player.scores.set(bench.id, {
-                    id: bench.id,
-                    maxScore: entry.score,
-                    count: 1,
-                });
-            }
-        }
-    }
-
-    return [...players.values()]
-        .map((player) => {
-            const result = calculateRevosectBenchmarks(
-                { tasks: [...player.scores.values()], id: player.id },
-                mode
-            );
-            return {
-                username: player.username,
-                ...result,
-                subCategoryPoints: Object.fromEntries(
-                    result.subCategoryPoints.map((points, index) => [
-                        (mode === "easy" ? ["Static", "Dynamic", "Precise", "Flick"] : categories)[index],
-                        points,
-                    ])
-                ),
-            };
-        })
-        .filter((player) => player.overallPoints > 0)
-        .sort((a, b) => b.overallPoints - a.overallPoints);
 }
