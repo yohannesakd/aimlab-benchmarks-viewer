@@ -137,8 +137,9 @@ test("leaderboard combines every scenario and keeps each player's best score", (
     "Static",
     "Dynamic",
     "Precise",
-    "Reactive",
+    "Flick",
   ]);
+  assert.equal(result[0].subCategoryPoints.Flick, 40);
   assert.equal(playerList[easyBench[0].id].length, 2);
 });
 

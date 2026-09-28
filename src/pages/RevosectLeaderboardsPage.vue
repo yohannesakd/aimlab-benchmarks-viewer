@@ -173,6 +173,7 @@ export default {
         return {
             currentPage: 0,
             goToPageInput: null,
+            pageData: { players: [], pageCount: 0 },
             leaderboardLoading: false,
             leaderboardError: "",
             requestVersion: 0,
@@ -186,9 +187,20 @@ export default {
         };
     },
     watch: {
-        selectedBenchmarkRA(newIndex) {
+        selectedBenchmarkRA() {
             this.currentPage = 0;
-            this.loadLeaderboard(newIndex);
+            this.loadLeaderboard();
+        },
+        selectedCategoryRA() {
+            this.currentPage = 0;
+            this.loadLeaderboard();
+        },
+        selectedSubCategoryRA() {
+            this.currentPage = 0;
+            this.loadLeaderboard();
+        },
+        currentPage() {
+            this.loadLeaderboard();
         },
     },
     computed: {
@@ -201,47 +213,24 @@ export default {
             "categoriesRA",
         ]),
         selectedLeaderboard() {
-            let ldb = null;
-            switch (this.selectedBenchmarkRA) {
-                case 0:
-                    ldb = this.$store.getters.easyLdb;
-                    break;
-                case 1:
-                    ldb = this.$store.getters.mediumLdb;
-                    break;
-                case 2:
-                    ldb = this.$store.getters.hardLdb;
-                    break;
+            return this.pageData.players;
+        },
+        selectedSort() {
+            if (this.selectedCategoryRA === 3) return "overall";
+            if (this.selectedSubCategoryRA === 2) {
+                return ["clicking", "tracking", "switching"][this.selectedCategoryRA];
             }
-            return ldb.map((player) => {
-                let selectedPoints = 0;
-                let cat =
-                    this.subCategory[this.category[this.selectedCategoryRA]];
-                if (this.selectedCategoryRA == 3) {
-                    selectedPoints = player.overallPoints;
-                } else if (this.selectedSubCategoryRA == 2) {
-                    selectedPoints =
-                        player.subCategoryPoints[cat[0]] +
-                        player.subCategoryPoints[cat[1]];
-                } else {
-                    selectedPoints =
-                        player.subCategoryPoints[cat[this.selectedSubCategoryRA]];
-                }
-                return { ...player, selectedPoints };
-            }).sort((a, b) => b.selectedPoints - a.selectedPoints);
+            return [
+                ["first", "second"],
+                ["third", "fourth"],
+                ["fifth", "sixth"],
+            ][this.selectedCategoryRA][this.selectedSubCategoryRA];
         },
         paginatedPlayerList() {
-            let perPage = 25;
-            let playerList = [...this.selectedLeaderboard];
-            let pageCount = Math.max(0, Math.ceil(playerList.length / perPage) - 1);
-            let start = this.currentPage * perPage;
-            let end = this.currentPage * perPage + perPage;
             return {
-                data: playerList.slice(start, end),
-                start: start,
-                end: end,
-                perPage: perPage,
-                pageCount: pageCount,
+                data: this.selectedLeaderboard,
+                start: this.currentPage * 25,
+                pageCount: Math.max(0, this.pageData.pageCount - 1),
             };
         },
         pageNumbers() {
@@ -276,25 +265,21 @@ export default {
             this.$store.commit("setSelectedSubCategoryRA", index);
         },
 
-        async loadLeaderboard(index) {
+        async loadLeaderboard() {
             const version = ++this.requestVersion;
-            const mode = this.benchmark[index].toLowerCase();
-            const cached = this.$store.getters[`${mode}Ldb`];
+            const mode = this.benchmark[this.selectedBenchmarkRA].toLowerCase();
             this.leaderboardError = "";
-            if (cached.length) {
-                this.leaderboardLoading = false;
-                return;
-            }
             this.leaderboardLoading = true;
             try {
-                await this.$store.dispatch("fetchLeaderboard", mode);
+                const response = await fetch(`/api/leaderboards/ra/${mode}/page?page=${this.currentPage + 1}&sort=${this.selectedSort}`);
+                if (!response.ok) throw new Error(`Leaderboard request failed: ${response.status}`);
+                const page = await response.json();
+                if (page.mode !== `ra-${mode}` || !Array.isArray(page.players)) throw new Error("Invalid leaderboard response");
+                if (version === this.requestVersion) this.pageData = page;
             } catch (error) {
                 if (version === this.requestVersion) {
                     console.error(error);
-                    this.leaderboardError =
-                        mode === "easy"
-                            ? "The Easy leaderboard is unavailable. Easy benchmark results still appear on player profiles."
-                            : "Could not load the leaderboard. Try again later.";
+                    this.leaderboardError = "Could not load the leaderboard. Try again later.";
                 }
             } finally {
                 if (version === this.requestVersion) this.leaderboardLoading = false;
@@ -322,7 +307,7 @@ export default {
     },
 
     mounted() {
-        this.loadLeaderboard(this.selectedBenchmarkRA);
+        this.loadLeaderboard();
     },
     beforeUnmount() {
         this.requestVersion++;

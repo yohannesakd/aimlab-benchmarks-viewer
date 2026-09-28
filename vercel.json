@@ -1,3 +1,9 @@
 {
-  "rewrites": [{ "source": "/:path*", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/api/leaderboards/:path*",
+      "destination": "http://185.211.5.131:5182/api/leaderboards/:path*"
+    },
+    { "source": "/:path*", "destination": "/index.html" }
+  ]
 }

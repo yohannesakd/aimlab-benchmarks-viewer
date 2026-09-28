@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
+import { handleLeaderboardRequest } from "./leaderboard-db.js";
 
 const port = Number(process.env.PORT || 5180);
 const dataDir = resolve(process.env.AIMLAB_DATA_DIR || "data");
@@ -27,10 +28,11 @@ const server = createServer(async (request, response) => {
   }
 
   let pathname;
+  let searchParams;
   try {
-    pathname = decodeURIComponent(
-      new URL(request.url, "http://localhost").pathname
-    );
+    const url = new URL(request.url, "http://localhost");
+    pathname = decodeURIComponent(url.pathname);
+    searchParams = url.searchParams;
   } catch {
     send(response, 400, "Invalid path", "text/plain");
     return;
@@ -40,6 +42,8 @@ const server = createServer(async (request, response) => {
     send(response, 200, "ok", "text/plain");
     return;
   }
+
+  if (await handleLeaderboardRequest(request, response, pathname, searchParams)) return;
 
   const leaderboardMatch = pathname.match(
     /^\/api\/leaderboards\/ra\/(hard|medium|easy)$/

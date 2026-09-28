@@ -548,7 +548,10 @@ export function organizeLeaderboard(playerList, fullBench, mode) {
                 username: player.username,
                 ...result,
                 subCategoryPoints: Object.fromEntries(
-                    result.subCategoryPoints.map((points, index) => [categories[index], points])
+                    result.subCategoryPoints.map((points, index) => [
+                        (mode === "easy" ? ["Static", "Dynamic", "Precise", "Flick"] : categories)[index],
+                        points,
+                    ])
                 ),
             };
         })

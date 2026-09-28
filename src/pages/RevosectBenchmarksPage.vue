@@ -61,7 +61,7 @@
                                     :key="index"
                                     class="flex items-center gap-2 pr-4"
                                 >
-                                    {{ subCategories[index] }} :
+                                    {{ displaySubCategories[index] }} :
                                     <span class="font-bold">{{ item }}</span>
                                 </li>
                             </ul>
@@ -316,6 +316,11 @@ export default {
         },
         subCategoryPoints() {
             return this.RABenchmarks.subCategoryPoints;
+        },
+        displaySubCategories() {
+            return this.currentTab.value === "easy"
+                ? ["Static", "Dynamic", "Precise", "Flick"]
+                : this.subCategories;
         },
     },
     methods: {

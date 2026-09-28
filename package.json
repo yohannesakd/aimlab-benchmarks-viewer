@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test": "node --test",
     "start": "node server/index.js",
-    "refresh:leaderboards": "node server/refresh-leaderboards.js"
+    "refresh:leaderboards": "node server/refresh-leaderboards.js",
+    "refresh:database": "node server/refresh-database.js",
+    "start:public-api": "node server/public-api.js"
   },
   "dependencies": {
     "autoprefixer": "^10.4.12",
