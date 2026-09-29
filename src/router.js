@@ -5,6 +5,7 @@ import ProfileSearch from "./pages/ProfileSearch.vue";
 import TaskSearch from "./pages/TaskSearch.vue";
 import PlayerProfile from "./pages/PlayerProfile.vue";
 import PlayerTasksOverview from "./pages/PlayerTasksOverview.vue";
+import PlayerActivityPage from "./pages/PlayerActivityPage.vue";
 import RevosectBenchmarksPage from "./pages/RevosectBenchmarksPage.vue";
 import VoltaicBenchmarksPage from "./pages/VoltaicBenchmarksPage.vue";
 import LeaderboardsPage from "./pages/LeaderboardsPage.vue";
@@ -50,6 +51,12 @@ const router = createRouter({
           name: "profile-overview",
           path: "overview",
           component: PlayerTasksOverview,
+        },
+        {
+          name: "profile-activity",
+          path: "activity",
+          component: PlayerActivityPage,
+          props: true,
         },
         {
           name: "vt-benches",
