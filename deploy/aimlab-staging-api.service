@@ -1,0 +1,16 @@
+[Unit]
+Description=Read-only Aimlab staging API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/sai/aimlab-staging
+Environment=AIMLAB_DATA_DIR=/home/sai/.local/share/aimlab-viewer
+Environment=PUBLIC_API_PORT=5183
+ExecStart=/home/sai/.nvm/versions/node/v24.16.0/bin/node server/public-api.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
