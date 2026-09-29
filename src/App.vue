@@ -15,11 +15,3 @@ export default {
   },
 };
 </script>
-<style>
-html {
-  @apply bg-slate-800  text-white;
-}
-* {
-  @apply font-poppins;
-}
-</style>

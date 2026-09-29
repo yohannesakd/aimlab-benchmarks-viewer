@@ -1,8 +1,8 @@
 <template>
-  <div class="mb-10">
-    <base-card class="max-w-3xl tracking-wide mt-10 mx-auto px-8">
+  <main class="page-shell">
+    <base-card class="max-w-3xl tracking-wide mx-auto p-8">
       <div class="relative flex flex-col gap-4">
-        <h1 class="text-xl text-center">About Me</h1>
+        <h1 class="section-title">About this project</h1>
         <p>
           Hello! My name is Yohannes, known to the Aimtraining community as
           Saibot. I'm a Frontend Developer currently in my Junior year of
@@ -40,7 +40,7 @@
         </div>
       </div>
     </base-card>
-  </div>
+  </main>
 </template>
 
 <script>
