@@ -4,7 +4,7 @@ ingress:
   - hostname: aimlab-api.saibot.site
     service: http://127.0.0.1:5182
   - hostname: aimlab-staging-api.saibot.site
-    service: http://127.0.0.1:5183
+    service: http://127.0.0.1:5282
   - hostname: aimlab-analytics.saibot.site
     path: ^/(script\.js|api/send)$
     service: http://127.0.0.1:5181
