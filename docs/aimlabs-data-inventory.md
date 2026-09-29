@@ -1,6 +1,6 @@
 # Aimlabs data inventory
 
-Checked **2026-09-29** against the public `https://api.aimlab.gg/graphql` endpoint. This is a field and behavior inventory for future product work, not a claim that Aimlabs supports these calls as a stable, unauthenticated integration contract. The archived SDL at `/home/sai/code/aimlab-schema-reference/latest-schema.graphql` is a historical reference; live validation takes precedence. Probes used small result limits and public profiles or tasks. No private account token was used.
+Checked **2026-09-29** against the public `https://api.aimlab.gg/graphql` endpoint. This is a field and behavior inventory for future product work, not a claim that Aimlabs supports these calls as a stable, unauthenticated integration contract. The archived SDL at `/home/sai/code/aimlab-schema-reference/latest-schema.graphql` is a historical reference; live validation takes precedence. [The archived schema map](aimlabs-archived-schema-map.md) and [full field index](aimlabs-archived-schema-fields.tsv) cover its declared paths, including fields not checked live. Probes used small result limits and public profiles or tasks. No private account token was used.
 
 ## What the viewer currently uses
 
