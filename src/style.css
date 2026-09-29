@@ -82,11 +82,6 @@ button:disabled { cursor: not-allowed; }
 .result-row:hover { background: var(--raised); }
 .result-title { font-weight: 600; }
 .result-meta { color: var(--muted); font-size: .8rem; }
-.profile-summary { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 22px; }
-.profile-stat { padding: 19px; }
-.profile-stat dt { color: var(--muted); font-size: .77rem; }
-.profile-stat dd { margin: 6px 0 0; font-size: 1.35rem; font-weight: 600; line-height: 1.25; }
-.profile-stat img { width: 27px; height: 27px; object-fit: contain; }
 .profile-content { margin-top: 16px; }
 .task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 10px; }
 .task-card { padding: 16px; border: 1px solid var(--line); border-radius: 2px; background: var(--panel); transition: border-color .15s, background-color .15s; }
@@ -132,8 +127,6 @@ button:disabled { cursor: not-allowed; }
 .bench-actions > *:disabled { opacity: .4; }
 @media (max-width: 800px) {
   .page-shell { padding-top: 30px; }
-  .profile-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .profile-summary > :first-child, .profile-summary > :last-child { grid-column: 1 / -1; }
   .bench-overview { grid-template-columns: 1fr; }
 }
 @media (max-width: 620px) {
@@ -154,9 +147,6 @@ button:disabled { cursor: not-allowed; }
   .pagination-controls .page-number { display: none; }
   .page-status { display: inline-flex; align-items: center; margin-right: auto; }
   .search-form { flex-direction: column; }
-  .profile-summary { gap: 8px; }
-  .profile-stat { padding: 14px; }
-  .profile-stat dd { font-size: 1.12rem; }
   .benchmark-view { padding: 12px; }
   .bench-overview-main { flex-wrap: wrap; }
   .bench-overview-main .dropdown { flex-basis: 100%; }

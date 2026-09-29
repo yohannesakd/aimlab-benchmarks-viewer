@@ -13,9 +13,6 @@ const profileQuery = `
           latestStreak { endDate streakCount }
           highestStreak { streakCount }
         }
-        recommendedTasks(app: AIMLAB, engine: DAILY_PLAYLIST, max: 1) {
-          aimlabTask { id name }
-        }
       }
     }
   }
@@ -26,7 +23,7 @@ const taskQuery = `
     Trainer {
       aimlab {
         task(slug: $taskId) {
-          id style duration mode version weapon_id created_at updated_at
+          id style duration version weapon_id created_at updated_at
           asset { id currentVersion }
         }
       }
@@ -64,7 +61,6 @@ function achievementValue(metrics, slug) {
 function publicProfile(trainer) {
   const profile = trainer.aimlabProfile;
   if (!profile) return null;
-  const pick = profile.recommendedTasks?.[0];
   const activity = profile.activity;
   return {
     username: profile.username,
@@ -75,10 +71,6 @@ function publicProfile(trainer) {
     latestDailyStreak: activity?.latestStreak ? {
       days: activity.latestStreak.streakCount,
       endedOn: activity.latestStreak.endDate,
-    } : null,
-    dailyPick: pick?.aimlabTask?.name ? {
-      taskId: pick.aimlabTask.id,
-      name: pick.aimlabTask.name,
     } : null,
     fetchedAt: new Date().toISOString(),
   };
@@ -91,7 +83,6 @@ function publicTask(trainer) {
     id: task.id,
     style: task.style,
     durationSeconds: Number.isFinite(task.duration) ? task.duration : null,
-    mode: task.mode,
     taskVersion: task.version,
     weaponId: task.weapon_id,
     createdAt: task.created_at,

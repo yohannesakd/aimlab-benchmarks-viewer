@@ -11,39 +11,28 @@
     <div v-if="isLoading" class="panel status-panel"><loading-spinner></loading-spinner></div>
     <div v-else-if="loadError" class="panel status-panel" role="alert">{{ loadError }}</div>
     <template v-else>
-      <div class="profile-summary">
-        <div class="panel profile-stat">
-          <div class="profile-identity">
-            <img v-if="publicDetails?.imageUrl" class="profile-avatar" :src="publicDetails.imageUrl" alt="" />
-            <dl>
-              <dt>Username</dt>
-              <dd class="profile-username">{{ currentPlayerInfo.username }}</dd>
-            </dl>
+      <section class="panel profile-summary" aria-label="Player statistics">
+        <div class="profile-identity">
+          <img v-if="publicDetails?.imageUrl" class="profile-avatar" :src="publicDetails.imageUrl" alt="" />
+          <div class="profile-name">
+            <span class="result-meta">Username</span>
+            <strong class="profile-username">{{ currentPlayerInfo.username }}</strong>
+            <span class="muted profile-aimlab">Aimlab {{ currentPlayerInfo.rank }} · {{ Math.floor(currentPlayerInfo.skill || 0) }} skill</span>
+            <progress-bar class="profile-progress" :value="playerSkill" color="bg-mainCyan"></progress-bar>
           </div>
-          <p class="muted profile-aimlab">Aimlab {{ currentPlayerInfo.rank }} · {{ Math.floor(currentPlayerInfo.skill || 0) }} skill</p>
-          <progress-bar class="profile-progress" :value="playerSkill" color="bg-mainCyan"></progress-bar>
         </div>
-        <div class="panel profile-stat"><dl><dt>Tasks played</dt><dd>{{ Number(tasksPlayed).toLocaleString() }}</dd></dl></div>
-        <div class="panel profile-stat"><dl><dt>Total plays</dt><dd>{{ Number(totalPlays).toLocaleString() }}</dd></dl></div>
-        <div class="panel profile-stat rank-summary">
-          <div><span class="muted">Revosect</span><span><img :src="'/rank-img/ra/' + imagePath(overallRankRA) + '.png'" alt="" />{{ overallRankRA }}</span></div>
-          <div><span class="muted">Voltaic</span><span><img :src="'/rank-img/' + imagePath(overallRankVT) + '_badge.png'" alt="" />{{ overallRankVT }}</span></div>
-        </div>
-      </div>
-      <section v-if="publicDetails" class="panel profile-discovery">
-        <div class="panel-header"><div><h2 class="section-title">Aimlabs activity</h2><p class="result-meta">Public profile details reported by Aimlabs.</p></div></div>
-        <div class="profile-discovery-grid">
-          <div><span class="result-meta">Account age</span><strong>{{ daysLabel(publicDetails.accountAgeDays) }}</strong></div>
-          <div><span class="result-meta">Current daily streak</span><strong>{{ daysLabel(publicDetails.currentStreakDays) }}</strong></div>
-          <div><span class="result-meta">Best daily streak</span><strong>{{ daysLabel(publicDetails.bestDailyStreakDays) }}</strong></div>
-          <div><span class="result-meta">Latest daily streak</span><strong>{{ daysLabel(publicDetails.latestDailyStreak?.days) }}</strong><small v-if="publicDetails.latestDailyStreak?.endedOn" class="result-meta">Ended {{ publicDetails.latestDailyStreak.endedOn }}</small></div>
-        </div>
-        <div v-if="publicDetails.dailyPick" class="profile-daily-pick">
-          <span class="result-meta">Aimlabs daily pick</span>
-          <router-link class="text-link" :to="`/tasks/${encodeURIComponent(publicDetails.dailyPick.taskId)}/leaderboard`">{{ publicDetails.dailyPick.name }} →</router-link>
-        </div>
+        <dl class="profile-stats">
+          <div><dt>Tasks played</dt><dd>{{ Number(tasksPlayed).toLocaleString() }}</dd></div>
+          <div><dt>Total plays</dt><dd>{{ Number(totalPlays).toLocaleString() }}</dd></div>
+          <template v-if="publicDetails">
+            <div><dt>Account age</dt><dd>{{ daysLabel(publicDetails.accountAgeDays) }}</dd></div>
+            <div><dt>Current streak</dt><dd>{{ daysLabel(publicDetails.currentStreakDays) }}</dd></div>
+            <div><dt>Best streak</dt><dd>{{ daysLabel(publicDetails.bestDailyStreakDays) }}</dd></div>
+            <div><dt>Latest streak</dt><dd>{{ daysLabel(publicDetails.latestDailyStreak?.days) }}</dd><small v-if="publicDetails.latestDailyStreak?.endedOn" class="result-meta">Ended {{ publicDetails.latestDailyStreak.endedOn }}</small></div>
+          </template>
+        </dl>
       </section>
-      <div v-else-if="detailsError" class="panel status-panel profile-details-error" role="status">Additional Aimlabs details are unavailable right now.</div>
+      <p v-if="detailsError" class="result-meta profile-details-error" role="status">Aimlabs activity is unavailable right now.</p>
       <nav class="tab-list" aria-label="Profile sections">
         <router-link v-for="(tab, key) in tabs" :key="tab" class="tab-link" :to="{ name: tab }">{{ key }}</router-link>
       </nav>
@@ -53,23 +42,26 @@
 </template>
 <style scoped>
 .profile-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
-.profile-identity { display: flex; align-items: center; gap: 12px; }
-.profile-avatar { width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 2px; object-fit: cover; }
-.profile-username { overflow-wrap: anywhere; }
-.profile-aimlab { margin-top: 7px; font-size: .82rem; }
-.profile-progress { max-width: 260px; height: 6px; margin-top: 14px; background: var(--raised); }
-.rank-summary { display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
-.rank-summary > div { display: flex; flex-direction: column; gap: 3px; font-size: .78rem; }
-.rank-summary > div > span:last-child { display: flex; align-items: center; gap: 7px; font-size: .88rem; font-weight: 600; }
-.rank-summary img { width: 22px; height: 22px; object-fit: contain; }
-.profile-discovery { margin-bottom: 18px; }
-.profile-discovery-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 16px 20px; }
-.profile-discovery-grid > div { min-width: 0; padding: 12px; border: 1px solid var(--line); background: var(--raised); }
-.profile-discovery-grid strong { display: block; margin-top: 5px; font-size: .92rem; }
-.profile-discovery-grid small { display: block; margin-top: 3px; }
-.profile-daily-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 0 20px 18px; }
-.profile-details-error { margin-bottom: 18px; }
-@media (max-width: 800px) { .profile-discovery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.profile-summary { display: grid; grid-template-columns: minmax(230px, 1.8fr) minmax(0, 6fr); margin-bottom: 18px; }
+.profile-identity { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 16px 18px; border-right: 1px solid var(--line); }
+.profile-avatar { flex: 0 0 44px; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 2px; object-fit: cover; }
+.profile-name { min-width: 0; }
+.profile-username { display: block; font-size: 1.1rem; font-weight: 600; overflow-wrap: anywhere; }
+.profile-aimlab { display: block; margin-top: 3px; font-size: .75rem; }
+.profile-progress { max-width: 210px; height: 4px; margin-top: 9px; background: var(--raised); }
+.profile-stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0; }
+.profile-stats > div { min-width: 0; padding: 17px 12px; border-right: 1px solid var(--line); }
+.profile-stats > div:last-child { border-right: 0; }
+.profile-stats dt { color: var(--muted); font-size: .73rem; }
+.profile-stats dd { margin: 6px 0 0; font-size: .94rem; font-weight: 600; line-height: 1.3; }
+.profile-stats small { display: block; margin-top: 3px; font-size: .68rem; }
+.profile-details-error { margin: -6px 0 16px; }
+@media (max-width: 1050px) {
+  .profile-summary { grid-template-columns: 1fr; }
+  .profile-identity { border-right: 0; border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 800px) { .profile-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } .profile-stats > div:nth-child(-n+3) { border-bottom: 1px solid var(--line); } }
+@media (max-width: 620px) { .profile-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-stats > div { padding: 12px 14px; border-bottom: 1px solid var(--line); } .profile-stats > div:nth-last-child(-n+2) { border-bottom: 0; } }
 @media (max-width: 620px) { .profile-heading { align-items: start; flex-direction: column; } }
 </style>
 
@@ -97,29 +89,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      "VTAdvanced",
-      "VTIntermediate",
-      "VTNovice",
-      "RAHard",
-      "RAMedium",
-      "RAEasy",
-      "currentPlayerTasks",
       "currentPlayerInfo",
     ]),
-    overallRankVT() {
-      return this.VTAdvanced.overallRank != "Unranked"
-        ? this.VTAdvanced.overallRank
-        : this.VTIntermediate.overallRank != "Unranked"
-        ? this.VTIntermediate.overallRank
-        : this.VTNovice.overallRank;
-    },
-    overallRankRA() {
-      return this.RAHard.overallRank != "Unranked"
-         ? this.RAHard.overallRank
-        : this.RAMedium.overallRank != "Unranked"
-        ? this.RAMedium.overallRank
-        : this.RAEasy.overallRank;
-    },
     playerSkill() {
       if (this.currentPlayerInfo.skill) {
         if (this.currentPlayerInfo.skill == 1000) return 100;
@@ -161,9 +132,6 @@ export default {
       } catch (error) {
         if (version === this.detailsVersion) this.detailsError = error.message;
       }
-    },
-    imagePath(rank) {
-      return rank.replace(/ /g, "").toLowerCase();
     },
     handleSwitchProfile() {
       sessionStorage.removeItem("currentPlayer");
