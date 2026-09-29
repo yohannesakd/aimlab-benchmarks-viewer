@@ -42,7 +42,9 @@ Sampled run `performanceData` included `killTotal`, `hitsTotal`, `shotsTotal`, `
 
 `avroSchemas` anonymously listed Aimlab `1.0.0`, `2.0.0`, and `2.1.0` on the probe date. `avroSchema(clientId:AIMLAB,version:...)` returned the full schema. A 105,980-byte 2025 replay decoded with `2.0.0`: 42 target records, 214 event records, 9 pause intervals, sampled player position/rotation/animation/FOV, and score and accuracy curves. Its 137,004 ms of pauses matched the manifest and the final score curve matched the leaderboard. A 144,361-byte 2026 replay decoded with `2.1.0`: 198 targets and 1,189 events; its new `players` and `rsPing` collections were empty in that single-player run. Version `1.0.0` has a different `shotData`/`targetData`/`eventData` layout. [Source: live `avroSchemas`/`avroSchema` and sampled `PlayManifest.replayUrl`, 2026-09-29.]
 
-These payloads support **timeline visualizations**, pause-aware timing, target lifecycle and aim movement analysis. Numeric event codes have not been mapped to stable meanings. A 2026 replay’s final score curve was **1,940**, while the same play, manifest and leaderboard said **1,935**. Use the API play/leaderboard score for rank and best score; label replay curves as telemetry. Do not infer an official scoring formula from a time series alone. Replay availability differed for the *same* play between `latestPlays` and `latestPlay` in one response; prefer a checked `latestPlay`/manifest and test the URL before promising a replay.
+These payloads support timeline visualizations, pause-aware timing, target lifecycle and aim movement analysis. Coverage depends on the run: sampled player position had 412 points in the 2025 replay but only one in the static 2026 replay, while aim rotation had thousands in both. All sampled targets had `timeToLive=-1`; treat it as a sentinel, not a measured duration. Two targets per replay had a destroy timestamp earlier than spawn and must be excluded from measured durations. Event `customData` was null and numeric event codes have not been mapped to stable meanings.
+
+The 2025 score curve fell from 2,201 to 2,159 in its final ten seconds, so interval score changes do not equal kills or raw scoring pace. A 2026 replay’s final score curve was **1,940**, while the same play, manifest and leaderboard said **1,935**. Use the API play/leaderboard score for rank and best score; label replay curves as telemetry. Do not infer an official scoring formula from a time series alone. Replay availability differed for the *same* play between `latestPlays` and `latestPlay` in one response; prefer a checked `latestPlay`/manifest and test the URL before promising a replay.
 
 ### Scenario packages and scoring settings
 
@@ -66,7 +68,40 @@ Task packages can also yield target scale and movement/respawn configuration, us
 | `xboxProfile`, `psProfile` | Fields validated, both null for the sampled profile | Possible platform-specific player information; unverified on an actual console profile. |
 | Plans, missions, Valorant, mobile, account/shop and social APIs | Present in old SDL or found by targeted validation; not functionally probed | Broader product areas. Several concern authenticated/private account state and do not currently justify a viewer feature. |
 
-The live API added at least `benchmarkSeasons`, profile `benchmarkPerformance`/`latestPlays`/console profiles, `AimlabTask.style`, and `Play.replay` since the archived SDL. Targeted GraphQL validation established their types; representative executable probes established the public statuses above. This is **not** a complete current schema reconstruction. Broad introspection was unavailable in earlier attempts; avoid guessing from field names.
+## New since archived SDL
+
+This section lists **field names absent from** the archived `latest-schema.graphql`, found by small candidate batches through [Clairvoyance](https://github.com/nikitastupin/clairvoyance) and direct GraphQL validation on 2026-09-29. A valid field name alone says nothing about public access or useful data. Existing fields such as `avroSchema`, `avroSchemas`, `PlayManifest.replayUrl`, `AimlabProfile.activity` and `taskStats` remain valuable but are not new names. The new profile `benchmarkPerformance(input:{seasonId,difficulty})` differs from the old `User.benchmarkPerformance(benchmarkId)`.
+
+| New field / type | Validation and bounded runtime result | Meaning and next check |
+| --- | --- | --- |
+| `Play.athenaMetrics: [AthenaMetricSample!]` | The sample type accepts `id`, `metricId`, `metricValue`, `aimCategory`, `createdAt`, `extraData`. It returned `null` without errors on one 2025 run and two 2026 official-task runs. | Potential per-run Aimlabs metric samples. Coverage, units, metric IDs and calculation are **unknown**; do not show a chart or infer a zero value from `null`. |
+| `AimlabProfile.athenaMetricInsight(range:AthenaMetricTimeframeRange!)` | Returns `AthenaUserMetricInsight!`; its `insights` items accept `insightId`, `title`, `description`, `playCount`. Runtime access is **unverified**. `__type` introspection returned HTTP 403, and a bounded set of likely range enum values failed validation. | Could provide Aimlabs-generated player insights. Obtain the actual enum and a permitted sample through official access before using the text or claiming it is public. |
+| `AimlabProfile.learningStats: UserLearningStats!` | `stars` and `completedPlans` answered anonymously with `0` and `0` for one sampled profile. | Training-plan progress may be visible. One zero sample cannot establish completeness, update frequency or the meaning of “stars.” |
+| `AimlabProfile.plans(input:UserPlansInput!)` | Field and required input validated; `plans(input:{})` returned HTTP 401 for a public profile. | User-specific learning plans require authenticated access; exclude from the anonymous viewer. |
+| `Play.replay: AimlabReplay!` | Public sampled replay had ID, play ID, creation time, tags and description. Additional valid fields: `title`, `thumbnailId`, `thumbnail`, `comments`, `stats`. Title and thumbnail ID were null on two 2026 runs; `stats` worked for one sampled player but returned HTTP 500 for another. `thumbnail` and `comments` are object/connection fields, not yet executed. | Show a replay link only after availability is checked. Description may be task-sourced; do not call it a user annotation. Treat comments and engagement as separate optional requests. |
+| `AimlabTask.style` | Public, `Standard` for a sampled task. | A task descriptor, but no current taxonomy or stability claim. |
+| `AimlabProfile.latestPlays(app:App!)` | Public, returned three recent plays in one sample. It disagreed with `latestPlay` on `replayAvailable` for the same play. | Convenient preview only; use cursor-paged `latestPlay` for history and validate replay separately. |
+| `benchmarkSeasons` and profile `benchmarkPerformance(input:BenchmarkPerformanceInput!)` | Public in bounded probes; season task configurations and a sampled player progression returned. | Official Aimlabs benchmark data. Keep its identity separate from archived Revosect and Voltaic sets. |
+| Profile `eventpass`, `xboxProfile`, `psProfile`; root `eventpasses`, `plan`, `plans` | Names and object types validated. `eventpasses` returned HTTP 401; console profiles were null for the sampled account. Plan catalog and per-user event progress were not executed. | Other platform and event data are possible, but public coverage remains unverified. |
+
+The scan was targeted, not an exhaustive reconstruction of the current schema. In particular, public GraphQL introspection is blocked and candidate validation can miss fields whose names were not tried. The new Athena names are discovery leads; the two nullable metric responses and unresolved insight range are insufficient evidence for a user feature.
+
+```graphql
+query NewPublicFields($username: String!) {
+  aimlabProfile(username: $username) {
+    learningStats { stars completedPlans }
+    latestPlay(first: 1) {
+      edges { node {
+        id taskSlug startedAt
+        athenaMetrics { metricId metricValue aimCategory createdAt extraData }
+        replay { id title description thumbnailId }
+      } }
+    }
+  }
+}
+```
+
+This query returned HTTP 200 without GraphQL errors for a sampled public profile; `athenaMetrics` was `null`. It deliberately excludes `replay.stats`, which failed on another sampled run.
 
 ## Reproduce the key reads
 
