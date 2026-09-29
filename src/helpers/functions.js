@@ -1,9 +1,12 @@
 "use strict";
 import {
+    advancedBench,
     advancedRanks,
     advancedEnergy,
+    intermediateBench,
     intermediateEnergy,
     intermediateRanks,
+    noviceBench,
     noviceEnergy,
     noviceRanks,
 } from "./voltaicData.js";
@@ -80,30 +83,61 @@ export async function findReplay(playerName, taskId, weapon) {
     }
 }
 
+const benchmarkTaskWeapons = new Set(
+    [
+        ...advancedBench,
+        ...intermediateBench,
+        ...noviceBench,
+        ...hardBench,
+        ...mediumBench,
+        ...easyBench,
+    ].map((bench) => `${bench.id}\0${bench.weapon}`)
+);
+
 export function cleanUpUserTasks(taskList) {
-    let data = taskList.map((task) => {
-        return {
-            name: task.group_by.task_name,
-            id: task.group_by.task_id,
-            count: task.aggregate.count,
-            avgScore: task.aggregate.avg.score,
-            avgAcc: task.aggregate.avg.accuracy,
-            maxScore: task.aggregate.max.score,
-            maxAcc: task.aggregate.max.accuracy,
+    return summarizeUserTasks(taskList, (task) => `${task.id}\0${task.name}`);
+}
+
+export function cleanUpBenchmarkTasks(taskList) {
+    return summarizeUserTasks(
+        taskList.filter((task) =>
+            task.group_by.task_mode_mod === 0 &&
+            benchmarkTaskWeapons.has(`${task.group_by.task_id}\0${task.group_by.weapon_id}`)
+        ),
+        (task) => `${task.id}\0${task.weapon}`
+    );
+}
+
+function summarizeUserTasks(taskList, groupKey) {
+    const groups = new Map();
+    for (const row of taskList) {
+        const name = row.group_by.task_name;
+        const id = row.group_by.task_id;
+        if (!name && id.includes(".")) continue;
+        const task = {
+            name: name || id,
+            id,
+            weapon: row.group_by.weapon_id,
+            count: row.aggregate.count,
+            avgScore: row.aggregate.avg.score,
+            avgAcc: row.aggregate.avg.accuracy,
+            maxScore: row.aggregate.max.score,
+            maxAcc: row.aggregate.max.accuracy,
         };
-    });
-    data = data
-        .filter((task) => {
-            if (task.name) return true;
-            if (!task.id.includes(".")) return true;
-        })
-        .map((task) => {
-            if (!task.name) {
-                task.name = task.id;
-            }
-            return task;
-        });
-    data = data.sort((a, b) =>
+        const key = groupKey(task);
+        const previous = groups.get(key);
+        if (!previous) {
+            groups.set(key, task);
+            continue;
+        }
+        const count = previous.count + task.count;
+        previous.avgScore = (previous.avgScore * previous.count + task.avgScore * task.count) / count;
+        previous.avgAcc = (previous.avgAcc * previous.count + task.avgAcc * task.count) / count;
+        previous.maxScore = Math.max(previous.maxScore, task.maxScore);
+        previous.maxAcc = Math.max(previous.maxAcc, task.maxAcc);
+        previous.count = count;
+    }
+    const data = [...groups.values()].sort((a, b) =>
         a.count > b.count ? -1 : b.count > a.count ? 1 : 0
     );
     return data;

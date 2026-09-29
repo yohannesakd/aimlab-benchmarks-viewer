@@ -1,10 +1,11 @@
-import { cleanUpUserTasks } from "../../helpers/functions";
+import { cleanUpBenchmarkTasks, cleanUpUserTasks } from "../../helpers/functions";
 
 export default {
   state() {
     return {
       currentPlayerInfo: {},
       currentPlayerTasks: [],
+      currentPlayerBenchmarkTasks: [],
     };
   },
   getters: {
@@ -22,6 +23,9 @@ export default {
     currentPlayerTasks(state) {
       return state.currentPlayerTasks;
     },
+    currentPlayerBenchmarkTasks(state) {
+      return state.currentPlayerBenchmarkTasks;
+    },
   },
   mutations: {
     updateCurrentPlayerInfo(state, payload) {
@@ -30,14 +34,17 @@ export default {
     updateCurrentPlayerTasks(state, payload) {
       state.currentPlayerTasks = payload;
     },
+    updateCurrentPlayerBenchmarkTasks(state, payload) {
+      state.currentPlayerBenchmarkTasks = payload;
+    },
   },
   actions: {
     updateCurrentPlayerInfo(context, payload) {
       context.commit("updateCurrentPlayerInfo", payload);
     },
     updateCurrentPlayerTasks(context, payload) {
-      let plays = cleanUpUserTasks(payload);
-      context.commit("updateCurrentPlayerTasks", plays);
+      context.commit("updateCurrentPlayerTasks", cleanUpUserTasks(payload));
+      context.commit("updateCurrentPlayerBenchmarkTasks", cleanUpBenchmarkTasks(payload));
     },
   },
 };
