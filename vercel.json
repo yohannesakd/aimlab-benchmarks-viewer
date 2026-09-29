@@ -4,6 +4,10 @@
       "source": "/api/leaderboards/:path*",
       "destination": "https://aimlab-api.saibot.site/api/leaderboards/:path*"
     },
+    {
+      "source": "/api/profiles/:path*",
+      "destination": "https://aimlab-api.saibot.site/api/profiles/:path*"
+    },
     { "source": "/:path*", "destination": "/index.html" }
   ]
 }

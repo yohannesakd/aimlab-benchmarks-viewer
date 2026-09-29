@@ -11,6 +11,7 @@ import LeaderboardsPage from "./pages/LeaderboardsPage.vue";
 import VoltaicLeaderboardsPage from "./pages/VoltaicLeaderboardsPage.vue";
 import RevosectLeaderboardsPage from "./pages/RevosectLeaderboardsPage.vue";
 import TaskView from "./pages/TaskView.vue";
+import PlayerRunsPage from "./pages/PlayerRunsPage.vue";
 import AboutPage from "./pages/AboutPage.vue";
 
 const router = createRouter({
@@ -30,6 +31,11 @@ const router = createRouter({
           return "/profile/" + encodeURIComponent(sessionStorage.getItem("currentPlayer"));
         }
       },
+    },
+    {
+      path: "/profile/:username/tasks/:taskId/runs",
+      component: PlayerRunsPage,
+      props: true,
     },
     {
       path: "/profile/:username",

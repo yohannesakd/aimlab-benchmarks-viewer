@@ -6,10 +6,12 @@
       <label class="task-filter"><span class="sr-only">Search played tasks</span><input class="text-field" type="search" placeholder="Search played tasks" v-model.trim="searchQuery" /></label>
     </div>
     <div v-if="paginatedTaskList.data.length" class="task-grid profile-task-grid">
-      <router-link v-for="task in paginatedTaskList.data" :key="task.id" class="task-card" :to="'/tasks/' + task.id">
+      <div v-for="task in paginatedTaskList.data" :key="task.id" class="task-card player-task-card">
+        <router-link class="player-task-leaderboard" :to="'/tasks/' + encodeURIComponent(task.id)" :aria-label="`View ${task.name} leaderboard`"></router-link>
         <h3>{{ task.name }}</h3>
         <div class="task-card-meta"><span>Best score: {{ task.maxScore }}</span><span>{{ task.count }} plays</span></div>
-      </router-link>
+        <router-link class="text-link player-task-runs" :to="`/profile/${encodeURIComponent($route.params.username)}/tasks/${encodeURIComponent(task.id)}/runs`">View runs →</router-link>
+      </div>
     </div>
     <p v-else class="status-panel">No played tasks match this search.</p>
     <div v-if="paginatedTaskList.data.length" class="pagination">
@@ -29,6 +31,9 @@
 .profile-tasks-header { flex-wrap: wrap; }
 .task-filter { width: min(100%, 290px); }
 .profile-task-grid { padding: 18px; }
+.player-task-card { position: relative; }
+.player-task-leaderboard { position: absolute; inset: 0; }
+.player-task-runs { position: relative; display: inline-block; margin-top: 14px; }
 </style>
 
 <script>
