@@ -12,33 +12,33 @@
       <div class="activity-summary">
         <p><strong>{{ activity.activeDays.toLocaleString() }}</strong><span>active days in total</span></p>
         <p><strong>{{ activity.recentActiveDays.toLocaleString() }}</strong><span>active days in the last 12 months</span></p>
+        <p v-if="activity.learning.stars !== null || activity.learning.completedPlans !== null">
+          Learning: {{ activity.learning.stars ?? '—' }} stars · {{ activity.learning.completedPlans ?? '—' }} plans completed
+        </p>
       </div>
-      <div class="activity-chart" role="img" :aria-label="activity.years.map(item => item.year + ': ' + item.activeDays + ' active days').join(', ')">
-        <div v-for="item in activity.years" :key="item.year" class="activity-year" :title="`${item.activeDays} active days in ${item.year}`">
-          <strong>{{ item.activeDays }}</strong>
-          <div class="activity-track"><span v-if="item.activeDays" :style="{ height: barHeight(item.activeDays) }"></span></div>
-          <span>{{ item.year }}</span>
-        </div>
-      </div>
-      <p v-if="activity.learning.stars !== null || activity.learning.completedPlans !== null" class="result-meta learning-summary">
-        Learning: {{ activity.learning.stars ?? '—' }} stars · {{ activity.learning.completedPlans ?? '—' }} plans completed
-      </p>
+      <ul class="activity-chart" aria-label="Active days by year">
+        <li v-for="item in activity.years" :key="item.year">
+          <span class="activity-year">{{ item.year }}</span>
+          <span class="activity-track" aria-hidden="true"><span v-if="item.activeDays" :style="{ width: barWidth(item.activeDays) }"></span></span>
+          <strong class="activity-count">{{ item.activeDays }}<span class="sr-only"> active days</span></strong>
+        </li>
+      </ul>
     </div>
   </section>
 </template>
 
 <style scoped>
-.activity-content { padding: 20px; }
-.activity-summary { display: flex; flex-wrap: wrap; gap: 16px 32px; margin-bottom: 22px; }
+.activity-content { padding: 18px 20px; }
+.activity-summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 28px; margin-bottom: 16px; }
 .activity-summary p { display: flex; align-items: baseline; gap: 9px; color: var(--muted); font-size: .85rem; }
 .activity-summary strong { color: var(--text); font-size: 1.55rem; line-height: 1; }
-.activity-chart { display: flex; gap: 12px; min-height: 150px; }
-.activity-year { display: flex; flex: 1 1 0; max-width: 120px; flex-direction: column; align-items: center; gap: 5px; color: var(--muted); font-size: .72rem; }
-.activity-year strong { color: var(--text); font-size: .8rem; }
-.activity-track { display: flex; align-items: flex-end; width: 100%; height: 96px; background: var(--raised); }
-.activity-track span { display: block; width: 100%; min-height: 2px; background: var(--accent); }
-.learning-summary { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--line); }
-@media (max-width: 620px) { .activity-content { padding: 16px; } .activity-chart { gap: 5px; overflow-x: auto; } .activity-year { flex: 0 0 50px; font-size: .62rem; } .activity-track { height: 72px; } }
+.activity-chart { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.activity-chart li { display: grid; grid-template-columns: 46px minmax(0, 1fr) 34px; align-items: center; gap: 12px; min-height: 24px; }
+.activity-year { color: var(--muted); font-size: .78rem; }
+.activity-track { display: block; width: 100%; height: 10px; background: var(--raised); }
+.activity-track span { display: block; min-width: 2px; height: 100%; background: var(--accent); }
+.activity-count { font-size: .8rem; text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 620px) { .activity-content { padding: 16px; } .activity-chart li { gap: 8px; } }
 </style>
 
 <script>
@@ -59,7 +59,7 @@ export default {
     this.requestVersion++;
   },
   methods: {
-    barHeight(days) {
+    barWidth(days) {
       return `${Math.round(days / this.maxDays * 100)}%`;
     },
     async loadActivity(username) {

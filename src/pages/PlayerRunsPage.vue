@@ -1,5 +1,5 @@
 <template>
-  <main class="page-shell">
+  <main class="page-shell run-page">
     <router-link :to="`/profile/${encodeURIComponent(username)}/overview`" class="text-link">← {{ username }}'s profile</router-link>
     <div class="page-intro run-heading">
       <div>
@@ -35,7 +35,7 @@
           </section>
           <section class="run-detail-section">
             <h3>Performance</h3>
-            <dl class="run-facts run-performance">
+            <dl class="run-facts">
               <div v-for="item in runPerformance" :key="item.label"><dt>{{ item.label }}</dt><dd>{{ item.value }}</dd></div>
             </dl>
           </section>
@@ -55,7 +55,7 @@
           <strong>{{ run.score.toLocaleString() }} points</strong>
           <time class="run-date muted" :datetime="run.endedAt || run.startedAt">
             <span>{{ formatDay(run.endedAt || run.startedAt) }}</span>
-            <small>{{ formatClock(run.endedAt || run.startedAt) }}</small>
+            <small> · {{ formatClock(run.endedAt || run.startedAt) }}</small>
           </time>
           <router-link :to="{ path: $route.path, query: { ...pageQuery, run: run.id } }" class="text-link run-action">View details →</router-link>
         </div>
@@ -72,35 +72,38 @@
 </template>
 
 <style scoped>
+.run-page { max-width: 980px; }
 .run-heading, .run-detail-heading { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 18px; }
 .run-heading { margin-top: 20px; }
 .run-detail { padding: 20px; margin-bottom: 18px; }
-.run-detail-body { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr); gap: 30px; margin-top: 20px; }
+.run-detail-body { display: grid; gap: 18px; margin-top: 16px; }
 .run-detail-section h3 { padding-bottom: 8px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: .76rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
-.run-facts { margin: 0; }
-.run-facts > div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: .8rem; }
+.run-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 18px; margin: 0; }
+.run-facts > div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: .8rem; }
 .run-facts dt { color: var(--muted); }
 .run-facts dd { margin: 0; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
-.run-performance { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
-.run-detail-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 24px; margin-top: 18px; }
+.run-detail-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 24px; margin-top: 14px; }
 .run-note { margin-top: 17px; line-height: 1.6; }
 .run-replay { display: inline-flex; align-items: center; gap: 8px; }
 .run-list { overflow: hidden; }
-.run-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, 1fr) auto; align-items: center; gap: 18px; padding: 11px 18px; border-top: 1px solid var(--line); font-size: .84rem; }
+.run-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; gap: 16px; padding: 10px 18px; border-top: 1px solid var(--line); font-size: .84rem; }
 .run-row-head { border-top: 0; background: var(--raised); color: var(--muted); font-size: .76rem; font-weight: 600; }
-.run-date { text-align: right; }
-.run-date small { display: block; font-size: .72rem; }
-.run-action { text-align: right; }
+.run-date { white-space: nowrap; }
+.run-date small { font-size: .72rem; }
 .run-pagination { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 @media (max-width: 800px) {
-  .run-detail-body { grid-template-columns: 1fr; gap: 20px; }
+  .run-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .run-facts { grid-template-columns: 1fr; }
   .run-row-head { display: none; }
   .run-row { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
   .run-row > :first-child { grid-column: 1; grid-row: 1; }
-  .run-row > :nth-child(2) { grid-column: 2; grid-row: 1; }
+  .run-row > :nth-child(2) { grid-column: 2; grid-row: 1; text-align: right; white-space: normal; }
   .run-row > :last-child { grid-column: 2; grid-row: 2; }
+  .run-date { font-size: .75rem; }
+  .run-action { text-align: right; }
 }
-@media (max-width: 620px) { .run-performance { grid-template-columns: 1fr; } .run-date { font-size: .75rem; } }
 </style>
 
 <script>
@@ -133,7 +136,7 @@ export default {
       const details = [];
       if (run.taskVersion !== null && run.taskVersion !== undefined && run.taskVersion !== "") details.push({ label: "Task version", value: run.taskVersion });
       if (Number.isFinite(run.duration)) details.push({ label: "Duration", value: `${Math.round(run.duration)} s` });
-      if (Number.isFinite(run.pauseDuration) && run.pauseDuration > 0) details.push({ label: "Time paused", value: `${Math.round(run.pauseDuration)} s` });
+      if (Number.isFinite(run.pauseDuration) && run.pauseDuration > 0) details.push({ label: "Time paused", value: this.formatPaused(run.pauseDuration) });
       if (run.inputDevice?.length) details.push({ label: "Input device", value: run.inputDevice.join(", ") });
       if (run.gridshieldStatus) details.push({ label: "Run status", value: run.gridshieldStatus.replaceAll("_", " ").toLowerCase().replace(/^./, (letter) => letter.toUpperCase()) });
       if (run.appVersion) details.push({ label: "App version", value: run.appVersion });
@@ -168,6 +171,12 @@ export default {
     this.requestVersion++;
   },
   methods: {
+    formatPaused(milliseconds) {
+      const seconds = Math.round(milliseconds / 1000);
+      if (!seconds) return "<1 s";
+      if (seconds < 60) return `${seconds} s`;
+      return `${Math.floor(seconds / 60)} min ${seconds % 60} s`;
+    },
     formatDate(value) {
       return new Date(value).toLocaleString();
     },
