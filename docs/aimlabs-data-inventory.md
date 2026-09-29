@@ -42,7 +42,7 @@ Sampled run `performanceData` included `killTotal`, `hitsTotal`, `shotsTotal`, `
 
 `avroSchemas` anonymously listed Aimlab `1.0.0`, `2.0.0`, and `2.1.0` on the probe date. `avroSchema(clientId:AIMLAB,version:...)` returned the full schema. A 105,980-byte 2025 replay decoded with `2.0.0`: 42 target records, 214 event records, 9 pause intervals, sampled player position/rotation/animation/FOV, and score and accuracy curves. Its 137,004 ms of pauses matched the manifest and the final score curve matched the leaderboard. A 144,361-byte 2026 replay decoded with `2.1.0`: 198 targets and 1,189 events; its new `players` and `rsPing` collections were empty in that single-player run. Version `1.0.0` has a different `shotData`/`targetData`/`eventData` layout. [Source: live `avroSchemas`/`avroSchema` and sampled `PlayManifest.replayUrl`, 2026-09-29.]
 
-These payloads support timeline visualizations, pause-aware timing, target lifecycle and aim movement analysis. Coverage depends on the run: sampled player position had 412 points in the 2025 replay but only one in the static 2026 replay, while aim rotation had thousands in both. All sampled targets had `timeToLive=-1`; treat it as a sentinel, not a measured duration. Two targets per replay had a destroy timestamp earlier than spawn and must be excluded from measured durations. Event `customData` was null and numeric event codes have not been mapped to stable meanings.
+These payloads support timeline visualizations, pause-aware timing, target lifecycle and aim movement analysis. Coverage depends on the run: sampled player position had 412 points in the 2025 replay but only one in the static 2026 replay, while aim rotation had thousands in both. A separate, bounded 199,208-byte tracking replay had 6 targets, 6,335 events and 602 score samples; every target position/rotation/scale/color/health/visibility series still had only one point. The format supports target time series, but moving-target trajectories have **not** been demonstrated in a replay. All targets in the first two sampled replays had `timeToLive=-1`; treat it as a sentinel, not a measured duration. Two targets per replay had a destroy timestamp earlier than spawn and must be excluded from measured durations. Event `customData` was null and numeric event codes have not been mapped to stable meanings.
 
 The 2025 score curve fell from 2,201 to 2,159 in its final ten seconds, so interval score changes do not equal kills or raw scoring pace. A 2026 replay’s final score curve was **1,940**, while the same play, manifest and leaderboard said **1,935**. Use the API play/leaderboard score for rank and best score; label replay curves as telemetry. Do not infer an official scoring formula from a time series alone. Replay availability differed for the *same* play between `latestPlays` and `latestPlay` in one response; prefer a checked `latestPlay`/manifest and test the URL before promising a replay.
 
@@ -50,7 +50,20 @@ The 2025 score curve fell from 2,201 to 2,159 in its final ten seconds, so inter
 
 The signed task asset is a ZIP containing a human-readable Creator Studio `level.es3`, bot settings, images and workshop metadata. The sampled `level.options` included `LevelLength`, `Weapon`, `ScoreHit`, `ScoreMiss`, `ScoreKill`, `ScoreSQRTBonus`, target and movement settings. The sampled old Revosect Sixshot Easy had a 60-second length, kill score 10 and square-root accuracy bonus; five live leaderboard rows matched `floor(10 × kills × sqrt(accuracy / 100))`. Revosect Jumptrack matched `hits + 30 × kills`; Wideflick matched kills. A newer Revosect S4 Fourshot Easy package had kill score 10, miss score -3 and no square-root bonus; three live rows matched `10 × kills − 3 × (shots fired − shots hit)`. Voltaic S3 Angleshot Novice matched the square-root example in three rows. These are **verified examples, not a global formula**. [Source: live `aimlab.csTask.asset.signedUrl` packages and sampled Aimlabs task leaderboards, 2026-09-29.]
 
-Task packages can also yield target scale and movement/respawn configuration, useful for “what this trains” explanations. The package should be read as data, not executable content. Keep a task’s package version beside any parsed facts and validate derived score rules against representative real scores before showing them as fact.
+Task packages can also yield target scale and movement/respawn configuration, useful for “what this trains” explanations. Sample bot files contained geometry, health, respawn delay and range, and movement modules; the tracking sample had strafe/jump settings, while the Voltaic S3 sample included lifetime despawn settings. Units and in-game interpretation were not independently verified. `level.value.contentMetadata.ancestors[]` listed prior task IDs and dates in all five inspected packages, so it may help connect related scenario editions. It is creator-controlled lineage, not a complete canonical revision history. `AimlabTask.version`, `AimlabCSTask.currentVersion`, `TaskAsset.currentVersion` and package `levelVersion` are separate values; preserve their source rather than merging them into one version. The package should be read as data, not executable content. Keep the package asset ID/version beside parsed facts, omit author platform IDs, and validate derived score rules against representative real scores before showing them as fact.
+
+[Aimlabs' March 2026 Creator Studio update](https://aimlabs.com/articles/aimlabs/we-have-updated-the-aimlabs-creators-studio/) describes acceleration and velocity controls, movement transitions, fakeouts, spawn behavior, conditional movement, wall avoidance, gravity, FOV limits and cosmetic restrictions. Those controls are promising scenario descriptors, but their serialized fields were **not** verified in the five inspected packages. Inspect a newer published asset before adding them to a parser or comparison view.
+
+### Derived analytics that are defensible
+
+| Analysis | Inputs and boundary |
+| --- | --- |
+| Personal-best progression and run-to-run consistency | Compare runs only within the same task ID, normalized mode, weapon and version; show sample count and date range. Do not infer a fixed improvement threshold from one score. |
+| Activity calendar | Use public `AimlabProfile.activity` ranges as reported. Its activity disagreed with sampled `lastPlayed`, so do not use `lastPlayed` as the calendar source. |
+| Replay timelines | Plot sampled score and accuracy against replay time; show the API score separately as canonical. Score can fall during a run, and replay curves may end at a different value. |
+| Scenario comparison | Compare package options, bot settings and `ancestors[]` with asset/version provenance. Label creator settings and lineage as descriptive data, not a verified skill measure or exhaustive revision record. |
+
+Target spawn-to-destroy time is not validated reaction time. Numeric event codes are not verified hit or miss labels. Neither should be presented as a player metric until its semantics are mapped against independent evidence.
 
 ## Other API families worth tracking
 
@@ -78,8 +91,10 @@ This section lists **field names absent from** the archived `latest-schema.graph
 | `AimlabProfile.athenaMetricInsight(range:AthenaMetricTimeframeRange!)` | Returns `AthenaUserMetricInsight!`; its `insights` items accept `insightId`, `title`, `description`, `playCount`. Runtime access is **unverified**. `__type` introspection returned HTTP 403, and a bounded set of likely range enum values failed validation. | Could provide Aimlabs-generated player insights. Obtain the actual enum and a permitted sample through official access before using the text or claiming it is public. |
 | `AimlabProfile.learningStats: UserLearningStats!` | `stars` and `completedPlans` answered anonymously with `0` and `0` for one sampled profile. | Training-plan progress may be visible. One zero sample cannot establish completeness, update frequency or the meaning of “stars.” |
 | `AimlabProfile.plans(input:UserPlansInput!)` | Field and required input validated; `plans(input:{})` returned HTTP 401 for a public profile. | User-specific learning plans require authenticated access; exclude from the anonymous viewer. |
+| `AimlabProfile.profileCosmetics: AimlabProfileCosmetics!` | `avatar`, `profileBanner`, `profileIcon`, `title` are nullable `AimlabProfileCosmetic` objects with `slug` and `url`. Banner, icon and title were non-null in one public profile; avatar was null. The title had no URL. | Existing `cosmetics` exposes slugs, while this field can provide the corresponding public image URLs. Handle empty slots and URLs by type. |
 | `Play.replay: AimlabReplay!` | Public sampled replay had ID, play ID, creation time, tags and description. Additional valid fields: `title`, `thumbnailId`, `thumbnail`, `comments`, `stats`. Title and thumbnail ID were null on two 2026 runs; `stats` worked for one sampled player but returned HTTP 500 for another. `thumbnail` and `comments` are object/connection fields, not yet executed. | Show a replay link only after availability is checked. Description may be task-sourced; do not call it a user annotation. Treat comments and engagement as separate optional requests. |
-| `AimlabTask.style` | Public, `Standard` for a sampled task. | A task descriptor, but no current taxonomy or stability claim. |
+| `Play.playInsights: PlayInsights` | Valid `playId`, `events { key startSeconds endSeconds metrics { key data } }`, and `globalMetrics { key data }`. It returned `null` without errors for two sampled 2026 official-task runs. | Potential event-window and whole-run metrics; coverage, `data` shape, units and interpretation remain unknown. Do not treat null as an empty report. |
+| `AimlabTask.style`, `duration` | `style` was `Standard` for sampled tasks. `duration` was `null` for an older Revosect task and `60` for a 2026 official task. | Public task duration can save package decoding for some tasks, but older tasks require another source. Unit is plausibly seconds, not established by this field alone. |
 | `AimlabProfile.latestPlays(app:App!)` | Public, returned three recent plays in one sample. It disagreed with `latestPlay` on `replayAvailable` for the same play. | Convenient preview only; use cursor-paged `latestPlay` for history and validate replay separately. |
 | `benchmarkSeasons` and profile `benchmarkPerformance(input:BenchmarkPerformanceInput!)` | Public in bounded probes; season task configurations and a sampled player progression returned. | Official Aimlabs benchmark data. Keep its identity separate from archived Revosect and Voltaic sets. |
 | Profile `eventpass`, `xboxProfile`, `psProfile`; root `eventpasses`, `plan`, `plans` | Names and object types validated. `eventpasses` returned HTTP 401; console profiles were null for the sampled account. Plan catalog and per-user event progress were not executed. | Other platform and event data are possible, but public coverage remains unverified. |
@@ -90,10 +105,20 @@ The scan was targeted, not an exhaustive reconstruction of the current schema. I
 query NewPublicFields($username: String!) {
   aimlabProfile(username: $username) {
     learningStats { stars completedPlans }
+    profileCosmetics {
+      profileBanner { slug url }
+      profileIcon { slug url }
+      title { slug url }
+    }
     latestPlay(first: 1) {
       edges { node {
         id taskSlug startedAt
         athenaMetrics { metricId metricValue aimCategory createdAt extraData }
+        playInsights {
+          playId
+          events { key startSeconds endSeconds metrics { key data } }
+          globalMetrics { key data }
+        }
         replay { id title description thumbnailId }
       } }
     }
@@ -101,7 +126,7 @@ query NewPublicFields($username: String!) {
 }
 ```
 
-This query returned HTTP 200 without GraphQL errors for a sampled public profile; `athenaMetrics` was `null`. It deliberately excludes `replay.stats`, which failed on another sampled run.
+This query returned HTTP 200 without GraphQL errors for a sampled public profile; `athenaMetrics` and `playInsights` were `null`. It deliberately excludes `replay.stats`, which failed on another sampled run.
 
 ## Reproduce the key reads
 
@@ -127,7 +152,7 @@ query PlayerRuns($username: String!, $task: String!, $after: String) {
 query TaskDetail($task: String!) {
   aimlab {
     task(slug: $task) {
-      id name mode version style description image_url weapon_id workshop_id
+      id name mode version style duration description image_url weapon_id workshop_id
       author { id username }
       asset { id currentVersion fileSize modifiedAt }
     }
