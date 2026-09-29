@@ -13,7 +13,7 @@
         <p><strong>{{ activity.activeDays.toLocaleString() }}</strong><span>active days in total</span></p>
         <p><strong>{{ activity.recentActiveDays.toLocaleString() }}</strong><span>active days in the last 12 months</span></p>
       </div>
-      <div class="activity-chart" role="img" :aria-label="`${activity.activeDays} active days in total, by year`">
+      <div class="activity-chart" role="img" :aria-label="activity.years.map(item => item.year + ': ' + item.activeDays + ' active days').join(', ')">
         <div v-for="item in activity.years" :key="item.year" class="activity-year" :title="`${item.activeDays} active days in ${item.year}`">
           <strong>{{ item.activeDays }}</strong>
           <div class="activity-track"><span v-if="item.activeDays" :style="{ height: barHeight(item.activeDays) }"></span></div>
