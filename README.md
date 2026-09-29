@@ -39,11 +39,13 @@ The Task is Presented as such, the option to launch Aimlab and play as well as w
 
 ## Running on a VPS
 
-The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The production Vercel site uses the read-only API at `aimlab-api.saibot.site`. The staging Vercel preview uses `aimlab-staging-api.saibot.site` for leaderboards and bounded player run pages. `vercel.json` proxies those two API paths; other API paths are not exposed.
+The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The production Vercel site uses the read-only API at `aimlab-api.saibot.site`. The staging Vercel preview uses `aimlab-staging-api.saibot.site` for leaderboards, player runs, and public profile/task details. `vercel.json` proxies those three API paths; other API paths are not exposed.
 
 The Node server serves the built site and paged Revosect and Voltaic leaderboards. The refresh command collects Aimlab scores into a resumable SQLite staging database, calculates ranks using the same benchmark functions as player profiles, then atomically publishes one database per benchmark level. It keeps the previous published database if Aimlab fails. Large levels take longer to backfill; until one completes, its API returns 503 and the site shows an error.
 
 `GET /api/profiles/:username/tasks/:taskId/runs?after=...` reads 12 public solo plays at a time from Aimlabs' current API. It returns only display fields, caches successful pages briefly, limits concurrent upstream requests, and pauses after a provider rate limit. Arbitrary play lookup requires authentication, so a run detail opens from its history page and retains that page's cursor in the URL. This endpoint does not download replay files.
+
+`GET /api/profiles/:username/details` and `GET /api/tasks/:taskId/details` add public activity, a daily task pick, and scenario metadata from the current Aimlabs API. They return selected display fields and cache them for one minute. The existing profile and task views still load their base data independently.
 
 ```sh
 npm ci

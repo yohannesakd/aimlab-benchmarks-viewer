@@ -8,6 +8,10 @@
       "source": "/api/profiles/:path*",
       "destination": "https://aimlab-staging-api.saibot.site/api/profiles/:path*"
     },
+    {
+      "source": "/api/tasks/:path*",
+      "destination": "https://aimlab-staging-api.saibot.site/api/tasks/:path*"
+    },
     { "source": "/:path*", "destination": "/index.html" }
   ]
 }

@@ -13,10 +13,13 @@
     <template v-else>
       <div class="profile-summary">
         <div class="panel profile-stat">
-          <dl>
-            <dt>Username</dt>
-            <dd class="profile-username">{{ currentPlayerInfo.username }}</dd>
-          </dl>
+          <div class="profile-identity">
+            <img v-if="publicDetails?.imageUrl" class="profile-avatar" :src="publicDetails.imageUrl" alt="" />
+            <dl>
+              <dt>Username</dt>
+              <dd class="profile-username">{{ currentPlayerInfo.username }}</dd>
+            </dl>
+          </div>
           <p class="muted profile-aimlab">Aimlab {{ currentPlayerInfo.rank }} · {{ Math.floor(currentPlayerInfo.skill || 0) }} skill</p>
           <progress-bar class="profile-progress" :value="playerSkill" color="bg-mainCyan"></progress-bar>
         </div>
@@ -27,6 +30,20 @@
           <div><span class="muted">Voltaic</span><span><img :src="'/rank-img/' + imagePath(overallRankVT) + '_badge.png'" alt="" />{{ overallRankVT }}</span></div>
         </div>
       </div>
+      <section v-if="publicDetails" class="panel profile-discovery">
+        <div class="panel-header"><div><h2 class="section-title">Aimlabs activity</h2><p class="result-meta">Public profile details reported by Aimlabs.</p></div></div>
+        <div class="profile-discovery-grid">
+          <div><span class="result-meta">Account age</span><strong>{{ daysLabel(publicDetails.accountAgeDays) }}</strong></div>
+          <div><span class="result-meta">Current daily streak</span><strong>{{ daysLabel(publicDetails.currentStreakDays) }}</strong></div>
+          <div><span class="result-meta">Best daily streak</span><strong>{{ daysLabel(publicDetails.bestDailyStreakDays) }}</strong></div>
+          <div><span class="result-meta">Latest daily streak</span><strong>{{ daysLabel(publicDetails.latestDailyStreak?.days) }}</strong><small v-if="publicDetails.latestDailyStreak?.endedOn" class="result-meta">Ended {{ publicDetails.latestDailyStreak.endedOn }}</small></div>
+        </div>
+        <div v-if="publicDetails.dailyPick" class="profile-daily-pick">
+          <span class="result-meta">Aimlabs daily pick</span>
+          <router-link class="text-link" :to="`/tasks/${encodeURIComponent(publicDetails.dailyPick.taskId)}/leaderboard`">{{ publicDetails.dailyPick.name }} →</router-link>
+        </div>
+      </section>
+      <div v-else-if="detailsError" class="panel status-panel profile-details-error" role="status">Additional Aimlabs details are unavailable right now.</div>
       <nav class="tab-list" aria-label="Profile sections">
         <router-link v-for="(tab, key) in tabs" :key="tab" class="tab-link" :to="{ name: tab }">{{ key }}</router-link>
       </nav>
@@ -36,6 +53,8 @@
 </template>
 <style scoped>
 .profile-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.profile-identity { display: flex; align-items: center; gap: 12px; }
+.profile-avatar { width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 2px; object-fit: cover; }
 .profile-username { overflow-wrap: anywhere; }
 .profile-aimlab { margin-top: 7px; font-size: .82rem; }
 .profile-progress { max-width: 260px; height: 6px; margin-top: 14px; background: var(--raised); }
@@ -43,6 +62,14 @@
 .rank-summary > div { display: flex; flex-direction: column; gap: 3px; font-size: .78rem; }
 .rank-summary > div > span:last-child { display: flex; align-items: center; gap: 7px; font-size: .88rem; font-weight: 600; }
 .rank-summary img { width: 22px; height: 22px; object-fit: contain; }
+.profile-discovery { margin-bottom: 18px; }
+.profile-discovery-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 16px 20px; }
+.profile-discovery-grid > div { min-width: 0; padding: 12px; border: 1px solid var(--line); background: var(--raised); }
+.profile-discovery-grid strong { display: block; margin-top: 5px; font-size: .92rem; }
+.profile-discovery-grid small { display: block; margin-top: 3px; }
+.profile-daily-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 0 20px 18px; }
+.profile-details-error { margin-bottom: 18px; }
+@media (max-width: 800px) { .profile-discovery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .profile-heading { align-items: start; flex-direction: column; } }
 </style>
 
@@ -58,6 +85,9 @@ export default {
       isLoading: false,
       loadError: "",
       requestVersion: 0,
+      publicDetails: null,
+      detailsError: "",
+      detailsVersion: 0,
       tabs: {
         Overview: "profile-overview",
         Voltaic: "vt-benches",
@@ -106,12 +136,32 @@ export default {
     },
   },
   watch: {
-    username: { immediate: true, handler: "loadPlayer" },
+    username: { immediate: true, handler(username) {
+      this.loadPlayer(username);
+      this.loadPublicDetails(username);
+    } },
   },
   beforeUnmount() {
     this.requestVersion++;
+    this.detailsVersion++;
   },
   methods: {
+    daysLabel(value) {
+      return Number.isFinite(value) ? `${value.toLocaleString()} ${value === 1 ? "day" : "days"}` : "Unavailable";
+    },
+    async loadPublicDetails(username) {
+      const version = ++this.detailsVersion;
+      this.publicDetails = null;
+      this.detailsError = "";
+      try {
+        const response = await fetch(`/api/profiles/${encodeURIComponent(username)}/details`);
+        const details = await response.json().catch(() => null);
+        if (!response.ok || !details) throw new Error("Additional Aimlabs details unavailable");
+        if (version === this.detailsVersion) this.publicDetails = details;
+      } catch (error) {
+        if (version === this.detailsVersion) this.detailsError = error.message;
+      }
+    },
     imagePath(rank) {
       return rank.replace(/ /g, "").toLowerCase();
     },

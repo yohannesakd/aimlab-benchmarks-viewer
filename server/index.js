@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
 import { handleLeaderboardRequest } from "./leaderboard-db.js";
 import { handlePlayerRunsRequest } from "./player-runs.js";
+import { handlePublicDetailsRequest } from "./public-details.js";
 
 const port = Number(process.env.PORT || 5180);
 const distDir = resolve("dist");
@@ -47,6 +48,7 @@ const server = createServer(async (request, response) => {
 
   if (await handleLeaderboardRequest(request, response, pathname, searchParams)) return;
   if (await handlePlayerRunsRequest(request, response, rawPathname, searchParams)) return;
+  if (await handlePublicDetailsRequest(request, response, rawPathname)) return;
 
   if (pathname.startsWith("/api/")) {
     send(response, 404, "Not found", "text/plain");
