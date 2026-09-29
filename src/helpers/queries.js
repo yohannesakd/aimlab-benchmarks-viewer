@@ -24,6 +24,8 @@ export const GET_USER_PLAYS_AGG = `
         group_by {
           task_id
           task_name
+          task_mode_mod
+          weapon_id
         }
         aggregate {
           count

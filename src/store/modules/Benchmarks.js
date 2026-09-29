@@ -106,17 +106,17 @@ export default {
   actions: {
     setVTBenches(context) {
       let VTAdvanced = caclulateVT(
-        context.rootGetters.currentPlayerTasks,
+        context.rootGetters.currentPlayerBenchmarkTasks,
         [...advancedBench],
         "advanced"
       );
       let VTIntermediate = caclulateVT(
-        context.rootGetters.currentPlayerTasks,
+        context.rootGetters.currentPlayerBenchmarkTasks,
         [...intermediateBench],
         "intermediate"
       );
       let VTNovice = caclulateVT(
-        context.rootGetters.currentPlayerTasks,
+        context.rootGetters.currentPlayerBenchmarkTasks,
         [...noviceBench],
         "novice"
       );
@@ -128,21 +128,21 @@ export default {
     setRABenches(context) {
       let RAHard = calculateRevosectBenchmarks(
         {
-          tasks: context.rootGetters.currentPlayerTasks,
+          tasks: context.rootGetters.currentPlayerBenchmarkTasks,
           id: context.rootGetters.currentPlayerInfo.id,
         },
         "hard"
       );
       let RAMedium = calculateRevosectBenchmarks(
         {
-          tasks: context.rootGetters.currentPlayerTasks,
+          tasks: context.rootGetters.currentPlayerBenchmarkTasks,
           id: context.rootGetters.currentPlayerInfo.id,
         },
         "medium"
       );
       let RAEasy = calculateRevosectBenchmarks(
         {
-          tasks: context.rootGetters.currentPlayerTasks,
+          tasks: context.rootGetters.currentPlayerBenchmarkTasks,
           id: context.rootGetters.currentPlayerInfo.id,
         },
         "easy"
