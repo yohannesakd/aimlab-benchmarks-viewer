@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { handleLeaderboardRequest } from "./leaderboard-db.js";
 import { handlePlayerRunsRequest } from "./player-runs.js";
+import { handlePublicDetailsRequest } from "./public-details.js";
 
 const port = Number(process.env.PUBLIC_API_PORT || 5182);
 const server = createServer(async (request, response) => {
@@ -21,6 +22,7 @@ const server = createServer(async (request, response) => {
   }
   if (await handleLeaderboardRequest(request, response, url.pathname, url.searchParams)) return;
   if (await handlePlayerRunsRequest(request, response, url.pathname, url.searchParams)) return;
+  if (await handlePublicDetailsRequest(request, response, url.pathname)) return;
   response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
 });
 server.headersTimeout = 10000;

@@ -6,12 +6,13 @@ Checked **2026-09-29** against the public `https://api.aimlab.gg/graphql` endpoi
 
 | Surface | Current source | Additional useful data |
 | --- | --- | --- |
-| Player profile | `GET_USER_INFO` and `GET_USER_PLAYS_AGG` in [`src/helpers/queries.js`](../src/helpers/queries.js) | Run history, score trend, activity, best/worst tasks, selected run details |
-| Task page | Basic `aimlab.task` metadata and `aimlab.leaderboard` in [`src/pages/TaskView.vue`](../src/pages/TaskView.vue) | Scenario version, creator, scoring configuration, per-run performance, leaderboard schema |
+| Player profile | Existing profile/aggregate queries plus bounded public details in [`server/public-details.js`](../server/public-details.js) | Full activity calendar, score trend, best/worst tasks |
+| Task page | Basic task/leaderboard queries plus style, duration, task and asset versions from the public details API | Verified scoring configuration, asset contents, leaderboard schema |
+| Task run page | Bounded cursor pages from [`server/player-runs.js`](../server/player-runs.js), with score identity and allowlisted run metrics | Replay telemetry, comparable-run trends, populated insights if access permits |
 | Task search | Name search through `aimlab.tasks` | Creator Studio tasks, asset types, playlists and published versions |
-| Leaderboards | Public paged API backed by SQLite | Existing server can later serve normalized profile/task/run data |
+| Leaderboards | Public paged API backed by SQLite | A later backend can normalize profile, task and run data together |
 
-The app has no run detail route. The frontend still calls GraphQL directly for profiles and tasks. The existing [`server/index.js`](../server/index.js), [`server/public-api.js`](../server/public-api.js), and [`server/refresh-database.js`](../server/refresh-database.js) already form a read-only server and refresh boundary for leaderboards. A later backend migration should extend that boundary, not start a second backend.
+The frontend still calls the older GraphQL endpoint for its base profile, task and task leaderboard data. The VPS API now supplies bounded run pages and optional profile/task details from the current endpoint. These optional panels leave the base pages usable if the current endpoint fails. [`server/index.js`](../server/index.js) and [`server/public-api.js`](../server/public-api.js) share those read-only handlers; a later backend migration can move the remaining direct queries into this boundary.
 
 ## Immediate score identity rule
 

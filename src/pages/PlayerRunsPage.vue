@@ -32,7 +32,7 @@
             <strong>{{ item.value }}</strong>
           </div>
         </div>
-        <p class="result-meta run-note">These are Aimlabs' reported run values. Scores and stat meanings can vary by scenario.</p>
+        <p class="result-meta run-note">These are Aimlabs' reported run values. Some metric units and meanings vary by scenario.</p>
         <a v-if="selectedRun.replayAvailable" :href="replayLink(selectedRun.id)" target="_blank" rel="noopener noreferrer" class="text-link run-replay">
           <play-icon class="h-5 w-5" /> Open replay in Aimlabs
         </a>
@@ -120,12 +120,20 @@ export default {
         { label: "Task version", value: run.taskVersion || "Unavailable" },
         { label: "Recorded duration", value: Number.isFinite(run.duration) ? `${Math.round(run.duration)} s` : "Unavailable" },
         { label: "Input device", value: run.inputDevice?.join(", ") || "Unavailable" },
+        { label: "Gridshield status", value: run.gridshieldStatus ? run.gridshieldStatus.replaceAll("_", " ").toLowerCase() : "Unavailable" },
       ];
+      if (run.weaponName && run.weaponName !== run.weaponId) details.push({ label: "Weapon name", value: run.weaponName });
+      if (run.appVersion) details.push({ label: "App version", value: run.appVersion });
+      if (run.analyticsVersion) details.push({ label: "Analytics version", value: run.analyticsVersion });
       const metrics = [
-        ["hitsTotal", "Hits"], ["shotsTotal", "Shots"], ["killTotal", "Kills"],
-        ["targetsTotal", "Targets"], ["accTotal", "Reported accuracy"],
+        ["hitsTotal", "Hits"], ["shotsTotal", "Shots"], ["missesTotal", "Misses"],
+        ["killTotal", "Kills"], ["targetsTotal", "Targets"],
+        ["headshots", "Headshots"], ["bodyshots", "Bodyshots"],
+        ["damageTotal", "Reported damage"], ["accTotal", "Reported accuracy"],
+        ["avgDist", "Average distance (reported)"], ["timePerKill", "Time per kill (reported)"],
       ];
       for (const [key, label] of metrics) {
+        if (key === "timePerKill" && !run.metrics.killTotal) continue;
         if (Number.isFinite(run.metrics[key])) details.push({ label, value: run.metrics[key].toLocaleString() });
       }
       return details;
@@ -159,8 +167,9 @@ export default {
       const url = this.afterCursor ? `${path}?after=${encodeURIComponent(this.afterCursor)}` : path;
       try {
         const response = await fetch(url);
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error || "Run history is unavailable. Try again.");
+        const body = await response.json().catch(() => null);
+        if (!response.ok) throw new Error(body?.error || "Run history is unavailable. Try again.");
+        if (!body) throw new Error("Run history is unavailable. Try again.");
         if (version === this.requestVersion) this.history = body;
       } catch (error) {
         if (version === this.requestVersion) this.loadError = error.message;

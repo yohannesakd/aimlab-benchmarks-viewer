@@ -1,9 +1,8 @@
-const endpoint = "https://api.aimlabs.com/graphql";
+import { queryAimlabs } from "./aimlabs-graphql.js";
+
 const pageSize = 12;
 const cacheLifeMs = 45_000;
 const maxCacheEntries = 120;
-const maxConcurrentRequests = 4;
-const maxResponseBytes = 1_000_000;
 
 const query = `
   query PlayerTaskRuns($username: String, $taskId: String!, $after: String, $first: Int!) {
@@ -15,9 +14,10 @@ const query = `
           pageInfo { endCursor hasNextPage }
           edges {
             node {
-              id score startedAt endedAt mode convertedMode taskVersion
+              id score startedAt endedAt mode convertedMode taskVersion weaponName gridshieldStatus
               manifest {
-                taskName weaponId duration inputDevice replayAvailable performanceData
+                taskName weaponId taskVersion duration pauseDuration inputDevice
+                appVersion analyticsVersion replayAvailable performanceData
               }
             }
           }
@@ -28,8 +28,6 @@ const query = `
 `;
 
 const cache = new Map();
-let activeRequests = 0;
-let retryAfter = 0;
 
 function send(response, status, body, extraHeaders = {}) {
   response.writeHead(status, {
@@ -40,7 +38,10 @@ function send(response, status, body, extraHeaders = {}) {
 }
 
 function reportedMetrics(data) {
-  const keys = ["hitsTotal", "shotsTotal", "killTotal", "targetsTotal", "accTotal"];
+  const keys = [
+    "hitsTotal", "shotsTotal", "missesTotal", "killTotal", "targetsTotal",
+    "headshots", "bodyshots", "damageTotal", "accTotal", "avgDist", "timePerKill",
+  ];
   const metrics = {};
   for (const key of keys) {
     if (typeof data?.[key] === "number" && Number.isFinite(data[key])) metrics[key] = data[key];
@@ -56,87 +57,47 @@ function publicRun(play) {
     endedAt: play.endedAt,
     mode: play.mode,
     convertedMode: play.convertedMode,
-    taskVersion: play.taskVersion,
+    taskVersion: play.taskVersion ?? play.manifest.taskVersion,
     weaponId: play.manifest.weaponId,
+    weaponName: play.weaponName,
+    gridshieldStatus: play.gridshieldStatus,
     duration: play.manifest.duration,
+    pauseDuration: play.manifest.pauseDuration,
     inputDevice: play.manifest.inputDevice,
+    appVersion: play.manifest.appVersion,
+    analyticsVersion: play.manifest.analyticsVersion,
     replayAvailable: play.manifest.replayAvailable,
     metrics: reportedMetrics(play.manifest.performanceData),
   };
-}
-
-async function readBoundedJson(response) {
-  let size = 0;
-  const chunks = [];
-  for await (const chunk of response.body) {
-    size += chunk.length;
-    if (size > maxResponseBytes) {
-      throw new Error("Aimlabs response exceeded the page limit");
-    }
-    chunks.push(chunk);
-  }
-  return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
 
 export async function getPlayerTaskRuns(username, taskId, after = null) {
   const key = JSON.stringify([username, taskId, after]);
   const cached = cache.get(key);
   if (cached && Date.now() - cached.savedAt < cacheLifeMs) return cached.result;
-  if (Date.now() < retryAfter) {
-    const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
-    error.status = 503;
-    error.retryAfter = Math.ceil((retryAfter - Date.now()) / 1000);
+  const trainer = await queryAimlabs(query, { username, taskId, after, first: pageSize },
+    "Aimlabs did not return run history");
+  const profile = trainer.aimlabProfile;
+  if (!profile) {
+    const error = new Error("Player not found");
+    error.status = 404;
     throw error;
   }
-  if (activeRequests >= maxConcurrentRequests) {
-    const error = new Error("Run history is busy. Try again shortly.");
-    error.status = 503;
-    throw error;
-  }
-
-  activeRequests++;
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, variables: { username, taskId, after, first: pageSize } }),
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (response.status === 429) {
-      const seconds = Math.min(300, Math.max(15, Number(response.headers.get("retry-after")) || 30));
-      retryAfter = Date.now() + seconds * 1000;
-      const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
-      error.status = 503;
-      error.retryAfter = seconds;
-      throw error;
-    }
-    if (!response.ok) throw new Error(`Aimlabs returned HTTP ${response.status}`);
-    const payload = await readBoundedJson(response);
-    if (payload.errors?.length || !payload.data?.Trainer) throw new Error("Aimlabs did not return run history");
-    const profile = payload.data.Trainer.aimlabProfile;
-    if (!profile) {
-      const error = new Error("Player not found");
-      error.status = 404;
-      throw error;
-    }
-    const history = profile.latestPlay;
-    if (!history?.pageInfo || !Array.isArray(history.edges)) throw new Error("Aimlabs returned an incomplete run page");
-    const plays = history.edges.filter((edge) => edge?.node).map((edge) => edge.node);
-    const result = {
-      username: profile.username,
-      taskId,
-      taskName: plays[0]?.manifest.taskName || taskId,
-      totalCount: history.totalCount,
-      pageInfo: history.pageInfo,
-      runs: plays.map(publicRun),
-      fetchedAt: new Date().toISOString(),
-    };
-    if (cache.size >= maxCacheEntries) cache.delete(cache.keys().next().value);
-    cache.set(key, { savedAt: Date.now(), result });
-    return result;
-  } finally {
-    activeRequests--;
-  }
+  const history = profile.latestPlay;
+  if (!history?.pageInfo || !Array.isArray(history.edges)) throw new Error("Aimlabs returned an incomplete run page");
+  const plays = history.edges.filter((edge) => edge?.node).map((edge) => edge.node);
+  const result = {
+    username: profile.username,
+    taskId,
+    taskName: plays[0]?.manifest.taskName || taskId,
+    totalCount: history.totalCount,
+    pageInfo: history.pageInfo,
+    runs: plays.map(publicRun),
+    fetchedAt: new Date().toISOString(),
+  };
+  if (cache.size >= maxCacheEntries) cache.delete(cache.keys().next().value);
+  cache.set(key, { savedAt: Date.now(), result });
+  return result;
 }
 
 export async function handlePlayerRunsRequest(request, response, pathname, searchParams) {
