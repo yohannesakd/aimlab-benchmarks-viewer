@@ -45,7 +45,7 @@ export async function queryAimlabs(query, variables, missingDataMessage) {
     });
     if (response.status === 429) {
       const seconds = retryDelaySeconds(response.headers.get("Retry-After"));
-      retryAfter = Date.now() + seconds * 1000;
+      retryAfter = Math.max(retryAfter, Date.now() + seconds * 1000);
       const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
       error.status = 503;
       error.retryAfter = seconds;
