@@ -17,6 +17,8 @@ Navigate to the Profile Page and insert a player's username (_case sensitive_)
 The Player's Profile is presented as such:
 From here you can navigate to the [Voltaic](https://voltaic.gg) and [Revosect](https://revosect.com) Benchmarks Pages
 
+Each task card also has **View runs**. It opens cursor-paged solo run history with score, mode, weapon, version, reported metrics, and a replay link when Aimlabs marks one available. Open a run to see its details. The history keeps different modes, weapons, and versions distinct; its count is Aimlabs' task-run count, not a count of comparable benchmark attempts.
+
 ![Player Profile](./public/guide/player-profile.png)
 
 ## Task
@@ -33,9 +35,11 @@ The Task is Presented as such, the option to launch Aimlab and play as well as w
 
 ## Running on a VPS
 
-The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The public Vercel site uses the same leaderboard data through the read-only API at `aimlab-api.saibot.site`. `vercel.json` proxies only leaderboard requests to that API; other API paths are not exposed.
+The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The public Vercel site uses the read-only API at `aimlab-api.saibot.site` for leaderboards and bounded player run pages. `vercel.json` proxies those two API paths; other API paths are not exposed.
 
 The Node server serves the built site and paged Revosect and Voltaic leaderboards. The refresh command collects Aimlab scores into a resumable SQLite staging database, calculates ranks using the same benchmark functions as player profiles, then atomically publishes one database per benchmark level. It keeps the previous published database if Aimlab fails. Large levels take longer to backfill; until one completes, its API returns 503 and the site shows an error.
+
+`GET /api/profiles/:username/tasks/:taskId/runs?after=...` reads 12 public solo plays at a time from Aimlabs' current API. It returns only display fields, caches successful pages briefly, limits concurrent upstream requests, and pauses after a provider rate limit. Arbitrary play lookup requires authentication, so a run detail opens from its history page and retains that page's cursor in the URL. This endpoint does not download replay files.
 
 ```sh
 npm ci

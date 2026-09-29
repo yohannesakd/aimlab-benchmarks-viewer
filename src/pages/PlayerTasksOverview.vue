@@ -27,12 +27,13 @@
         v-model.trim="searchQuery"
         @change="handleQuery"
       />
-      <router-link
+      <div
         v-for="(task, index) in paginatedTaskList.data"
         :key="index"
         class="
           bg-slate-800
           border border-slate-800
+          relative
           min-h-[128px]
           px-4
           py-2
@@ -45,11 +46,9 @@
           transition
           hover:scale-[101%] hover:shadow-xl hover:border hover:border-slate-500
         "
-        :to="'/tasks/' + task.id"
       >
-        <h3 class="text-lg uppercase text-slate-100">
-          {{ task.name }}
-        </h3>
+        <router-link :to="'/tasks/' + encodeURIComponent(task.id)" :aria-label="`View ${task.name} leaderboard`" class="absolute inset-0"></router-link>
+        <h3 class="text-lg uppercase text-slate-100">{{ task.name }}</h3>
         <p>
           <span class="text-sm text-blue-100">High Score :</span>
           {{ task.maxScore }}
@@ -57,7 +56,8 @@
         <p>
           <span class="text-sm text-blue-100">Plays : </span>{{ task.count }}
         </p>
-      </router-link>
+        <router-link :to="`/profile/${encodeURIComponent($route.params.username)}/tasks/${encodeURIComponent(task.id)}/runs`" class="relative z-10 text-mainCyan hover:text-white mt-2 text-sm self-start">View runs →</router-link>
+      </div>
     </div>
     <!-- Paginator -->
     <div class="max-w-max mx-auto flex gap-1 items-center mb-4">
