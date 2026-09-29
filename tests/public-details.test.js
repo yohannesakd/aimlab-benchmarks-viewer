@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getPublicProfileDetails, getPublicTaskDetails } from "../server/public-details.js";
+import { getPublicActivity, getPublicProfileDetails, getPublicTaskDetails } from "../server/public-details.js";
 
 test("public profile details preserve zero and absence", async () => {
   const originalFetch = globalThis.fetch;
@@ -51,6 +51,35 @@ test("public scenario details keep task and asset versions distinct", async () =
     assert.equal(details.assetVersion, "0.02");
     assert.equal(details.weaponId, "Fixture_Weapon");
     assert.equal(JSON.stringify(details).includes("secret"), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("public activity counts unique active days across a month boundary", async () => {
+  const originalFetch = globalThis.fetch;
+  const now = new Date();
+  const firstThisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const lastMonthDay = new Date(firstThisMonth.getTime() - 86_400_000).toISOString().slice(0, 10);
+  const firstDay = firstThisMonth.toISOString().slice(0, 10);
+  const olderDay = new Date(Date.UTC(now.getUTCFullYear() - 2, now.getUTCMonth(), now.getUTCDate())).toISOString().slice(0, 10);
+  globalThis.fetch = async () => new Response(JSON.stringify({ data: { Trainer: {
+    aimlabProfile: {
+      username: "FixtureActivity",
+      activity: { ranges: [
+        { startDate: lastMonthDay, endDate: firstDay },
+        { startDate: firstDay, endDate: firstDay },
+        { startDate: olderDay, endDate: olderDay },
+      ] },
+      learningStats: { stars: 3, completedPlans: 1 },
+    },
+  } } }), { status: 200 });
+  try {
+    const activity = await getPublicActivity("FixtureActivity");
+    assert.equal(activity.activeDays, 3);
+    assert.equal(activity.recentActiveDays, 2);
+    assert.equal(activity.years.reduce((sum, year) => sum + year.activeDays, 0), 3);
+    assert.deepEqual(activity.learning, { stars: 3, completedPlans: 1 });
   } finally {
     globalThis.fetch = originalFetch;
   }

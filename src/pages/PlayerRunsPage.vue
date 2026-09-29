@@ -6,7 +6,7 @@
         <p class="eyebrow">Run history</p>
         <h1 class="page-title">{{ history?.taskName || taskId }}</h1>
         <p v-if="history" class="page-subtitle">
-          {{ history.totalCount.toLocaleString() }} solo task runs reported by Aimlabs
+          {{ history.totalCount.toLocaleString() }} solo runs
         </p>
       </div>
       <router-link :to="`/tasks/${encodeURIComponent(taskId)}/leaderboard`" class="btn-secondary">
@@ -41,7 +41,7 @@
           </section>
         </div>
         <div class="run-detail-footer">
-          <p class="result-meta">Aimlabs reports these values; metric units and meanings can vary by scenario.</p>
+          <p class="result-meta">Statistics come from Aimlabs. Their definitions can vary by scenario.</p>
           <a v-if="selectedRun.replayAvailable" :href="replayLink(selectedRun.id)" target="_blank" rel="noopener noreferrer" class="text-link run-replay"><play-icon class="h-5 w-5" /> Open replay in Aimlabs</a>
         </div>
       </section>
@@ -49,13 +49,15 @@
 
       <section v-if="history.runs.length" class="panel run-list">
         <div class="run-row run-row-head">
-          <span>Score</span><span>Weapon</span><span>Date</span><span>Run</span>
+          <span>Score</span><span class="run-date">Date</span><span class="run-action">Run</span>
         </div>
         <div v-for="run in history.runs" :key="run.id" class="run-row">
           <strong>{{ run.score.toLocaleString() }} points</strong>
-          <span class="run-weapon muted">{{ run.weaponId || 'Unknown' }}</span>
-          <span class="run-date muted">{{ formatDate(run.endedAt || run.startedAt) }}</span>
-          <router-link :to="{ path: $route.path, query: { ...pageQuery, run: run.id } }" class="text-link">View details →</router-link>
+          <time class="run-date muted" :datetime="run.endedAt || run.startedAt">
+            <span>{{ formatDay(run.endedAt || run.startedAt) }}</span>
+            <small>{{ formatClock(run.endedAt || run.startedAt) }}</small>
+          </time>
+          <router-link :to="{ path: $route.path, query: { ...pageQuery, run: run.id } }" class="text-link run-action">View details →</router-link>
         </div>
       </section>
       <div v-else class="panel status-panel">No solo runs were returned for this task.</div>
@@ -64,7 +66,7 @@
         <router-link v-if="afterCursor" :to="{ path: $route.path }" class="btn-secondary">First page</router-link>
         <router-link v-if="history.pageInfo.hasNextPage && history.pageInfo.endCursor" :to="{ path: $route.path, query: { after: history.pageInfo.endCursor } }" class="btn-secondary">Older runs →</router-link>
       </div>
-      <p class="result-meta run-note">Runs are ordered by Aimlabs. Scores may use different weapons or scenario settings.</p>
+      <p class="result-meta run-note">Runs are shown in Aimlabs order. Scores may reflect different scenario settings.</p>
     </template>
   </main>
 </template>
@@ -84,19 +86,19 @@
 .run-note { margin-top: 17px; line-height: 1.6; }
 .run-replay { display: inline-flex; align-items: center; gap: 8px; }
 .run-list { overflow: hidden; }
-.run-row { display: grid; grid-template-columns: minmax(140px, 1fr) minmax(180px, 1.2fr) minmax(190px, 1fr) auto; align-items: center; gap: 12px; padding: 13px 18px; border-top: 1px solid var(--line); font-size: .84rem; }
+.run-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, 1fr) auto; align-items: center; gap: 18px; padding: 11px 18px; border-top: 1px solid var(--line); font-size: .84rem; }
 .run-row-head { border-top: 0; background: var(--raised); color: var(--muted); font-size: .76rem; font-weight: 600; }
-.run-weapon { overflow-wrap: anywhere; }
 .run-date { text-align: right; }
+.run-date small { display: block; font-size: .72rem; }
+.run-action { text-align: right; }
 .run-pagination { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 @media (max-width: 800px) {
   .run-detail-body { grid-template-columns: 1fr; gap: 20px; }
   .run-row-head { display: none; }
-  .run-row { grid-template-columns: minmax(0, 1fr) auto; gap: 7px 12px; }
+  .run-row { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
   .run-row > :first-child { grid-column: 1; grid-row: 1; }
-  .run-row > :nth-child(2) { grid-column: 1; grid-row: 2; }
-  .run-row > :nth-child(3) { grid-column: 2; grid-row: 1; }
-  .run-row > :last-child { grid-column: 2; grid-row: 2; text-align: right; }
+  .run-row > :nth-child(2) { grid-column: 2; grid-row: 1; }
+  .run-row > :last-child { grid-column: 2; grid-row: 2; }
 }
 @media (max-width: 620px) { .run-performance { grid-template-columns: 1fr; } .run-date { font-size: .75rem; } }
 </style>
@@ -128,10 +130,10 @@ export default {
     runMetadata() {
       const run = this.selectedRun;
       if (!run) return [];
-      const details = [{ label: "Weapon", value: run.weaponId || "Unavailable" }];
-      if (run.weaponName && run.weaponName !== run.weaponId) details.push({ label: "Weapon name", value: run.weaponName });
+      const details = [];
       if (run.taskVersion !== null && run.taskVersion !== undefined && run.taskVersion !== "") details.push({ label: "Task version", value: run.taskVersion });
       if (Number.isFinite(run.duration)) details.push({ label: "Duration", value: `${Math.round(run.duration)} s` });
+      if (Number.isFinite(run.pauseDuration) && run.pauseDuration > 0) details.push({ label: "Time paused", value: `${Math.round(run.pauseDuration)} s` });
       if (run.inputDevice?.length) details.push({ label: "Input device", value: run.inputDevice.join(", ") });
       if (run.gridshieldStatus) details.push({ label: "Run status", value: run.gridshieldStatus.replaceAll("_", " ").toLowerCase().replace(/^./, (letter) => letter.toUpperCase()) });
       if (run.appVersion) details.push({ label: "App version", value: run.appVersion });
@@ -146,8 +148,8 @@ export default {
         ["hitsTotal", "Hits"], ["shotsTotal", "Shots"], ["missesTotal", "Misses"],
         ["killTotal", "Kills"], ["targetsTotal", "Targets"],
         ["headshots", "Headshots"], ["bodyshots", "Bodyshots"],
-        ["damageTotal", "Reported damage"], ["accTotal", "Reported accuracy"],
-        ["avgDist", "Average distance (reported)"], ["timePerKill", "Time per kill (reported)"],
+        ["damageTotal", "Damage"], ["accTotal", "Accuracy"],
+        ["avgDist", "Average distance"], ["timePerKill", "Time per kill"],
       ];
       for (const [key, label] of metrics) {
         if (key === "timePerKill" && !run.metrics.killTotal) continue;
@@ -168,6 +170,12 @@ export default {
   methods: {
     formatDate(value) {
       return new Date(value).toLocaleString();
+    },
+    formatDay(value) {
+      return new Date(value).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    },
+    formatClock(value) {
+      return new Date(value).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
     },
     replayLink(playId) {
       return replayDeepLink(playId);

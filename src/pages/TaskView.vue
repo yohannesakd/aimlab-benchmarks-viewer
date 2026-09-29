@@ -13,11 +13,11 @@
           <a :href="taskLink" class="btn-primary" target="_blank" rel="noopener noreferrer"><play-icon class="h-5 w-5"></play-icon>Play task</a>
         </div>
         <dl v-if="taskDetails" class="task-facts">
-          <div><dt>Style</dt><dd>{{ taskDetails.style || 'Not reported' }}</dd></div>
-          <div><dt>Duration</dt><dd>{{ Number.isFinite(taskDetails.durationSeconds) ? `${taskDetails.durationSeconds} s` : 'Not reported' }}</dd></div>
-          <div><dt>Task version</dt><dd>{{ taskDetails.taskVersion ?? 'Not reported' }}</dd></div>
-          <div><dt>Asset version</dt><dd>{{ taskDetails.assetVersion || 'Not reported' }}</dd></div>
-          <div><dt>Weapon</dt><dd>{{ taskDetails.weaponId || 'Not reported' }}</dd></div>
+          <div><dt>Style</dt><dd>{{ taskDetails.style || 'Unavailable' }}</dd></div>
+          <div><dt>Duration</dt><dd>{{ Number.isFinite(taskDetails.durationSeconds) ? `${taskDetails.durationSeconds} s` : 'Unavailable' }}</dd></div>
+          <div><dt>Task version</dt><dd>{{ taskDetails.taskVersion ?? 'Unavailable' }}</dd></div>
+          <div><dt>Asset version</dt><dd>{{ taskDetails.assetVersion || 'Unavailable' }}</dd></div>
+          <div><dt>Weapon</dt><dd>{{ taskDetails.weaponId || 'Unavailable' }}</dd></div>
           <div><dt>Created</dt><dd>{{ formatDate(taskDetails.createdAt) }}</dd></div>
           <div><dt>Updated</dt><dd>{{ formatDate(taskDetails.updatedAt) }}</dd></div>
         </dl>
@@ -155,9 +155,9 @@ export default {
   },
   methods: {
     formatDate(value) {
-      if (!value) return "Not reported";
+      if (!value) return "Unavailable";
       const date = new Date(value);
-      return Number.isNaN(date.getTime()) ? "Not reported" : date.toLocaleDateString();
+      return Number.isNaN(date.getTime()) ? "Unavailable" : date.toLocaleDateString();
     },
     async loadTaskDetails(taskId) {
       const version = ++this.detailsVersion;

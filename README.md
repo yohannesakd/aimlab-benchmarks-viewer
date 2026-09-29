@@ -45,7 +45,7 @@ The Node server serves the built site and paged Revosect and Voltaic leaderboard
 
 `GET /api/profiles/:username/tasks/:taskId/runs?after=...` reads 12 public solo plays at a time from Aimlabs' current API. It returns only display fields, caches successful pages briefly, limits concurrent upstream requests, and pauses after a provider rate limit. Arbitrary play lookup requires authentication, so a run detail opens from its history page and retains that page's cursor in the URL. This endpoint does not download replay files.
 
-`GET /api/profiles/:username/details` and `GET /api/tasks/:taskId/details` add public activity and scenario metadata from the current Aimlabs API. They return selected display fields and cache them for one minute. The existing profile and task views still load their base data independently.
+`GET /api/profiles/:username/details` and `GET /api/tasks/:taskId/details` add public activity and scenario metadata from the current Aimlabs API. `GET /api/profiles/:username/activity` supplies yearly and recent active-day counts plus learning-plan totals when the Activity tab opens. These routes return selected display fields and cache them for one minute. The existing profile and task views still load their base data independently.
 
 ```sh
 npm ci
