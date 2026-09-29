@@ -6,7 +6,7 @@ Checked **2026-09-29** against the public `https://api.aimlab.gg/graphql` endpoi
 
 | Surface | Current source | Additional useful data |
 | --- | --- | --- |
-| Player profile | Existing profile/aggregate queries plus bounded public details in [`server/public-details.js`](../server/public-details.js) | Full activity calendar, score trend, best/worst tasks |
+| Player profile | Existing profile/aggregate queries plus public details and yearly activity counts in [`server/public-details.js`](../server/public-details.js) | Comparable score trends, best/worst tasks, session timing |
 | Task page | Basic task/leaderboard queries plus style, duration, task and asset versions from the public details API | Verified scoring configuration, asset contents, leaderboard schema |
 | Task run page | Bounded cursor pages from [`server/player-runs.js`](../server/player-runs.js), with score identity and allowlisted run metrics | Replay telemetry, comparable-run trends, populated insights if access permits |
 | Task search | Name search through `aimlab.tasks` | Creator Studio tasks, asset types, playlists and published versions |

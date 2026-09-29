@@ -82,6 +82,7 @@ export default {
       detailsVersion: 0,
       tabs: {
         Overview: "profile-overview",
+        Activity: "profile-activity",
         Voltaic: "vt-benches",
         Revosect: "ra-benches",
       },

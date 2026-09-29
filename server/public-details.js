@@ -31,6 +31,18 @@ const taskQuery = `
   }
 `;
 
+const activityQuery = `
+  query PublicPlayerActivity($username: String!) {
+    Trainer {
+      aimlabProfile(username: $username) {
+        username
+        activity(interval: DAILY) { ranges { startDate endDate } }
+        learningStats { stars completedPlans }
+      }
+    }
+  }
+`;
+
 const cache = new Map();
 
 function send(response, status, body, headers = {}) {
@@ -92,6 +104,60 @@ function publicTask(trainer) {
   };
 }
 
+function publicActivity(trainer) {
+  const profile = trainer.aimlabProfile;
+  if (!profile) return null;
+  const now = new Date();
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const recentStart = Date.UTC(now.getUTCFullYear() - 1, now.getUTCMonth(), now.getUTCDate());
+  const dayMs = 86_400_000;
+  const intervals = [];
+  for (const range of profile.activity?.ranges || []) {
+    const start = Date.parse(`${range.startDate}T00:00:00Z`);
+    const end = Date.parse(`${range.endDate}T00:00:00Z`);
+    if (Number.isFinite(start) && Number.isFinite(end) && start <= end && start <= today) {
+      intervals.push([start, Math.min(end, today)]);
+    }
+  }
+  intervals.sort((a, b) => a[0] - b[0]);
+  const merged = [];
+  for (const [start, end] of intervals) {
+    const last = merged.at(-1);
+    if (last && start <= last[1] + dayMs) last[1] = Math.max(last[1], end);
+    else merged.push([start, end]);
+  }
+  let activeDays = 0;
+  let recentActiveDays = 0;
+  const daysByYear = new Map();
+  for (const [start, end] of merged) {
+    activeDays += Math.round((end - start) / dayMs) + 1;
+    if (end >= recentStart) recentActiveDays += Math.round((end - Math.max(start, recentStart)) / dayMs) + 1;
+    for (let cursor = start; cursor <= end;) {
+      const year = new Date(cursor).getUTCFullYear();
+      const nextYear = Date.UTC(year + 1, 0, 1);
+      const yearEnd = Math.min(end, nextYear - dayMs);
+      daysByYear.set(year, (daysByYear.get(year) || 0) + Math.round((yearEnd - cursor) / dayMs) + 1);
+      cursor = nextYear;
+    }
+  }
+  const firstYear = merged.length ? new Date(merged[0][0]).getUTCFullYear() : now.getUTCFullYear();
+  const years = Array.from({ length: now.getUTCFullYear() - firstYear + 1 }, (_, index) => ({
+    year: firstYear + index,
+    activeDays: daysByYear.get(firstYear + index) || 0,
+  }));
+  return {
+    username: profile.username,
+    years,
+    activeDays,
+    recentActiveDays,
+    learning: {
+      stars: profile.learningStats?.stars ?? null,
+      completedPlans: profile.learningStats?.completedPlans ?? null,
+    },
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
 export function getPublicProfileDetails(username) {
   return requestDetails(`profile:${username}`, profileQuery, { username }, publicProfile);
 }
@@ -100,28 +166,34 @@ export function getPublicTaskDetails(taskId) {
   return requestDetails(`task:${taskId}`, taskQuery, { taskId }, publicTask);
 }
 
+export function getPublicActivity(username) {
+  return requestDetails(`activity:${username}`, activityQuery, { username }, publicActivity);
+}
+
 export async function handlePublicDetailsRequest(request, response, pathname) {
   const profileMatch = pathname.match(/^\/api\/profiles\/([^/]+)\/details$/);
+  const activityMatch = pathname.match(/^\/api\/profiles\/([^/]+)\/activity$/);
   const taskMatch = pathname.match(/^\/api\/tasks\/([^/]+)\/details$/);
-  if (!profileMatch && !taskMatch) return false;
+  if (!profileMatch && !activityMatch && !taskMatch) return false;
   if (request.method !== "GET") {
     send(response, 405, { error: "Method not allowed" });
     return true;
   }
   let id;
   try {
-    id = decodeURIComponent((profileMatch || taskMatch)[1]);
+    id = decodeURIComponent((profileMatch || activityMatch || taskMatch)[1]);
   } catch {
     send(response, 400, { error: "Invalid path" });
     return true;
   }
-  const limit = profileMatch ? 64 : 256;
+  const limit = taskMatch ? 256 : 64;
   if (!id || id.length > limit || /[\x00-\x1f]/.test(id)) {
     send(response, 400, { error: "Invalid public details request" });
     return true;
   }
   try {
-    const result = profileMatch ? await getPublicProfileDetails(id) : await getPublicTaskDetails(id);
+    const result = profileMatch ? await getPublicProfileDetails(id)
+      : activityMatch ? await getPublicActivity(id) : await getPublicTaskDetails(id);
     send(response, 200, result, { "Cache-Control": "public, max-age=60" });
   } catch (error) {
     const status = error.status || 502;
