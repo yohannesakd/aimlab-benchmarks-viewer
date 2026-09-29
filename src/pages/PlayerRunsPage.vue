@@ -26,31 +26,35 @@
           </div>
           <router-link :to="{ path: $route.path, query: pageQuery }" class="text-link">Close</router-link>
         </div>
-        <div class="run-metrics">
-          <div v-for="item in runDetails" :key="item.label" class="run-metric">
-            <span class="result-meta">{{ item.label }}</span>
-            <strong>{{ item.value }}</strong>
-          </div>
+        <div class="run-detail-body">
+          <section class="run-detail-section">
+            <h3>Run</h3>
+            <dl class="run-facts">
+              <div v-for="item in runMetadata" :key="item.label"><dt>{{ item.label }}</dt><dd>{{ item.value }}</dd></div>
+            </dl>
+          </section>
+          <section class="run-detail-section">
+            <h3>Performance</h3>
+            <dl class="run-facts run-performance">
+              <div v-for="item in runPerformance" :key="item.label"><dt>{{ item.label }}</dt><dd>{{ item.value }}</dd></div>
+            </dl>
+          </section>
         </div>
-        <p class="result-meta run-note">These are Aimlabs' reported run values. Some metric units and meanings vary by scenario.</p>
-        <a v-if="selectedRun.replayAvailable" :href="replayLink(selectedRun.id)" target="_blank" rel="noopener noreferrer" class="text-link run-replay">
-          <play-icon class="h-5 w-5" /> Open replay in Aimlabs
-        </a>
+        <div class="run-detail-footer">
+          <p class="result-meta">Aimlabs reports these values; metric units and meanings can vary by scenario.</p>
+          <a v-if="selectedRun.replayAvailable" :href="replayLink(selectedRun.id)" target="_blank" rel="noopener noreferrer" class="text-link run-replay"><play-icon class="h-5 w-5" /> Open replay in Aimlabs</a>
+        </div>
       </section>
       <div v-else-if="selectedRunId" class="panel status-panel run-detail">This run is not on the selected history page. Open it from the run list.</div>
 
       <section v-if="history.runs.length" class="panel run-list">
         <div class="run-row run-row-head">
-          <span>Date</span><span>Score</span><span>Mode</span><span>Weapon</span><span>Run</span>
+          <span>Score</span><span>Weapon</span><span>Date</span><span>Run</span>
         </div>
         <div v-for="run in history.runs" :key="run.id" class="run-row">
-          <span class="muted">{{ formatDate(run.endedAt || run.startedAt) }}</span>
           <strong>{{ run.score.toLocaleString() }} points</strong>
-          <span>{{ modeLabel(run.convertedMode) }}</span>
-          <span class="run-weapon muted">
-            {{ run.weaponId || 'Unknown' }}
-            <small>Version {{ run.taskVersion || 'unknown' }}</small>
-          </span>
+          <span class="run-weapon muted">{{ run.weaponId || 'Unknown' }}</span>
+          <span class="run-date muted">{{ formatDate(run.endedAt || run.startedAt) }}</span>
           <router-link :to="{ path: $route.path, query: { ...pageQuery, run: run.id } }" class="text-link">View details →</router-link>
         </div>
       </section>
@@ -60,7 +64,7 @@
         <router-link v-if="afterCursor" :to="{ path: $route.path }" class="btn-secondary">First page</router-link>
         <router-link v-if="history.pageInfo.hasNextPage && history.pageInfo.endCursor" :to="{ path: $route.path, query: { after: history.pageInfo.endCursor } }" class="btn-secondary">Older runs →</router-link>
       </div>
-      <p class="result-meta run-note">Runs are ordered by Aimlabs. Mode, weapon and version are shown per run so different settings are not treated as comparable scores.</p>
+      <p class="result-meta run-note">Runs are ordered by Aimlabs. Scores may use different weapons or scenario settings.</p>
     </template>
   </main>
 </template>
@@ -69,22 +73,32 @@
 .run-heading, .run-detail-heading { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 18px; }
 .run-heading { margin-top: 20px; }
 .run-detail { padding: 20px; margin-bottom: 18px; }
-.run-metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-top: 20px; }
-.run-metric { min-width: 0; padding: 12px; border: 1px solid var(--line); background: var(--raised); }
-.run-metric strong { display: block; margin-top: 5px; overflow-wrap: anywhere; }
+.run-detail-body { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr); gap: 30px; margin-top: 20px; }
+.run-detail-section h3 { padding-bottom: 8px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: .76rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+.run-facts { margin: 0; }
+.run-facts > div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: .8rem; }
+.run-facts dt { color: var(--muted); }
+.run-facts dd { margin: 0; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+.run-performance { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+.run-detail-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 24px; margin-top: 18px; }
 .run-note { margin-top: 17px; line-height: 1.6; }
-.run-replay { display: inline-flex; align-items: center; gap: 8px; margin-top: 17px; }
+.run-replay { display: inline-flex; align-items: center; gap: 8px; }
 .run-list { overflow: hidden; }
-.run-row { display: grid; grid-template-columns: minmax(170px, 1.4fr) minmax(110px, .8fr) minmax(80px, .7fr) minmax(130px, 1fr) minmax(110px, .7fr); align-items: center; gap: 12px; padding: 14px 18px; border-top: 1px solid var(--line); font-size: .84rem; }
+.run-row { display: grid; grid-template-columns: minmax(140px, 1fr) minmax(180px, 1.2fr) minmax(190px, 1fr) auto; align-items: center; gap: 12px; padding: 13px 18px; border-top: 1px solid var(--line); font-size: .84rem; }
 .run-row-head { border-top: 0; background: var(--raised); color: var(--muted); font-size: .76rem; font-weight: 600; }
 .run-weapon { overflow-wrap: anywhere; }
-.run-weapon small { display: block; font-size: .72rem; }
+.run-date { text-align: right; }
 .run-pagination { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 @media (max-width: 800px) {
+  .run-detail-body { grid-template-columns: 1fr; gap: 20px; }
   .run-row-head { display: none; }
-  .run-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 12px; }
-  .run-row > :first-child, .run-row > :last-child { grid-column: 1 / -1; }
+  .run-row { grid-template-columns: minmax(0, 1fr) auto; gap: 7px 12px; }
+  .run-row > :first-child { grid-column: 1; grid-row: 1; }
+  .run-row > :nth-child(2) { grid-column: 1; grid-row: 2; }
+  .run-row > :nth-child(3) { grid-column: 2; grid-row: 1; }
+  .run-row > :last-child { grid-column: 2; grid-row: 2; text-align: right; }
 }
+@media (max-width: 620px) { .run-performance { grid-template-columns: 1fr; } .run-date { font-size: .75rem; } }
 </style>
 
 <script>
@@ -111,20 +125,23 @@ export default {
     requestKey() {
       return JSON.stringify([this.username, this.taskId, this.afterCursor]);
     },
-    runDetails() {
+    runMetadata() {
       const run = this.selectedRun;
       if (!run) return [];
-      const details = [
-        { label: "Mode", value: `${this.modeLabel(run.convertedMode)} (raw ${run.mode})` },
-        { label: "Weapon", value: run.weaponId || "Unavailable" },
-        { label: "Task version", value: run.taskVersion || "Unavailable" },
-        { label: "Recorded duration", value: Number.isFinite(run.duration) ? `${Math.round(run.duration)} s` : "Unavailable" },
-        { label: "Input device", value: run.inputDevice?.join(", ") || "Unavailable" },
-        { label: "Gridshield status", value: run.gridshieldStatus ? run.gridshieldStatus.replaceAll("_", " ").toLowerCase() : "Unavailable" },
-      ];
+      const details = [{ label: "Weapon", value: run.weaponId || "Unavailable" }];
       if (run.weaponName && run.weaponName !== run.weaponId) details.push({ label: "Weapon name", value: run.weaponName });
+      if (run.taskVersion !== null && run.taskVersion !== undefined && run.taskVersion !== "") details.push({ label: "Task version", value: run.taskVersion });
+      if (Number.isFinite(run.duration)) details.push({ label: "Duration", value: `${Math.round(run.duration)} s` });
+      if (run.inputDevice?.length) details.push({ label: "Input device", value: run.inputDevice.join(", ") });
+      if (run.gridshieldStatus) details.push({ label: "Run status", value: run.gridshieldStatus.replaceAll("_", " ").toLowerCase().replace(/^./, (letter) => letter.toUpperCase()) });
       if (run.appVersion) details.push({ label: "App version", value: run.appVersion });
       if (run.analyticsVersion) details.push({ label: "Analytics version", value: run.analyticsVersion });
+      return details;
+    },
+    runPerformance() {
+      const run = this.selectedRun;
+      if (!run) return [];
+      const details = [];
       const metrics = [
         ["hitsTotal", "Hits"], ["shotsTotal", "Shots"], ["missesTotal", "Misses"],
         ["killTotal", "Kills"], ["targetsTotal", "Targets"],
@@ -151,9 +168,6 @@ export default {
   methods: {
     formatDate(value) {
       return new Date(value).toLocaleString();
-    },
-    modeLabel(mode) {
-      return mode === 0 ? "Normal" : `Mode ${mode}`;
     },
     replayLink(playId) {
       return replayDeepLink(playId);

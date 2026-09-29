@@ -8,23 +8,21 @@
         <button type="button" class="btn-secondary" @click="handleSwitchTask">Switch task</button>
       </div>
       <div class="panel task-summary">
-        <div><h2 class="section-title">About this task</h2><p class="muted">{{ currentTask.description || "No description available." }}</p></div>
-        <a :href="taskLink" class="btn-primary" target="_blank" rel="noopener noreferrer"><play-icon class="h-5 w-5"></play-icon>Play task</a>
-      </div>
-      <section v-if="taskDetails" class="panel scenario-details">
-        <div class="panel-header"><div><h2 class="section-title">Scenario details</h2><p class="result-meta">Task and asset versions are separate Aimlabs records.</p></div></div>
-        <div class="scenario-facts">
-          <div><span class="result-meta">Style</span><strong>{{ taskDetails.style || 'Not reported' }}</strong></div>
-          <div><span class="result-meta">Duration</span><strong>{{ Number.isFinite(taskDetails.durationSeconds) ? `${taskDetails.durationSeconds} s` : 'Not reported' }}</strong></div>
-          <div><span class="result-meta">Task version</span><strong>{{ taskDetails.taskVersion ?? 'Not reported' }}</strong></div>
-          <div><span class="result-meta">Asset version</span><strong>{{ taskDetails.assetVersion || 'Not reported' }}</strong></div>
-          <div><span class="result-meta">Weapon ID</span><strong>{{ taskDetails.weaponId || 'Not reported' }}</strong></div>
-          <div><span class="result-meta">Mode code</span><strong>{{ taskDetails.mode ?? 'Not reported' }}</strong></div>
-          <div><span class="result-meta">Created</span><strong>{{ formatDate(taskDetails.createdAt) }}</strong></div>
-          <div><span class="result-meta">Updated</span><strong>{{ formatDate(taskDetails.updatedAt) }}</strong></div>
+        <div class="task-summary-main">
+          <div><h2 class="section-title">About this task</h2><p class="muted">{{ currentTask.description || "No description available." }}</p></div>
+          <a :href="taskLink" class="btn-primary" target="_blank" rel="noopener noreferrer"><play-icon class="h-5 w-5"></play-icon>Play task</a>
         </div>
-      </section>
-      <div v-else-if="detailsError" class="panel status-panel scenario-details" role="status">Additional scenario details are unavailable right now.</div>
+        <dl v-if="taskDetails" class="task-facts">
+          <div><dt>Style</dt><dd>{{ taskDetails.style || 'Not reported' }}</dd></div>
+          <div><dt>Duration</dt><dd>{{ Number.isFinite(taskDetails.durationSeconds) ? `${taskDetails.durationSeconds} s` : 'Not reported' }}</dd></div>
+          <div><dt>Task version</dt><dd>{{ taskDetails.taskVersion ?? 'Not reported' }}</dd></div>
+          <div><dt>Asset version</dt><dd>{{ taskDetails.assetVersion || 'Not reported' }}</dd></div>
+          <div><dt>Weapon</dt><dd>{{ taskDetails.weaponId || 'Not reported' }}</dd></div>
+          <div><dt>Created</dt><dd>{{ formatDate(taskDetails.createdAt) }}</dd></div>
+          <div><dt>Updated</dt><dd>{{ formatDate(taskDetails.updatedAt) }}</dd></div>
+        </dl>
+        <p v-else-if="detailsError" class="result-meta task-details-error" role="status">Additional scenario details are unavailable right now.</p>
+      </div>
 
       <div v-if="isLoading" class="panel status-panel mt-4"><loading-spinner></loading-spinner></div>
       <div v-else-if="leaderboardError" class="panel status-panel mt-4" role="alert">{{ leaderboardError }}</div>
@@ -56,20 +54,23 @@
 </template>
 <style scoped>
 .task-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
-.task-summary { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px; }
+.task-summary-main { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px; }
 .task-summary p { margin-top: 6px; font-size: .86rem; line-height: 1.6; }
 .task-summary .btn-primary { flex: 0 0 auto; }
-.scenario-details { margin-top: 16px; }
-.scenario-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 16px 20px; }
-.scenario-facts > div { min-width: 0; padding: 12px; border: 1px solid var(--line); background: var(--raised); }
-.scenario-facts strong { display: block; margin-top: 5px; font-size: .9rem; overflow-wrap: anywhere; }
+.task-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(180px, 2fr) repeat(2, minmax(0, 1fr)); margin: 0; padding: 14px 20px; border-top: 1px solid var(--line); }
+.task-facts > div { min-width: 0; padding: 4px 12px; border-left: 1px solid var(--line); }
+.task-facts > div:first-child { padding-left: 0; border-left: 0; }
+.task-facts dt { color: var(--muted); font-size: .73rem; }
+.task-facts dd { margin: 4px 0 0; font-size: .84rem; font-weight: 600; overflow-wrap: anywhere; }
+.task-details-error { padding: 0 20px 16px; }
 .task-score-row { display: grid; grid-template-columns: 70px minmax(0, 1.5fr) 95px 80px 95px 85px; align-items: center; gap: 12px; min-height: 50px; padding: 9px 20px; border-bottom: 1px solid var(--line); font-size: .88rem; }
 .task-score-head { min-height: 40px; color: var(--muted); font-size: .78rem; }
 .task-score-value { font-weight: 600; font-variant-numeric: tabular-nums; }
 .task-replay { display: inline-flex; align-items: center; gap: 5px; }
 .task-score-row .player-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 800px) {
-  .scenario-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .task-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 0; }
+  .task-facts > div:nth-child(4n+1) { padding-left: 0; border-left: 0; }
   .task-score-row { grid-template-columns: 42px minmax(0, 1fr) auto; gap: 4px 10px; }
   .task-score-head { display: none; }
   .task-score-rank { grid-column: 1; grid-row: 1 / 3; }
@@ -78,7 +79,7 @@
   .task-score-hits, .task-score-accuracy { display: none; }
   .task-replay { grid-column: 2 / 4; grid-row: 2; font-size: .78rem; }
 }
-@media (max-width: 620px) { .task-intro, .task-summary { align-items: start; flex-direction: column; } .task-score-row { padding: 12px 14px; } .scenario-facts { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .task-intro, .task-summary-main { align-items: start; flex-direction: column; } .task-score-row { padding: 12px 14px; } .task-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 14px; } .task-facts > div:nth-child(2n+1) { padding-left: 0; border-left: 0; } }
 </style>
 
 <script>
