@@ -1,105 +1,50 @@
 <template>
-  <div class="px-[8%] relative">
-    <section class="py-8 flex items-start justify-between">
-      <base-card
-        v-if="isLoading"
-        class="grid place-items-center max-w-md py-5 px-10"
-      >
-        <loading-spinner></loading-spinner>
-      </base-card>
-      <base-card
-        v-else-if="loadError"
-        class="max-w-md py-5 px-10"
-      >{{ loadError }}</base-card>
-      <base-card
-        v-else
-        class="
-          bg-slate-700
-          text-gray-900
-          tracking-wide
-          p-8
-          flex flex-1
-          justify-between
-          gap-10
-          max-w-2xl
-        "
-      >
-        <div class="flex flex-col gap-4 w-[40%]">
-          <span class="block text-2xl font-semibold">{{
-            currentPlayerInfo.username
-          }}</span>
-          <span class="block"
-            >{{ currentPlayerInfo.rank }} -
-            {{ Math.floor(currentPlayerInfo.skill) }}</span
-          >
-
-          <progress-bar
-            class="w-40 h-5 bg-slate-200 rounded-sm"
-            :value="playerSkill"
-            :color="'bg-mainCyan'"
-          ></progress-bar>
-        </div>
-        <div class="flex flex-col flex-1 text-lg">
-          <span>Unique Tasks Played - {{ tasksPlayed }}</span>
-          <span>Total Play Count - {{ totalPlays }}</span>
-          <span
-            >VT Rank - {{ overallRankVT }}
-            <img
-              :src="`../../rank-img/${imagePath(overallRankVT)}_badge.png`"
-              class="h-5 inline"
-              alt=""
-          /></span>
-          <span
-            >rA Rank - {{ overallRankRA }}
-            <img
-              :src="`../../rank-img/ra/${imagePath(overallRankRA)}.png`"
-              class="h-5 inline"
-              alt=""
-          /></span>
-        </div>
-      </base-card>
-      <button
-        class="
-          right-0
-          border-2 border-slate-500
-          px-6
-          py-2
-          rounded
-          transition
-          hover:bg-slate-500
-        "
-        @click="handleSwitchProfile"
-      >
-        Switch Profile
-      </button>
-    </section>
-
-    <div v-if="!loadError" class="relative z-10" id="profile-nav">
-      <ul class="flex">
-        <li v-for="(tab, key) in tabs" :key="tab">
-          <router-link
-            class="
-              py-2
-              px-4
-              bg-slate-600
-              inline-block
-              border border-slate-600
-              hover:bg-slate-500
-            "
-            :to="{ name: tab }"
-          >
-            {{ key }}
-          </router-link>
-        </li>
-      </ul>
+  <main class="page-shell">
+    <div class="page-intro profile-heading">
+      <div>
+        <p class="eyebrow">Player overview</p>
+        <h1 class="page-title">Player profile</h1>
+      </div>
+      <button type="button" class="btn-secondary" @click="handleSwitchProfile">Switch profile</button>
     </div>
-    <router-view
-      v-if="!isLoading && !loadError"
-      :isLoading="isLoading"
-      class="border border-slate-600 bg-slate-900 rounded-b-md mb-10"
-    ></router-view>
-  </div>
+
+    <div v-if="isLoading" class="panel status-panel"><loading-spinner></loading-spinner></div>
+    <div v-else-if="loadError" class="panel status-panel" role="alert">{{ loadError }}</div>
+    <template v-else>
+      <div class="profile-summary">
+        <div class="panel profile-stat">
+          <dl>
+            <dt>Username</dt>
+            <dd class="profile-username">{{ currentPlayerInfo.username }}</dd>
+          </dl>
+          <p class="muted profile-aimlab">Aimlab {{ currentPlayerInfo.rank }} · {{ Math.floor(currentPlayerInfo.skill || 0) }} skill</p>
+          <progress-bar class="profile-progress" :value="playerSkill" color="bg-mainCyan"></progress-bar>
+        </div>
+        <div class="panel profile-stat"><dl><dt>Tasks played</dt><dd>{{ Number(tasksPlayed).toLocaleString() }}</dd></dl></div>
+        <div class="panel profile-stat"><dl><dt>Total plays</dt><dd>{{ Number(totalPlays).toLocaleString() }}</dd></dl></div>
+        <div class="panel profile-stat rank-summary">
+          <div><span class="muted">Revosect</span><span><img :src="'/rank-img/ra/' + imagePath(overallRankRA) + '.png'" alt="" />{{ overallRankRA }}</span></div>
+          <div><span class="muted">Voltaic</span><span><img :src="'/rank-img/' + imagePath(overallRankVT) + '_badge.png'" alt="" />{{ overallRankVT }}</span></div>
+        </div>
+      </div>
+      <nav class="tab-list" aria-label="Profile sections">
+        <router-link v-for="(tab, key) in tabs" :key="tab" class="tab-link" :to="{ name: tab }">{{ key }}</router-link>
+      </nav>
+      <router-view class="profile-content panel" :isLoading="isLoading"></router-view>
+    </template>
+  </main>
 </template>
+<style scoped>
+.profile-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.profile-username { overflow-wrap: anywhere; }
+.profile-aimlab { margin-top: 7px; font-size: .82rem; }
+.profile-progress { max-width: 260px; height: 6px; margin-top: 14px; background: var(--raised); }
+.rank-summary { display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
+.rank-summary > div { display: flex; flex-direction: column; gap: 3px; font-size: .78rem; }
+.rank-summary > div > span:last-child { display: flex; align-items: center; gap: 7px; font-size: .88rem; font-weight: 600; }
+.rank-summary img { width: 22px; height: 22px; object-fit: contain; }
+@media (max-width: 620px) { .profile-heading { align-items: start; flex-direction: column; } }
+</style>
 
 <script>
 import { mapGetters } from "vuex";

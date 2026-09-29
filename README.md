@@ -33,6 +33,10 @@ The Task is Presented as such, the option to launch Aimlab and play as well as w
 
 ![Task Search](./public/guide/task-overview.png)
 
+## Data inventory
+
+[Aimlabs API data inventory](./docs/aimlabs-data-inventory.md) records verified run, scenario, player, and replay fields, access limits, query examples, and the later server migration path.
+
 ## Running on a VPS
 
 The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The public Vercel site uses the read-only API at `aimlab-api.saibot.site` for leaderboards and bounded player run pages. `vercel.json` proxies those two API paths; other API paths are not exposed.

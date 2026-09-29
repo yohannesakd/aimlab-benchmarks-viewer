@@ -1,45 +1,57 @@
 <template>
-    <div class="space-y-10">
-        <base-card class="flex items-center gap-10">
-            <div>
-                <p class="mb-1 ml-1">Benchmark</p>
-                <dropdown class="relative" :selectedTab="{ label: benchmarks[benchmark] }">
-                    <li v-for="(name, index) in benchmarks" :key="name" class="w-full bg-slate-700 px-4 py-1 transition hover:bg-slate-500" @click="benchmark = index">{{ name }}</li>
-                </dropdown>
-            </div>
-            <div>
-                <p class="mb-1 ml-1">Category</p>
-                <dropdown class="relative" :selectedTab="{ label: categories[category] }">
-                    <li v-for="(name, index) in categories" :key="name" class="w-full bg-slate-700 px-4 py-1 transition hover:bg-slate-500" @click="category = index">{{ name }}</li>
-                </dropdown>
-            </div>
-            <div v-if="category !== 3">
-                <p class="mb-1 ml-1">Sub-Category</p>
-                <dropdown class="relative" :selectedTab="{ label: subCategories[category][subCategory] }">
-                    <li v-for="(name, index) in subCategories[category]" :key="name" class="w-full bg-slate-700 px-4 py-1 transition hover:bg-slate-500" @click="subCategory = index">{{ name }}</li>
-                </dropdown>
-            </div>
-        </base-card>
-
-        <div v-if="loading" class="mb-16 flex items-center justify-center rounded-sm border border-slate-600 bg-slate-900 py-10"><loading-spinner></loading-spinner></div>
-        <div v-else-if="error" class="rounded-sm border border-slate-600 bg-slate-900 p-4" role="alert">{{ error }}</div>
-        <div v-else class="rounded-sm border border-slate-600 bg-slate-900">
-            <div class="mx-2 mt-2 grid grid-cols-4 bg-slate-600 px-6 py-2"><p>Rank</p><p>Name</p><p>Energy</p><p>Overall Rank</p></div>
-            <router-link v-for="(player, index) in pageData.players" :key="player.username" class="mx-2 mt-1 grid grid-cols-4 bg-slate-700 px-6 py-2" :to="'/profile/' + player.username + '/voltaic'">
-                <p>{{ (page - 1) * 25 + index + 1 }}</p>
-                <p>{{ player.username }}</p>
-                <p>{{ player.selectedPoints }}</p>
-                <p class="flex items-center space-x-2"><img :src="getImagePath(player.overallRank)" alt="" class="inline-block h-6 w-6" /><span>{{ player.overallRank }}</span></p>
-            </router-link>
-            <div class="mx-auto my-4 flex max-w-max items-center gap-1">
-                <button type="button" class="bg-slate-700 px-3 py-2.5 disabled:text-slate-500" :disabled="page <= 1" @click="page--"><chevron-icon direction="left" class="h-5 w-5"></chevron-icon></button>
-                <span class="bg-slate-700 px-4 py-2">{{ page }} / {{ pageData.pageCount || 1 }}</span>
-                <button type="button" class="bg-slate-700 px-3 py-2.5 disabled:text-slate-500" :disabled="page >= pageData.pageCount" @click="page++"><chevron-icon direction="right" class="h-5 w-5"></chevron-icon></button>
-                <input type="number" min="1" :max="pageData.pageCount" v-model.number="goToPageInput" @keydown.enter="goToPage" class="ml-2 w-14 bg-slate-600 py-2 text-center outline-none ring-inset ring-slate-300 transition focus:ring-2" />
-                <button type="button" class="w-10 bg-slate-600 py-2 transition hover:bg-slate-500" @click="goToPage">Go</button>
-            </div>
-        </div>
+  <section class="space-y-4">
+    <div class="panel filter-bar">
+      <div>
+        <label class="field-label">Level</label>
+        <dropdown :selectedTab="{ label: benchmarks[benchmark] }">
+          <li v-for="(name, index) in benchmarks" :key="name" @click="benchmark = index">{{ name }}</li>
+        </dropdown>
+      </div>
+      <div>
+        <label class="field-label">Category</label>
+        <dropdown :selectedTab="{ label: categories[category] }">
+          <li v-for="(name, index) in categories" :key="name" @click="category = index">{{ name }}</li>
+        </dropdown>
+      </div>
+      <div v-if="category !== 3">
+        <label class="field-label">Subcategory</label>
+        <dropdown :selectedTab="{ label: subCategories[category][subCategory] }">
+          <li v-for="(name, index) in subCategories[category]" :key="name" @click="subCategory = index">{{ name }}</li>
+        </dropdown>
+      </div>
+      <span class="filter-status">Refreshed daily</span>
     </div>
+
+    <div v-if="loading" class="panel status-panel" aria-live="polite"><loading-spinner></loading-spinner></div>
+    <div v-else-if="error" class="panel status-panel" role="alert">{{ error }}</div>
+    <div v-else class="panel leaderboard-panel">
+      <h2 class="leaderboard-heading">Voltaic · {{ benchmarks[benchmark] }}</h2>
+      <div class="leaderboard-row leaderboard-row--head" aria-hidden="true">
+        <span>Rank</span><span>Player</span><span>Energy</span><span>Overall rank</span>
+      </div>
+      <router-link
+        v-for="(player, index) in pageData.players"
+        :key="index"
+        class="leaderboard-row leaderboard-row--player"
+        :to="'/profile/' + player.username + '/voltaic'"
+      >
+        <span>{{ (page - 1) * 25 + index + 1 }}</span>
+        <span class="player-name">{{ player.username }}</span>
+        <span class="points">{{ player.selectedPoints }}</span>
+        <span class="rank-badge"><img :src="getImagePath(player.overallRank)" alt="" /><span>{{ player.overallRank }}</span></span>
+      </router-link>
+      <div class="pagination">
+        <span>Showing {{ (page - 1) * 25 + 1 }}–{{ Math.min((page - 1) * 25 + pageData.players.length, pageData.total || 0) }} of {{ (pageData.total || 0).toLocaleString() }} players</span>
+        <div class="pagination-controls">
+          <button type="button" class="page-button" :disabled="page <= 1" aria-label="Previous page" @click="page--"><chevron-icon direction="left" class="h-4 w-4"></chevron-icon></button>
+          <span class="page-button active">{{ page }} / {{ pageData.pageCount || 1 }}</span>
+          <button type="button" class="page-button" :disabled="page >= pageData.pageCount" aria-label="Next page" @click="page++"><chevron-icon direction="right" class="h-4 w-4"></chevron-icon></button>
+          <input class="page-input" type="number" min="1" :max="pageData.pageCount" aria-label="Go to page" v-model.number="goToPageInput" @keydown.enter="goToPage" />
+          <button type="button" class="page-button" @click="goToPage">Go</button>
+        </div>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script>
@@ -109,7 +121,7 @@ export default {
             this.goToPageInput = null;
         },
         getImagePath(rank) {
-            return `../../rank-img/${rank.replace(/ /g, "").toLowerCase()}_badge.png`;
+            return `/rank-img/${rank.replace(/ /g, "").toLowerCase()}_badge.png`;
         },
     },
     mounted() { this.loadLeaderboard(); },

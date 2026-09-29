@@ -1,39 +1,17 @@
 <template>
-  <div class="container px-[8%] space-y-4 mb-10">
-    <base-card class="mt-4 flex gap-4">
-      <router-link
-        :to="{ name: 'ra-leaderboards' }"
-        class="
-          border-2 border-slate-500
-          px-6
-          py-2
-          rounded-sm
-          transition
-          hover:bg-slate-500
-          inline-block
-        "
-        >Revosect</router-link
-      >
-      <router-link
-        :to="{ name: 'vt-leaderboards' }"
-        class="
-          border-2 border-slate-500
-          px-6
-          py-2
-          rounded-sm
-          transition
-          hover:bg-slate-500
-          inline-block
-        "
-        >Voltaic</router-link
-      >
-    </base-card>
+  <main class="page-shell">
+    <div class="page-intro">
+      <p class="eyebrow">Community benchmarks</p>
+      <h1 class="page-title">Leaderboards</h1>
+      <p class="page-subtitle">Compare player results across Revosect and Voltaic.</p>
+    </div>
+    <nav class="tab-list leaderboard-tabs" aria-label="Benchmark source">
+      <router-link class="tab-link" :to="{ name: 'ra-leaderboards' }">Revosect</router-link>
+      <router-link class="tab-link" :to="{ name: 'vt-leaderboards' }">Voltaic</router-link>
+    </nav>
     <router-view></router-view>
-  </div>
+  </main>
 </template>
 <style scoped>
-.router-link-active,
-.router-link-exact-active {
-  @apply bg-slate-500 text-white;
-}
+.leaderboard-tabs { margin-bottom: 14px; }
 </style>
