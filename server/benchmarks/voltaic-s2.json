@@ -1,0 +1,1530 @@
+{
+  "id": "aimlabs_s2",
+  "community": "voltaic",
+  "label": "Season 2 (current definitions)",
+  "source": "https://app.voltaic.gg/api/v1/aimlabs/benchmarks/aimlabs_s2",
+  "retrievedAt": "2026-09-30",
+  "tiers": [
+    {
+      "playlist_workshop_id": "2790274927",
+      "id": 2,
+      "name": "Novice",
+      "color": "#37eca6"
+    },
+    {
+      "playlist_workshop_id": "2790276323",
+      "id": 3,
+      "name": "Intermediate",
+      "color": "#ffab54"
+    },
+    {
+      "playlist_workshop_id": "2813220560",
+      "id": 4,
+      "name": "Advanced",
+      "color": "#fc596f"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "clicking",
+      "color": "#e53535",
+      "subcategories": [
+        {
+          "id": 1,
+          "name": "dynamic",
+          "color": "#E9C452"
+        },
+        {
+          "id": 2,
+          "name": "static",
+          "color": "#FF5A47"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "tracking",
+      "color": "#2663ce",
+      "subcategories": [
+        {
+          "id": 3,
+          "name": "precise",
+          "color": "#61C0E0"
+        },
+        {
+          "id": 4,
+          "name": "reactive",
+          "color": "#8bb7ff"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "switching",
+      "color": "#7844d9",
+      "subcategories": [
+        {
+          "id": 5,
+          "name": "speed",
+          "color": "#8E6BFF"
+        },
+        {
+          "id": 6,
+          "name": "evasive",
+          "color": "#6B77FF"
+        }
+      ]
+    }
+  ],
+  "ranks": [
+    {
+      "name": "Iron",
+      "tier_id": 2,
+      "energy_threshold": 100
+    },
+    {
+      "name": "Bronze",
+      "tier_id": 2,
+      "energy_threshold": 200
+    },
+    {
+      "name": "Silver",
+      "tier_id": 2,
+      "energy_threshold": 300
+    },
+    {
+      "name": "Gold",
+      "tier_id": 2,
+      "energy_threshold": 400
+    },
+    {
+      "name": "Platinum",
+      "tier_id": 3,
+      "energy_threshold": 500
+    },
+    {
+      "name": "Diamond",
+      "tier_id": 3,
+      "energy_threshold": 600
+    },
+    {
+      "name": "Jade",
+      "tier_id": 3,
+      "energy_threshold": 700
+    },
+    {
+      "name": "Master",
+      "tier_id": 3,
+      "energy_threshold": 800
+    },
+    {
+      "name": "Grandmaster",
+      "tier_id": 4,
+      "energy_threshold": 900
+    },
+    {
+      "name": "Nova",
+      "tier_id": 4,
+      "energy_threshold": 1000
+    },
+    {
+      "name": "Astra",
+      "tier_id": 4,
+      "energy_threshold": 1100
+    },
+    {
+      "name": "Celestial",
+      "tier_id": 4,
+      "energy_threshold": 1200
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 178,
+      "name": "VT Angleshot Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            400,
+            460,
+            520,
+            650
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Angle.RB668Z",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2801883868",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Angle.RB668Z",
+        "name": "VT Angleshot Novice ",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2801883868",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 179,
+      "name": "VT Waveshot Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            300,
+            370,
+            440,
+            560
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Waves.R8TGLS",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2779707342",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Waves.R8TGLS",
+        "name": "VT Waveshot Novice",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2779707342",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 190,
+      "name": "VT Angleshot Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            660,
+            720,
+            800,
+            900
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Angle.R8S2XN",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2779324487",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Angle.R8S2XN",
+        "name": "VT Angleshot Intermediate",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2779324487",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 191,
+      "name": "VT Waveshot Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            530,
+            590,
+            670,
+            750
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Waves.R8S37J",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2779325605",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Waves.R8S37J",
+        "name": "VT Waveshot Intermediate",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2779325605",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 202,
+      "name": "VT Angleshot Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            850,
+            1020,
+            1100,
+            1300
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT mpXY .R7WQSA",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2765722547",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT mpXY .R7WQSA",
+        "name": "VT Angleshot Advanced",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2765722547",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 203,
+      "name": "VT Waveshot Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            860,
+            1030,
+            1120,
+            1375
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Sky C.R7164L",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2748726641",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Sky C.R7164L",
+        "name": "VT Sky Click v2",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2748726641",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 204,
+      "name": "VT Arcshot Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            900,
+            1050,
+            1200,
+            1400
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Arc 1.R7WRND",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2765759070",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Arc 1.R7WRND",
+        "name": "VT Arcshot Advanced ",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2765759070",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 180,
+      "name": "VT Sixshot Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            600,
+            700,
+            800,
+            1040
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Sixsh.R8TGD3",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2779702638",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Sixsh.R8TGD3",
+        "name": "VT Sixshot Novice",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2779702638",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 181,
+      "name": "VT Multishot 90 Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            750,
+            850,
+            950,
+            1200
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Multi.RB6AAB",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2801928075",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Multi.RB6AAB",
+        "name": "VT Multishot 90 Novice",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2801928075",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 192,
+      "name": "VT Fiveshot Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            1020,
+            1120,
+            1220,
+            1320
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Fives.R8YV6C",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2781095571",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Fives.R8YV6C",
+        "name": "VT Fiveshot Intermediate",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2781095571",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 193,
+      "name": "VT Multishot 120 Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            1170,
+            1270,
+            1370,
+            1490
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Multi.R8S3PL",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2779328823",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Multi.R8S3PL",
+        "name": "VT Multishot 120 Intermediate",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2779328823",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 205,
+      "name": "VT Fourshot Wide Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            1550,
+            1650,
+            1750,
+            1875
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Three.R7WSTK",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2765768597",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Three.R7WSTK",
+        "name": "VT Fourshot Wide Advanced",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2765768597",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 206,
+      "name": "VT Threeshot Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            1250,
+            1350,
+            1450,
+            1560
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Twosh.R7WTAX",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2765771322",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Twosh.R7WTAX",
+        "name": "VT Threeshot Advanced",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2765771322",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 207,
+      "name": "VT Multishot 180 Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            1490,
+            1580,
+            1670,
+            1800
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Multi.R7WTKS",
+      "task_mode": 42,
+      "weapon_id": "Custom_VTnoADS",
+      "category_id": 1,
+      "workshop_id": "2765776948",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Multi.R7WTKS",
+        "name": "VT Multishot 180 Advanced",
+        "weapon_id": "Custom_VTnoADS",
+        "mode": 0,
+        "workshop_id": "2765776948",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 182,
+      "name": "VT Suavetrack Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1000,
+            1300,
+            1600,
+            1900
+          ]
+        }
+      ],
+      "task_id": "CsLevel.canner.VT Suave.R8I6UD",
+      "task_mode": 42,
+      "weapon_id": "Custom_YoshZapper",
+      "category_id": 2,
+      "workshop_id": "2776342212",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.canner.VT Suave.R8I6UD",
+        "name": "VT Suavetrack Novice",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2776342212",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "canner"
+        }
+      }
+    },
+    {
+      "id": 183,
+      "name": "VT Steadytrack Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1250,
+            1550,
+            1850,
+            2150
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Stead.RB67MZ",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "2801899106",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Stead.RB67MZ",
+        "name": "VT Steadytrack Novice",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2801899106",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 194,
+      "name": "VT Suavetrack Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2600,
+            2900,
+            3200,
+            3500
+          ]
+        }
+      ],
+      "task_id": "CsLevel.canner.VT Suave.R8I6RC",
+      "task_mode": 42,
+      "weapon_id": "Custom_YoshZapper",
+      "category_id": 2,
+      "workshop_id": "2776341442",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.canner.VT Suave.R8I6RC",
+        "name": "VT Suavetrack Intermediate",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2776341442",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "canner"
+        }
+      }
+    },
+    {
+      "id": 195,
+      "name": "VT Steadytrack Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2200,
+            2500,
+            2800,
+            3100
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Stead.R8S43X",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "2779329569",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Stead.R8S43X",
+        "name": "VT Steadytrack Intermediate ",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2779329569",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 208,
+      "name": "VT Suavetrack Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            3530,
+            4000,
+            4150,
+            4450
+          ]
+        }
+      ],
+      "task_id": "CsLevel.canner.VT Suave.R9N6JI",
+      "task_mode": 42,
+      "weapon_id": "Custom_YoshZapper",
+      "category_id": 2,
+      "workshop_id": "2787595653",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.canner.VT Suave.R9N6JI",
+        "name": "VT Suavetrack Advanced",
+        "weapon_id": "Custom_YoshZapper",
+        "mode": 0,
+        "workshop_id": "2787595653",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "canner"
+        }
+      }
+    },
+    {
+      "id": 209,
+      "name": "VT Steadytrack Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            3000,
+            3550,
+            3900,
+            4350
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Preci.R7ZK29",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "2767937111",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Preci.R7ZK29",
+        "name": "VT Steadytrack Advanced ",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2767937111",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 210,
+      "name": "VT Minitrack Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2450,
+            3000,
+            3400,
+            3700
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Mini .R7ZKQO",
+      "task_mode": 42,
+      "weapon_id": "Custom_PGTIVT",
+      "category_id": 2,
+      "workshop_id": "2768030985",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Mini .R7ZKQO",
+        "name": "VT Minitrack Advanced ",
+        "weapon_id": "Custom_PGTIVT",
+        "mode": 0,
+        "workshop_id": "2768030985",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 184,
+      "name": "VT Pilltrack Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1650,
+            2050,
+            2450,
+            2850
+          ]
+        }
+      ],
+      "task_id": "CsLevel.zcr.VT Pillt.R8KMR0",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "2776953447",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.zcr.VT Pillt.R8KMR0",
+        "name": "VT Pilltrack Novice",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2776953447",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "zcr"
+        }
+      }
+    },
+    {
+      "id": 185,
+      "name": "VT Axitrack Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            2600,
+            2900,
+            3200,
+            3500
+          ]
+        }
+      ],
+      "task_id": "CsLevel.Lowgravity56.VT Axitr.RJF5AX",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper3",
+      "category_id": 2,
+      "workshop_id": "2872588679",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.Lowgravity56.VT Axitr.RJF5AX",
+        "name": "VT Axitrack Novice ",
+        "weapon_id": "Custom_VoltaicZapper3",
+        "mode": 0,
+        "workshop_id": "2872588679",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 196,
+      "name": "VT Pilltrack Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2000,
+            2350,
+            2750,
+            3150
+          ]
+        }
+      ],
+      "task_id": "CsLevel.zcr.VT Pillt.R8KMKK",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "2776952963",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.zcr.VT Pillt.R8KMKK",
+        "name": "VT Pilltrack Intermediate",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2776952963",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "zcr"
+        }
+      }
+    },
+    {
+      "id": 197,
+      "name": "VT Axitrack Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2150,
+            2450,
+            2750,
+            2900
+          ]
+        }
+      ],
+      "task_id": "CsLevel.Lowgravity56.VT Axitr.RJE095",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper3",
+      "category_id": 2,
+      "workshop_id": "2872316446",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.Lowgravity56.VT Axitr.RJE095",
+        "name": "VT Axitrack Intermediate",
+        "weapon_id": "Custom_VoltaicZapper3",
+        "mode": 0,
+        "workshop_id": "2872316446",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 211,
+      "name": "VT Blinktrack Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2500,
+            2800,
+            3000,
+            3385
+          ]
+        }
+      ],
+      "task_id": "CsLevel.zcr.VT React.R8CNGN",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "2774802677",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.zcr.VT React.R8CNGN",
+        "name": "VT Blinktrack Advanced",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2774802677",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "zcr"
+        }
+      }
+    },
+    {
+      "id": 212,
+      "name": "VT Pilltrack Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            3200,
+            3500,
+            3800,
+            4000
+          ]
+        }
+      ],
+      "task_id": "CsLevel.zcr.VT Pillt.R8DF2N",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper2",
+      "category_id": 2,
+      "workshop_id": "2774949791",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.zcr.VT Pillt.R8DF2N",
+        "name": "VT Pilltrack Advanced",
+        "weapon_id": "Custom_VoltaicZapper2",
+        "mode": 0,
+        "workshop_id": "2774949791",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "zcr"
+        }
+      }
+    },
+    {
+      "id": 213,
+      "name": "VT Axitrack Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2250,
+            2500,
+            2800,
+            3300
+          ]
+        }
+      ],
+      "task_id": "CsLevel.Lowgravity56.VT Axitr.RJE01M",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper3",
+      "category_id": 2,
+      "workshop_id": "2872302536",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.Lowgravity56.VT Axitr.RJE01M",
+        "name": "VT Axitrack Advanced ",
+        "weapon_id": "Custom_VoltaicZapper3",
+        "mode": 0,
+        "workshop_id": "2872302536",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 186,
+      "name": "VT Sphereswitch Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1500,
+            1600,
+            1700,
+            2000
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Spher.RB69A4",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2801916702",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Spher.RB69A4",
+        "name": "VT Sphereswitch Novice",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2801916702",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 187,
+      "name": "VT Skyswitch Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1800,
+            2000,
+            2150,
+            2500
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Skysw.R8TH9B",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2779707970",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Skysw.R8TH9B",
+        "name": "VT Skyswitch Novice",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2779707970",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 198,
+      "name": "VT Sphereswitch Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            1700,
+            1900,
+            2050,
+            2200
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Spher.R8S4B3",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2779330440",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Spher.R8S4B3",
+        "name": "VT Sphereswitch Intermediate",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2779330440",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 199,
+      "name": "VT Skyswitch Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2350,
+            2550,
+            2700,
+            2900
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Skysw.R8S4IF",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2779331007",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Skysw.R8S4IF",
+        "name": "VT Skyswitch Intermediate",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2779331007",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 214,
+      "name": "VT Swayswitch Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2670,
+            2870,
+            3070,
+            3350
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT evaTS.R7YQ67",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2768119220",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT evaTS.R7YQ67",
+        "name": "VT Swayswitch Advanced ",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2768119220",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 215,
+      "name": "VT Sphereswitch Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2370,
+            2570,
+            2650,
+            2825
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Spher.R89MOR",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2773506938",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Spher.R89MOR",
+        "name": "VT Sphereswitch Advanced",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2773506938",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 216,
+      "name": "VT Skyswitch Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2950,
+            3250,
+            3365,
+            3525
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT berry.R7ZWKV",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2772271995",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT berry.R7ZWKV",
+        "name": "VT Skyswitch Advanced",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2772271995",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 188,
+      "name": "VT Angleswitch Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1000,
+            1200,
+            1500,
+            1700
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Angle.R8X0YY",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2780605349",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Angle.R8X0YY",
+        "name": "VT Angleswitch Novice",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2780605349",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 189,
+      "name": "VT Arcswitch Novice",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            900,
+            1000,
+            1100,
+            1400
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Arcsw.RB6A0U",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2801921053",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Arcsw.RB6A0U",
+        "name": "VT Arcswitch Novice",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2801921053",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 200,
+      "name": "VT Dodgeswitch Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2100,
+            2250,
+            2400,
+            2550
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Dodge.R8S4N1",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2779331612",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Dodge.R8S4N1",
+        "name": "VT Dodgeswitch Intermediate",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2779331612",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 201,
+      "name": "VT Arcswitch Intermediate",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            1700,
+            1830,
+            1930,
+            2000
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Arcsw.R8S4QI",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2779332074",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Arcsw.R8S4QI",
+        "name": "VT Arcswitch Intermediate",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2779332074",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 217,
+      "name": "VT Dodgeswitch Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2680,
+            2980,
+            3130,
+            3275
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT evaTS.R7ZY84",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2772491319",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT evaTS.R7ZY84",
+        "name": "VT Dodgeswitch Advanced",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2772491319",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 218,
+      "name": "VT Angleswitch Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2100,
+            2400,
+            2600,
+            2825
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Angle.R8AH09",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2773899015",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Angle.R8AH09",
+        "name": "VT Angleswitch Advanced",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2773899015",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    },
+    {
+      "id": 219,
+      "name": "VT Arcswitch Advanced",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2000,
+            2250,
+            2450,
+            2750
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Empyrean.VT Arcsw.R8AOQF",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "2773981325",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Empyrean.VT Arcsw.R8AOQF",
+        "name": "VT Arcswitch Advanced",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "2773981325",
+        "duration": null,
+        "version": 1,
+        "author": {
+          "username": "VT Empyrean"
+        }
+      }
+    }
+  ]
+}

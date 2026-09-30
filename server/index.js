@@ -65,7 +65,7 @@ const server = createServer(async (request, response) => {
 
   const spaRoute =
     pathname === "/" ||
-    ["/home", "/profile", "/tasks", "/leaderboards", "/about"].some(
+    ["/home", "/profile", "/tasks", "/leaderboards", "/benchmarks", "/about"].some(
       (route) => pathname === route || pathname.startsWith(`${route}/`)
     );
   const file = spaRoute ? resolve(distDir, "index.html") : requested;
