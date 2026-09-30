@@ -32,4 +32,3 @@ export function sortColumnsFor(mode) {
   for (let index = 0; index < (season?.subcategories.length || 6); index++) columns[ordinals[index]] = `c${index + 1}`;
   return columns;
 }
-
