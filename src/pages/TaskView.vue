@@ -4,40 +4,31 @@
     <div v-else-if="taskError" class="panel status-panel" role="alert">{{ taskError }}</div>
     <template v-else>
       <div class="page-intro task-intro">
-        <div><p class="eyebrow">Task leaderboard</p><h1 class="page-title">{{ currentTask.name }}</h1><p class="page-subtitle">Created by {{ currentTask.author?.username || "Unknown creator" }}</p></div>
+        <div><p class="eyebrow">Task leaderboard</p><h1 class="page-title">{{ currentTask.name }}</h1><p class="page-subtitle">{{ currentTask.author?.username ? `Created by ${currentTask.author.username}` : "Aimlabs task" }}</p></div>
         <button type="button" class="btn-secondary" @click="handleSwitchTask">Switch task</button>
       </div>
-      <div class="panel task-summary">
+      <div v-if="currentTask.description || currentTask.workshop_id" class="panel task-summary">
         <div class="task-summary-main">
-          <div><h2 class="section-title">About this task</h2><p class="muted">{{ currentTask.description || "No description available." }}</p></div>
-          <a :href="taskLink" class="btn-primary" target="_blank" rel="noopener noreferrer"><play-icon class="h-5 w-5"></play-icon>Play task</a>
+          <p v-if="currentTask.description" class="muted">{{ currentTask.description }}</p>
+          <a v-if="currentTask.workshop_id" :href="taskLink" class="btn-primary" target="_blank" rel="noopener noreferrer"><play-icon class="h-5 w-5"></play-icon>Play task</a>
         </div>
-        <dl v-if="taskDetails" class="task-facts">
-          <div><dt>Style</dt><dd>{{ taskDetails.style || 'Unavailable' }}</dd></div>
-          <div><dt>Duration</dt><dd>{{ Number.isFinite(taskDetails.durationSeconds) ? `${taskDetails.durationSeconds} s` : 'Unavailable' }}</dd></div>
-          <div><dt>Task version</dt><dd>{{ taskDetails.taskVersion ?? 'Unavailable' }}</dd></div>
-          <div><dt>Asset version</dt><dd>{{ taskDetails.assetVersion || 'Unavailable' }}</dd></div>
-          <div><dt>Weapon</dt><dd>{{ taskDetails.weaponId || 'Unavailable' }}</dd></div>
-          <div><dt>Created</dt><dd>{{ formatDate(taskDetails.createdAt) }}</dd></div>
-          <div><dt>Updated</dt><dd>{{ formatDate(taskDetails.updatedAt) }}</dd></div>
-        </dl>
-        <p v-else-if="detailsError" class="result-meta task-details-error" role="status">Additional scenario details are unavailable right now.</p>
       </div>
 
       <div v-if="isLoading" class="panel status-panel mt-4"><loading-spinner></loading-spinner></div>
       <div v-else-if="leaderboardError" class="panel status-panel mt-4" role="alert">{{ leaderboardError }}</div>
       <section v-else class="panel task-leaderboard mt-4">
         <h2 class="leaderboard-heading">Task scores</h2>
-        <div class="task-score-row task-score-head" aria-hidden="true"><span>Rank</span><span>Player</span><span>Score</span><span>Hits</span><span>Accuracy</span><span>Replay</span></div>
+        <div class="task-score-row task-score-head" aria-hidden="true"><span>Rank</span><span>Player</span><span>Score</span><span>Hits</span><span>Accuracy</span><span>Run</span></div>
         <div v-for="(task, index) in currentTaskLeaderboard.data" :key="index" class="task-score-row">
           <span class="task-score-rank">{{ task.rank }}</span>
-          <router-link class="player-name" :to="'/profile/' + task.username">{{ task.username }}</router-link>
+          <router-link class="player-name" :to="'/profile/' + encodeURIComponent(task.username)">{{ task.username }}</router-link>
           <span class="task-score-value">{{ task.score }}</span>
           <span class="task-score-hits">{{ task.shotsHit }}</span>
           <span class="task-score-accuracy">{{ task.accuracy }}</span>
-          <a class="task-replay text-link" :href="replayLink(task.playId)" target="_blank" rel="noopener noreferrer"><play-icon class="h-4 w-4"></play-icon>Replay</a>
+          <button type="button" class="task-run text-link" :disabled="!task.playId" @click="showRun(task)">View run →</button>
         </div>
-        <div class="pagination">
+        <p v-if="!currentTaskLeaderboard.data?.length" class="status-panel">Aimlabs has no leaderboard scores for this task.</p>
+        <div v-if="currentTaskLeaderboard.data?.length" class="pagination">
           <span>Page {{ currentPage + 1 }} of {{ pageCount + 1 }}</span>
           <div class="pagination-controls">
             <button type="button" class="page-button" :disabled="currentPage <= 0" aria-label="Previous page" @click="currentPage--"><chevron-icon direction="left" class="h-4 w-4"></chevron-icon></button>
@@ -57,39 +48,28 @@
 .task-summary-main { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px; }
 .task-summary p { margin-top: 6px; font-size: .86rem; line-height: 1.6; }
 .task-summary .btn-primary { flex: 0 0 auto; }
-.task-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(180px, 2fr) repeat(2, minmax(0, 1fr)); margin: 0; padding: 14px 20px; border-top: 1px solid var(--line); }
-.task-facts > div { min-width: 0; padding: 4px 12px; border-left: 1px solid var(--line); }
-.task-facts > div:first-child { padding-left: 0; border-left: 0; }
-.task-facts dt { color: var(--muted); font-size: .73rem; }
-.task-facts dd { margin: 4px 0 0; font-size: .84rem; font-weight: 600; overflow-wrap: anywhere; }
-.task-details-error { padding: 0 20px 16px; }
-.task-score-row { display: grid; grid-template-columns: 70px minmax(0, 1.5fr) 95px 80px 95px 85px; align-items: center; gap: 12px; min-height: 50px; padding: 9px 20px; border-bottom: 1px solid var(--line); font-size: .88rem; }
+.task-score-row { display: grid; grid-template-columns: 70px minmax(0, 1.5fr) 95px 80px 95px 100px; align-items: center; gap: 12px; min-height: 50px; padding: 9px 20px; border-bottom: 1px solid var(--line); font-size: .88rem; }
 .task-score-head { min-height: 40px; color: var(--muted); font-size: .78rem; }
 .task-score-value { font-weight: 600; font-variant-numeric: tabular-nums; }
-.task-replay { display: inline-flex; align-items: center; gap: 5px; }
+.task-run { display: inline-flex; align-items: center; gap: 5px; }
 .task-score-row .player-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 800px) {
-  .task-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 0; }
-  .task-facts > div:nth-child(4n+1) { padding-left: 0; border-left: 0; }
   .task-score-row { grid-template-columns: 42px minmax(0, 1fr) auto; gap: 4px 10px; }
   .task-score-head { display: none; }
   .task-score-rank { grid-column: 1; grid-row: 1 / 3; }
   .task-score-row .player-name { grid-column: 2; grid-row: 1; }
   .task-score-value { grid-column: 3; grid-row: 1; text-align: right; }
   .task-score-hits, .task-score-accuracy { display: none; }
-  .task-replay { grid-column: 2 / 4; grid-row: 2; font-size: .78rem; }
+  .task-run { grid-column: 2 / 4; grid-row: 2; font-size: .78rem; }
 }
-@media (max-width: 620px) { .task-intro, .task-summary-main { align-items: start; flex-direction: column; } .task-score-row { padding: 12px 14px; } .task-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 14px; } .task-facts > div:nth-child(2n+1) { padding-left: 0; border-left: 0; } }
+@media (max-width: 620px) { .task-intro, .task-summary-main { align-items: start; flex-direction: column; } .task-score-row { padding: 12px 14px; } }
 </style>
 
 <script>
 import { mapGetters } from "vuex";
-import {
-  APIFetch,
-  GET_TASK_BY_ID,
-  GET_TASK_LEADERBOARD,
-} from "../helpers/queries.js";
-import { taskDeepLink, replayDeepLink } from "../helpers/functions.js";
+import { fetchData } from "../helpers/api.js";
+import { openRunDetails } from "../helpers/runDetails.js";
+import { taskDeepLink } from "../helpers/functions.js";
 export default {
   props: ["taskId"],
   data() {
@@ -101,11 +81,7 @@ export default {
       currentPage: 0,
       goToPageInput: null,
       taskRequestVersion: 0,
-      detailsVersion: 0,
-      taskDetails: null,
-      detailsError: "",
       leaderboardRequestVersion: 0,
-      perPage: 25,
     };
   },
   computed: {
@@ -140,7 +116,6 @@ export default {
   watch: {
     taskId: { immediate: true, handler(taskId) {
       this.loadTask(taskId);
-      this.loadTaskDetails(taskId);
     } },
     currentPage() {
       if (!this.headLoading && !this.taskError && this.currentTask.id === this.taskId) {
@@ -150,39 +125,19 @@ export default {
   },
   beforeUnmount() {
     this.taskRequestVersion++;
-    this.detailsVersion++;
     this.leaderboardRequestVersion++;
   },
   methods: {
-    formatDate(value) {
-      if (!value) return "Unavailable";
-      const date = new Date(value);
-      return Number.isNaN(date.getTime()) ? "Unavailable" : date.toLocaleDateString();
-    },
-    async loadTaskDetails(taskId) {
-      const version = ++this.detailsVersion;
-      this.taskDetails = null;
-      this.detailsError = "";
-      try {
-        const response = await fetch(`/api/tasks/${encodeURIComponent(taskId)}/details`);
-        const details = await response.json().catch(() => null);
-        if (!response.ok || !details || details.id !== taskId) throw new Error("Additional scenario details unavailable");
-        if (version === this.detailsVersion) this.taskDetails = details;
-      } catch (error) {
-        if (version === this.detailsVersion) this.detailsError = error.message;
-      }
-    },
     handlePageSelect(event) {
       let value = parseInt(event.target.textContent);
       if (value) {
         this.currentPage = value - 1;
       }
     },
-    replayLink(playId) {
-      return replayDeepLink(playId);
+    showRun(task) {
+      openRunDetails({ username: task.username, taskId: this.taskId, taskName: this.currentTask.name, playId: task.playId, score: task.score });
     },
     handleSwitchTask() {
-      sessionStorage.removeItem("currentTask");
       this.$router.push("/tasks");
     },
     goToPage() {
@@ -204,15 +159,14 @@ export default {
       this.currentPage = 0;
 
       try {
-        const response = await APIFetch(GET_TASK_BY_ID, { slug: taskId });
+        const response = await fetchData(`/api/tasks/${encodeURIComponent(taskId)}`);
         if (version !== this.taskRequestVersion) return;
-        const task = response.aimlab?.task;
+        const task = response;
         if (!task) {
           this.taskError = "Task not found";
           return;
         }
         this.$store.dispatch("setCurrentTask", task);
-        sessionStorage.setItem("currentTask", task.id);
         this.headLoading = false;
         await this.loadLeaderboard(task);
       } catch (error) {
@@ -232,21 +186,9 @@ export default {
       this.isLoading = true;
       this.leaderboardError = "";
       try {
-        const response = await APIFetch(GET_TASK_LEADERBOARD, {
-          leaderboardInput: {
-            clientId: "aimlab",
-            limit: this.perPage,
-            offset: this.currentPage * this.perPage,
-            taskId: task.id,
-            taskMode: 0,
-            weaponId: task.weapon_id,
-          },
-        });
-        const leaderboard = response.aimlab?.leaderboard;
-        if (!leaderboard) throw new Error("Missing task leaderboard");
+        const response = await fetchData(`/api/tasks/${encodeURIComponent(task.id)}/leaderboard?page=${this.currentPage}`);
         if (version !== this.leaderboardRequestVersion || task.id !== this.taskId) return;
-        leaderboard.metadata.rows = this.perPage;
-        this.$store.dispatch("setCurrentTaskLeaderboard", leaderboard);
+        this.$store.dispatch("setCurrentTaskLeaderboard", response);
       } catch (error) {
         if (version === this.leaderboardRequestVersion) {
           console.error(error);

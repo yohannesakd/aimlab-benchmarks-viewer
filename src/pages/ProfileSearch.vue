@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import * as queries from "../helpers/queries.js";
+import { fetchData } from "../helpers/api.js";
 import debounce from "lodash/debounce";
 export default {
   data() {
@@ -42,7 +42,7 @@ export default {
   },
   computed: {
     playerProfileLink() {
-      return this.$route.path + "/" + this.playerInfo.username;
+      return "/profile/" + encodeURIComponent(this.playerInfo.username);
     },
   },
   created() {
@@ -62,23 +62,14 @@ export default {
       }
       this.isLoading = true;
       try {
-        const data = await queries.APIFetch(queries.GET_USER_INFO, { username });
+        const data = await fetchData(`/api/profiles/${encodeURIComponent(username)}/lookup`);
         if (username !== this.usernameInput) return;
-        if (data.aimlabProfile) {
-          this.playerInfo = {
-            username: data.aimlabProfile.username,
-            id: data.aimlabProfile.user.id,
-            rank: data.aimlabProfile.ranking.rank.displayName,
-            skill: data.aimlabProfile.ranking.skill,
-          };
-        }
-        window.umami?.track("profile-search", {
-          result: data.aimlabProfile ? "found" : "missing",
-        });
+        this.playerInfo = data;
+        window.umami?.track("profile-search", { result: "found" });
       } catch (error) {
         if (username === this.usernameInput) {
           console.error(error);
-          this.searchError = true;
+          this.searchError = error.status !== 404;
           window.umami?.track("profile-search", { result: "error" });
         }
       } finally {

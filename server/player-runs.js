@@ -4,6 +4,13 @@ const pageSize = 12;
 const cacheLifeMs = 45_000;
 const maxCacheEntries = 120;
 
+export const runFields = `              id score startedAt endedAt mode convertedMode taskVersion weaponName gridshieldStatus
+              manifest {
+                taskName weaponId taskVersion duration pauseDuration inputDevice
+                appVersion analyticsVersion replayAvailable performanceData
+              }
+`;
+
 const query = `
   query PlayerTaskRuns($username: String, $taskId: String!, $after: String, $first: Int!) {
     Trainer {
@@ -14,11 +21,7 @@ const query = `
           pageInfo { endCursor hasNextPage }
           edges {
             node {
-              id score startedAt endedAt mode convertedMode taskVersion weaponName gridshieldStatus
-              manifest {
-                taskName weaponId taskVersion duration pauseDuration inputDevice
-                appVersion analyticsVersion replayAvailable performanceData
-              }
+              ${runFields}
             }
           }
         }
@@ -49,7 +52,7 @@ function reportedMetrics(data) {
   return metrics;
 }
 
-function publicRun(play) {
+export function publicRun(play) {
   return {
     id: play.id,
     score: play.score,

@@ -17,7 +17,9 @@ Navigate to the Profile Page and insert a player's username (_case sensitive_)
 The Player's Profile is presented as such:
 From here you can navigate to the [Voltaic](https://voltaic.gg) and [Revosect](https://revosect.com) Benchmarks Pages
 
-Each task card also has **View runs**. It opens cursor-paged solo run history with score, mode, weapon, version, reported metrics, and a replay link when Aimlabs marks one available. Open a run to see its details. The history keeps different modes, weapons, and versions distinct; its count is Aimlabs' task-run count, not a count of comparable benchmark attempts.
+Each task card has **View runs**. The list shows score, accuracy, shot count, and date. Run details open in a modal, with performance statistics, duration, pause time, versions, and a replay link where available. Leaderboard and benchmark scores open the same modal. Solo history can contain different scenario settings; its count is not a count of comparable benchmark attempts.
+
+Profile benchmark pages separate the benchmark set from difficulty. The existing sets are labelled **Legacy benchmark set**; the selected set and difficulty stay in the URL.
 
 ![Player Profile](./public/guide/player-profile.png)
 
@@ -39,13 +41,22 @@ The Task is Presented as such, the option to launch Aimlab and play as well as w
 
 ## Running on a VPS
 
-The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The production Vercel site uses the read-only API at `aimlab-api.saibot.site`. The staging Vercel preview uses `aimlab-staging-api.saibot.site` for leaderboards, player runs, and public profile/task details. `vercel.json` proxies those three API paths; other API paths are not exposed.
+The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The production Vercel site uses the read-only API at `aimlab-api.saibot.site`. The staging Vercel preview uses `aimlab-staging-api.saibot.site` for benchmark leaderboards and all profile/task data. `vercel.json` proxies the `/api/leaderboards`, `/api/profiles`, and `/api/tasks` namespaces.
 
 The Node server serves the built site and paged Revosect and Voltaic leaderboards. The refresh command collects Aimlab scores into a resumable SQLite staging database, calculates ranks using the same benchmark functions as player profiles, then atomically publishes one database per benchmark level. It keeps the previous published database if Aimlab fails. Large levels take longer to backfill; until one completes, its API returns 503 and the site shows an error.
 
-`GET /api/profiles/:username/tasks/:taskId/runs?after=...` reads 12 public solo plays at a time from Aimlabs' current API. It returns only display fields, caches successful pages briefly, limits concurrent upstream requests, and pauses after a provider rate limit. Arbitrary play lookup requires authentication, so a run detail opens from its history page and retains that page's cursor in the URL. This endpoint does not download replay files.
+The VPS owns Aimlabs requests, profile aggregation, weighted averages, totals, and all benchmark rank, energy, point, and progress calculations. The browser renders the processed results. Read-only routes are:
 
-`GET /api/profiles/:username/details` and `GET /api/tasks/:taskId/details` add public activity and scenario metadata from the current Aimlabs API. `GET /api/profiles/:username/activity` supplies yearly and recent active-day counts plus learning-plan totals when the Activity tab opens. These routes return selected display fields and cache them for one minute. The existing profile and task views still load their base data independently.
+- `GET /api/profiles/:username/lookup`: username and Aimlabs ranking.
+- `GET /api/profiles/:username`: task summaries, totals, and results grouped by benchmark set.
+- `GET /api/tasks/search?name=...` and `GET /api/tasks/:taskId`: search and task metadata.
+- `GET /api/tasks/:taskId/leaderboard?page=...`: 25 normalized scores per page.
+- `GET /api/tasks/:taskId/run?username=...&playId=...`: exact run details. Benchmark scores omit `playId` and supply `weapon` and `score`; the server checks that the best run matches the displayed score.
+- `GET /api/profiles/:username/tasks/:taskId/runs?after=...`: 12 public solo plays per cursor page. Existing `?run=...` history links open the modal.
+
+The API uses `api.aimlabs.com/graphql`, caches successful responses briefly, shares identical in-flight app-data requests, caps upstream concurrency at four and responses at 1 MB, and pauses after provider rate limits. Only selected display fields leave the server; no signed replay files are downloaded. `publishedReplay` can expose a run anonymously by its ID, but many older runs are not published. Those modals use allowlisted leaderboard statistics and explain the missing detail. There is no full-leaderboard scan or unbounded history crawl.
+
+`GET /api/profiles/:username/details` and `GET /api/tasks/:taskId/details` add public activity and scenario metadata from the current Aimlabs API. `GET /api/profiles/:username/activity` supplies yearly and recent active-day counts plus learning-plan totals when the Activity tab opens. These routes return selected display fields and cache them for one minute. The profile and task views load their base data through the VPS as well.
 
 ```sh
 npm ci

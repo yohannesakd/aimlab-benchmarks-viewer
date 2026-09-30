@@ -91,9 +91,8 @@ button:disabled { cursor: not-allowed; }
 .benchmark-view { padding: 18px; }
 .bench-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; margin-bottom: 16px; }
 .bench-overview-main { display: flex; align-items: center; gap: 18px; padding: 18px; }
-.bench-overview-main .dropdown { flex: 0 0 150px; align-self: start; }
-.bench-medal { display: flex; align-items: center; gap: 14px; }
-.bench-medal img { width: 72px; height: 72px; object-fit: contain; }
+.bench-medal { display: flex; align-items: center; gap: 14px; width: 100%; min-width: 0; }
+.bench-medal img { flex: 0 0 64px; width: 64px; height: 64px; object-fit: contain; }
 .bench-medal strong { display: block; font-size: 1.12rem; }
 .bench-medal small { display: block; color: var(--muted); font-size: .78rem; }
 .bench-categories { padding: 18px; }
@@ -108,7 +107,7 @@ button:disabled { cursor: not-allowed; }
 .bench-row { border-bottom: 1px solid var(--line); }
 .bench-row:last-child { border-bottom: 0; }
 .bench-name { min-width: 0; font-weight: 600; }
-.bench-score { font-variant-numeric: tabular-nums; }
+.bench-score { font-variant-numeric: tabular-nums; text-align: left; }
 .bench-rank { display: flex; align-items: center; gap: 7px; min-width: 0; font-size: .83rem; }
 .bench-rank img { width: 22px; height: 22px; object-fit: contain; }
 .bench-points { position: relative; display: flex; align-items: center; gap: 9px; font-variant-numeric: tabular-nums; }
@@ -149,7 +148,6 @@ button:disabled { cursor: not-allowed; }
   .search-form { flex-direction: column; }
   .benchmark-view { padding: 12px; }
   .bench-overview-main { flex-wrap: wrap; }
-  .bench-overview-main .dropdown { flex-basis: 100%; }
   .bench-categories-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bench-table-head { display: none; }
   .bench-main { grid-template-columns: minmax(0, 1fr) auto 34px; gap: 7px; }

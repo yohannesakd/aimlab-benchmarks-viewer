@@ -67,7 +67,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-import * as queries from "../helpers/queries.js";
+import { fetchData } from "../helpers/api.js";
 export default {
   props: {
     username: String,
@@ -135,7 +135,6 @@ export default {
       }
     },
     handleSwitchProfile() {
-      sessionStorage.removeItem("currentPlayer");
       this.$router.push("/profile");
     },
     async loadPlayer(username) {
@@ -149,33 +148,13 @@ export default {
       this.loadError = "";
 
       try {
-        const data = await queries.APIFetch(queries.GET_USER_INFO, { username });
-        if (!data.aimlabProfile) {
-          if (version === this.requestVersion) this.loadError = "Profile not found";
-          return;
-        }
-        const profile = data.aimlabProfile;
-        const playerInfo = {
-          username: profile.username,
-          id: profile.user.id,
-          rank: profile.ranking.rank.displayName,
-          skill: profile.ranking.skill,
-        };
-        const plays = await queries.APIFetch(queries.GET_USER_PLAYS_AGG, {
-          where: {
-            is_practice: { _eq: false },
-            score: { _gt: 0 },
-            user_id: { _eq: playerInfo.id },
-          },
-        });
-        if (!plays.aimlab?.plays_agg) throw new Error("Missing player history");
+        const data = await fetchData(`/api/profiles/${encodeURIComponent(username)}`);
         if (version !== this.requestVersion) return;
-
+        const playerInfo = data.playerInfo;
         this.$store.dispatch("updateCurrentPlayerInfo", playerInfo);
-        this.$store.dispatch("updateCurrentPlayerTasks", plays.aimlab.plays_agg);
-        this.$store.dispatch("setVTBenches");
-        this.$store.dispatch("setRABenches");
-        sessionStorage.setItem("currentPlayer", playerInfo.username);
+        this.$store.dispatch("updateCurrentPlayerTasks", data.tasks);
+        this.$store.dispatch("updateTotals", data.totals);
+        this.$store.dispatch("setPlayerBenchmarks", data.benchmarkSets);
       } catch (error) {
         if (version === this.requestVersion) {
           console.error(error);

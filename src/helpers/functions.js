@@ -28,18 +28,14 @@ import {
     mediumBench,
     easyBench,
 } from "./revosectData.js";
-import {
-    APIFetch,
-    GET_TASK_LEADERBOARD,
-    GET_TASK_BY_ID,
-} from "./queries.js";
+import { fetchData } from "./api.js";
 import _ from "lodash";
 
 
 export async function findWorkshopId(taskId) {
-    const task = await APIFetch(GET_TASK_BY_ID, { slug: taskId });
-    if (!task.aimlab?.task?.workshop_id) throw new Error("Task has no workshop ID");
-    return task.aimlab.task.workshop_id;
+    const task = await fetchData(`/api/tasks/${encodeURIComponent(taskId)}`);
+    if (!task.workshop_id) throw new Error("Task has no workshop ID");
+    return task.workshop_id;
 }
 export function taskDeepLink(workshopId) {
     return `https://go.aimlab.gg/v1/redirects?link=aimlab://workshop?id=${workshopId}&source=EEDCC708991834C0&link=steam://rungameid/714010`;
@@ -47,42 +43,6 @@ export function taskDeepLink(workshopId) {
 export function replayDeepLink(playId) {
     return `https://go.aimlab.gg/v1/redirects?link=aimlab%3a%2f%2fcompare%3fid%3d${playId}%26source%3d84966503A24BD515&link=steam%3a%2f%2frungameid%2f714010`;
 }
-export async function findReplay(playerName, taskId, weapon) {
-    let limit = 100;
-    let offset = 0;
-    let playerFound = false;
-    while (!playerFound) {
-        let ldb = await APIFetch(GET_TASK_LEADERBOARD, {
-            leaderboardInput: {
-                clientId: "aimlab",
-                limit: limit,
-                offset: offset,
-                taskId: taskId,
-                taskMode: 0,
-                weaponId: weapon,
-            },
-        });
-
-        if (ldb.aimlab?.leaderboard) {
-            let located = ldb.aimlab.leaderboard.data.filter(
-                (entry) => entry.username == playerName
-            );
-            if (_.isEmpty(located)) {
-                offset += limit;
-                if (offset >= ldb.aimlab.leaderboard.metadata.totalRows) {
-                    return;
-                }
-                continue;
-            } else {
-                playerFound = true;
-                return replayDeepLink(located[0].play_id);
-            }
-        } else {
-            throw new Error("Missing Aimlab leaderboard");
-        }
-    }
-}
-
 const benchmarkTaskWeapons = new Set(
     [
         ...advancedBench,

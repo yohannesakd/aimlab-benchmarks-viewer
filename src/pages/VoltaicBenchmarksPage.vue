@@ -1,10 +1,8 @@
 <template>
   <section class="benchmark-view">
+    <benchmark-controls :sets="benchmarkSets" :selected-set="selectedSet.id" :level="currentTab.value" :levels="dropdownElements" @set-change="selectSet" @level-change="selectLevel" />
     <div class="bench-overview">
       <div class="panel bench-overview-main">
-        <dropdown :selected-tab="currentTab">
-          <li v-for="(element, index) in dropdownElements" :key="element" @click="handleDropdownSelect(index)">{{ element }}</li>
-        </dropdown>
         <div class="bench-medal">
           <img :src="getImagePath(VTBenchmarks.overallRank, 'medal')" alt="" />
           <div>
@@ -32,9 +30,9 @@
       <div v-for="(bench, index) in VTBenchmarks.benchmarks" :key="index" class="bench-row">
         <div class="bench-main">
           <span class="bench-name">{{ bench.name }}</span>
-          <span class="bench-score">{{ bench.maxScore }}</span>
+          <button v-if="bench.count" type="button" class="bench-score text-link" :aria-label="`View best run for ${bench.name}: ${bench.maxScore} points`" @click="showBestRun(bench)">{{ bench.maxScore }}</button><span v-else class="bench-score">—</span>
           <span class="bench-rank" :class="colorLookup[bench.rank]"><img :src="getImagePath(bench.rank, 'badge')" alt="" />{{ bench.rank }}</span>
-          <span class="bench-points">{{ bench.energy }}<progress-bar class="progress-bar" :value="energyBar(bench.energy).value" :max="energyBar(bench.energy).max" color="bg-mainCyan"></progress-bar></span>
+          <span class="bench-points">{{ bench.energy }}<progress-bar class="progress-bar" :value="bench.energyProgress.value" :max="bench.energyProgress.max" color="bg-mainCyan"></progress-bar></span>
           <button type="button" class="bench-expand" :aria-expanded="!!bench.detailsOpen" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
             <chevron-icon direction="down" class="h-4 w-4" :class="{ 'rotate-180': bench.detailsOpen }"></chevron-icon>
           </button>
@@ -50,14 +48,15 @@
           <div class="bench-extra">
             <div class="bench-stats">
               <span>Total plays: {{ bench.count }}</span>
-              <span v-if="bench.count">PB accuracy: {{ Math.floor(bench.maxAcc) }}%</span>
+              <span v-if="bench.count">Best accuracy: {{ Math.floor(bench.maxAcc) }}%</span>
               <span v-if="bench.count">Average score: {{ Math.floor(bench.avgScore) }}</span>
               <span v-if="bench.count">Average accuracy: {{ Math.floor(bench.avgAcc) }}%</span>
             </div>
             <div class="bench-actions">
               <button type="button" @click="handlePlayScenario(bench.id)"><play-icon class="h-4 w-4"></play-icon>Play</button>
-              <button type="button" :disabled="!bench.count || replayLoading" @click="replayLink(bench.id, bench.weapon)">{{ replayLoading ? "Loading…" : "Watch replay" }}</button>
-              <router-link :to="'/tasks/' + bench.id">View leaderboard</router-link>
+              <button type="button" :disabled="!bench.count" @click="showBestRun(bench)">View best run</button>
+              <router-link :to="historyLink(bench.id)">View runs</router-link>
+              <router-link :to="'/tasks/' + encodeURIComponent(bench.id) + '/leaderboard'">View leaderboard</router-link>
             </div>
           </div>
         </div>
@@ -68,34 +67,16 @@
 
 <script>
 import {
-    advancedRanks,
-    intermediateRanks,
-    noviceRanks,
-    categories,
-    advancedEnergy,
-    intermediateEnergy,
-    noviceEnergy,
-} from "@/helpers/voltaicData.js";
-import { findReplay } from "@/helpers/functions.js";
-import {
     findWorkshopId,
     taskDeepLink,
 } from "../helpers/functions";
+import BenchmarkControls from "../components/BenchmarkControls.vue";
+import { openRunDetails } from "../helpers/runDetails.js";
 export default {
+    components: { BenchmarkControls },
     data() {
         return {
-            replayLoading: false,
             actionError: "",
-            currentTabIndex: 2,
-            categories: ["Clicking", "Tracking", "Switching"],
-            subCategories: [
-                "Dynamic",
-                "Static",
-                "Precise",
-                "Reactive",
-                "Speed",
-                "Evasive",
-            ],
             dropdownElements: ["Novice", "Intermediate", "Advanced"],
         };
     },
@@ -103,25 +84,14 @@ export default {
         currentPlayerInfo() {
             return this.$store.getters.currentPlayerInfo;
         },
+        benchmarkSets() { return this.$store.getters.benchmarkSets; },
+        selectedSet() { return this.benchmarkSets.find(set => set.id === this.$route.query.benchmark) || this.benchmarkSets[0]; },
         currentTab() {
-            return {
-                value: this.dropdownElements[
-                    this.currentTabIndex
-                ].toLowerCase(),
-                label: this.dropdownElements[this.currentTabIndex],
-            };
+            const label = this.dropdownElements.find(value => value.toLowerCase() === this.$route.query.level) || "Advanced";
+            return { value: label.toLowerCase(), label };
         },
         VTBenchmarks() {
-            switch (this.currentTab.value) {
-                case "advanced":
-                    return this.$store.getters.VTAdvanced;
-                case "intermediate":
-                    return this.$store.getters.VTIntermediate;
-                case "novice":
-                    return this.$store.getters.VTNovice;
-                default:
-                    return this.$store.getters.VTAdvanced;
-            }
+            return this.selectedSet.results[`VT${this.currentTab.label}`];
         },
 
         colorLookup() {
@@ -140,36 +110,7 @@ export default {
                 Celestial: "text-celestial",
             };
         },
-        mappedEnergy() {
-            let energyList;
-            let rankList;
-            switch (this.currentTab.value) {
-                case "advanced":
-                    energyList = advancedEnergy;
-                    rankList = advancedRanks;
-                    break;
-                case "intermediate":
-                    energyList = intermediateEnergy;
-                    rankList = intermediateRanks;
-                    break;
-                case "novice":
-                    energyList = noviceEnergy;
-                    rankList = noviceRanks;
-                    break;
-                default:
-                    break;
-            }
-            return this.VTBenchmarks.subCategoryEnergy.map((energy, index) => {
-                return {
-                    rank:
-                        energy < energyList[1]
-                            ? "Unranked"
-                            : rankList[Math.floor(energy / 100) * 100],
-                    energy,
-                    category: categories[index],
-                };
-            });
-        },
+        mappedEnergy() { return this.VTBenchmarks.categories; },
         rankList() {
             switch (this.currentTab.value) {
                 case "advanced":
@@ -194,35 +135,10 @@ export default {
                 return `/rank-img/${rankType.toLowerCase()}.png`;
             }
         },
-        energyBar(energy) {
-            let energyList = null;
-            let value = 0;
-            let max = 0;
-            switch (this.currentTab.value) {
-                case "advanced":
-                    energyList = advancedEnergy;
-                    max = energy < 900 ? 900 : 100;
-                    break;
-                case "intermediate":
-                    energyList = intermediateEnergy;
-                    max = energy < 500 ? 500 : 100;
-                    break;
-                case "novice":
-                    energyList = noviceEnergy;
-                    max = 100;
-                    break;
-            }
-            if (energy >= energyList[4]) value = 100;
-            else if (energy < energyList[1]) value = energy;
-            else value = energy % 100;
-            return {
-                value,
-                max,
-            };
-        },
-        handleDropdownSelect(index) {
-            this.currentTabIndex = index;
-        },
+        selectSet(id) { this.$router.push({ query: { benchmark: id, level: this.currentTab.value } }); },
+        selectLevel(level) { this.$router.push({ query: { benchmark: this.selectedSet.id, level } }); },
+        historyLink(taskId) { return `/profile/${encodeURIComponent(this.currentPlayerInfo.username)}/tasks/${encodeURIComponent(taskId)}/runs`; },
+        showBestRun(bench) { openRunDetails({ username: this.currentPlayerInfo.username, taskId: bench.id, taskName: bench.name, weapon: bench.weapon, score: bench.maxScore }); },
         toggleBenchDetails(bench) {
             bench.detailsOpen = !bench.detailsOpen;
         },
@@ -236,35 +152,7 @@ export default {
                 this.actionError = "Could not open this task. Try again.";
             }
         },
-        async replayLink(taskId, weapon) {
-            this.actionError = "";
-            this.replayLoading = true;
-            try {
-                const link = await findReplay(
-                    this.currentPlayerInfo.username,
-                    taskId,
-                    weapon
-                );
-                if (link) window.open(link, "_blank");
-                else this.actionError = "Replay not found.";
-            } catch (error) {
-                console.error(error);
-                this.actionError = "Could not find this replay. Try again.";
-            } finally {
-                this.replayLoading = false;
-            }
-        },
     },
 };
 </script>
 
-<style scoped>
-#category-bar {
-    min-width: 788px;
-    left: 64px;
-    top: 60px;
-}
-#category-bar span {
-    transform: scale(-1, -1);
-}
-</style>
