@@ -221,11 +221,12 @@ query PlayerTaskSummary($userId: String!, $task: String!) {
 
 The last query is illustrative. For a production profile, constrain scope and validate payload size before asking for all grouped tasks. For replay decoding, query `avroSchema(clientId:AIMLAB,version:"2.0.0") { schema }` for the manifest’s `analyticsVersion`, obtain `replayUrl` only on demand, and fetch it immediately. Do not store the signed URL.
 
-## Later backend processing, scoped to the existing server
+## Backend processing status and follow-ups
 
-1. Add read-only profile, task and run endpoints beside the current paged leaderboard routes. The public Vercel proxy currently forwards only leaderboard paths, so these routes will need an explicit proxy change. Preserve task ID, normalized mode, weapon ID, task/asset version, source and fetch time in each response; make “unavailable” distinct from an empty history.
-2. Cache metadata and bounded public aggregates with explicit freshness. Fetch run pages on demand. Keep large replay files out of routine page loads and use bounded decoding jobs only when a user opens run detail.
-3. Normalize metric names and units by task/version. Store canonical score separately from derived charts. Validate score rules per scenario against real runs; avoid using package settings as an authority for historical server scoring without this check.
-4. Define data retention and access before persisting replay traces, location, account settings or social fields. Strip signed URLs and raw account identifiers from logs. An Aimlabs API grant may change both available fields and permissible use; recheck its terms before a production data pipeline.
+Staging now routes profile lookup, task search, task leaderboards, run lookup, and profile calculations through the VPS. The server computes weighted averages, totals, benchmark ranks, energy, points, and progress. Public responses omit signed URLs and raw replay traces. [The README lists the endpoints and request limits](../README.md#running-on-a-vps).
 
-Near-term product order: **run history with canonical scores → richer task page → player trends → optional replay detail**. Each step uses fields already demonstrated publicly, while leaving benchmarks and a full processing migration for separate work.
+Remaining work:
+
+1. Normalize metric units by task/version before cross-run comparisons or trend charts. Keep canonical scores separate from derived charts, and verify scenario score rules against real runs.
+2. Add bounded replay decoding jobs only for on-demand detail. Signed replay URLs expire and must not be stored.
+3. Define retention and access before persisting replay traces, location, account settings, or social fields. Recheck available fields and terms if an Aimlabs API grant changes access.

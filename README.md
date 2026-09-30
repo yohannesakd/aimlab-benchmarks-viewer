@@ -37,7 +37,7 @@ The Task is Presented as such, the option to launch Aimlab and play as well as w
 
 ## Data inventory
 
-[Aimlabs API data inventory](./docs/aimlabs-data-inventory.md) records verified run, scenario, player, and replay fields, access limits, query examples, and the later server migration path.
+[Aimlabs API data inventory](./docs/aimlabs-data-inventory.md) records verified run, scenario, player, and replay fields, access limits, query examples, backend routes, and remaining processing work.
 
 ## Running on a VPS
 
