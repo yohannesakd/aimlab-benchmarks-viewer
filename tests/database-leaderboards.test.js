@@ -4,7 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { test } from "node:test";
-import { benchmarkSets, refreshDatabase, sortColumnsFor } from "../server/refresh-database.js";
+import { refreshDatabase } from "../server/refresh-database.js";
+import { benchmarkSets, sortColumnsFor } from "../server/benchmark-registry.js";
 
 test("database refresh scores Easy Flick and Voltaic Novice without publishing partial data", async () => {
   const dataDir = await mkdtemp(join(tmpdir(), "aimlab-leaderboards-"));
@@ -131,6 +132,7 @@ test('season API pages and filters cannot mix six- and nine-group standings', as
       assert.equal((await getLeaderboardPage(mode, 1, 'clicking')).players[0].selectedPoints, season === 's3' ? 300 : 200);
       await assert.rejects(getLeaderboardPage(mode, 3, 'overall'), /out of range/);
       await assert.rejects(getLeaderboardPage(mode, 1, 'overall; DELETE FROM players'), /Invalid sort/);
+      await assert.rejects(getLeaderboardPage(mode, 1, 'constructor'), /Invalid sort/);
     }
     await assert.rejects(getLeaderboardPage('vt-aimlabs_s2-novice', 1, 'ninth'), /Invalid sort/);
     const response = { writeHead(status) { this.status = status; }, end(body) { this.body = JSON.parse(body); } };

@@ -51,9 +51,18 @@ export async function queryAimlabs(query, variables, missingDataMessage) {
       error.retryAfter = seconds;
       throw error;
     }
-    if (!response.ok) throw new Error(`Aimlabs returned HTTP ${response.status}`);
+    if (!response.ok) {
+      const error = new Error('Aimlabs provider request failed');
+      error.providerStatus = response.status;
+      throw error;
+    }
     const payload = await readBoundedJson(response);
-    if (payload.errors?.length || !payload.data?.Trainer) throw new Error(missingDataMessage);
+    if (payload.errors?.length || !payload.data?.Trainer) {
+      const error = new Error(missingDataMessage);
+      error.providerCodes = [...new Set((payload.errors || []).map(item => item.extensions?.code)
+        .filter(code => typeof code === 'string' && /^[A-Z][A-Z0-9_]{0,63}$/.test(code)))];
+      throw error;
+    }
     return payload.data.Trainer;
   } finally {
     activeRequests--;

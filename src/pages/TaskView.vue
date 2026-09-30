@@ -20,11 +20,11 @@
         <h2 class="leaderboard-heading">Task scores</h2>
         <div class="task-score-row task-score-head" aria-hidden="true"><span>Rank</span><span>Player</span><span>Score</span><span>Hits</span><span>Accuracy</span><span>Run</span></div>
         <div v-for="(task, index) in currentTaskLeaderboard.data" :key="index" class="task-score-row">
-          <span class="task-score-rank">{{ task.rank }}</span>
-          <router-link class="player-name" :to="'/profile/' + encodeURIComponent(task.username)">{{ task.username }}</router-link>
-          <span class="task-score-value">{{ task.score }}</span>
-          <span class="task-score-hits">{{ task.shotsHit }}</span>
-          <span class="task-score-accuracy">{{ task.accuracy }}</span>
+          <span class="task-score-rank"><span class="sr-only">Rank: </span>{{ task.rank }}</span>
+          <router-link class="player-name" :aria-label="`View ${task.username} profile`" :to="'/profile/' + encodeURIComponent(task.username)">{{ task.username }}</router-link>
+          <span class="task-score-value"><span class="sr-only">Score: </span>{{ task.score }}</span>
+          <span class="task-score-hits"><span class="sr-only">Hits: </span>{{ task.shotsHit }}</span>
+          <span class="task-score-accuracy"><span class="sr-only">Accuracy: </span>{{ task.accuracy }}</span>
           <button type="button" class="task-run text-link" :disabled="!task.playId" @click="showRun(task)">View run →</button>
         </div>
         <p v-if="!currentTaskLeaderboard.data?.length" class="status-panel">Aimlabs has no leaderboard scores for this task.</p>
@@ -69,7 +69,7 @@
 import { mapGetters } from "vuex";
 import { fetchData } from "../helpers/api.js";
 import { openRunDetails } from "../helpers/runDetails.js";
-import { taskDeepLink } from "../helpers/functions.js";
+import { taskDeepLink } from "../helpers/taskLinks.js";
 export default {
   props: ["taskId"],
   data() {

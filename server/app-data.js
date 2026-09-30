@@ -1,27 +1,13 @@
 import { queryAimlabs } from "./aimlabs-graphql.js";
 import { GET_USER_INFO, GET_USER_PLAYS_AGG, GET_TASK_BY_ID, GET_TASKS_BY_NAME, GET_TASK_LEADERBOARD } from "./app-queries.js";
-import { cleanUpUserTasks, cleanUpBenchmarkTasks, calculateRevosectBenchmarks } from "../src/helpers/functions.js";
+import { cleanUpUserTasks, cleanUpBenchmarkTasks, calculateRevosectBenchmarks } from "./benchmark-calculations.js";
 import { publicRun, runFields } from "./player-runs.js";
 
 import { voltaicSeasons, calculateVoltaicSeason, calculateRevosectSeason } from './benchmark-seasons.js';
-import { sortColumnsFor } from './refresh-database.js';
+import { sortColumnsFor } from './benchmark-registry.js';
 
-const cache = new Map();
-const pending = new Map();
-const cacheLifeMs = 60_000;
-
-async function cached(key, load) {
-  const entry = cache.get(key);
-  if (entry && Date.now() - entry.savedAt < cacheLifeMs) return entry.value;
-  if (pending.has(key)) return pending.get(key);
-  const request = load().then((value) => {
-    if (cache.size >= 120) cache.delete(cache.keys().next().value);
-    cache.set(key, { savedAt: Date.now(), value });
-    return value;
-  }).finally(() => pending.delete(key));
-  pending.set(key, request);
-  return request;
-}
+import { createRequestCache } from './request-cache.js';
+const cached = createRequestCache({ ttlMs: 60_000, maxEntries: 120 });
 
 function notFound(message) {
   const error = new Error(message);
@@ -37,6 +23,7 @@ export function getProfileLookup(username) {
   });
 }
 
+/** @returns {import('./api-contracts.js').ProfileSnapshot} */
 export function calculateProfile(playerInfo, rows) {
   const tasks = cleanUpUserTasks(rows);
   const benchmarkTasks = cleanUpBenchmarkTasks(rows);
@@ -44,7 +31,7 @@ export function calculateProfile(playerInfo, rows) {
   for (const mode of ["hard", "medium", "easy"]) {
     benchmarks[`RA${mode[0].toUpperCase()}${mode.slice(1)}`] = calculateRevosectBenchmarks({ tasks: benchmarkTasks, id: playerInfo.id }, mode);
   }
-  return { playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", community: "revosect", label: "Series 2", results: benchmarks }, ...voltaicSeasons.map(definition => calculateVoltaicSeason(definition, rows)), calculateRevosectSeason(rows)] };
+  return { fetchedAt: new Date().toISOString(), playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", community: "revosect", label: "Series 2", results: benchmarks }, ...voltaicSeasons.map(definition => calculateVoltaicSeason(definition, rows)), calculateRevosectSeason(rows)] };
 }
 
 export function getProfile(username) {

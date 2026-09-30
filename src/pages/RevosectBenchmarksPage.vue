@@ -31,11 +31,11 @@
           <span v-else class="bench-rank" :class="colorLookup[bench.rank]"><img :src="getImagePath(bench.rank)" alt="" />{{ bench.rank }}</span>
           <span v-if="RABenchmarks.rankingAvailable === false">{{ bench.count ? Math.round(bench.avgScore).toLocaleString() : '—' }}</span>
           <span v-else class="bench-points"><span class="bench-point-value">{{ bench.points }}</span><progress-bar class="progress-bar" :value="bench.progress" color="bg-mainCyan"></progress-bar></span>
-          <button type="button" class="bench-expand" :aria-expanded="!!bench.detailsOpen" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
-            <chevron-icon direction="down" class="h-4 w-4" :class="{ 'rotate-180': bench.detailsOpen }"></chevron-icon>
+          <button type="button" class="bench-expand" :aria-expanded="!!expandedTasks[bench.id]" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
+            <chevron-icon direction="down" class="h-4 w-4" :class="{ 'rotate-180': expandedTasks[bench.id] }"></chevron-icon>
           </button>
         </div>
-        <div v-if="bench.detailsOpen" class="bench-details">
+        <div v-if="expandedTasks[bench.id]" class="bench-details">
           <p v-if="RABenchmarks.rankingAvailable !== false" class="field-label">Rank score requirements</p>
           <div v-if="RABenchmarks.rankingAvailable !== false" class="bench-threshold-wrap">
             <div class="bench-thresholds" :style="{ gridTemplateColumns: 'repeat(' + rankList.length + ', minmax(90px, 1fr))' }">
@@ -63,11 +63,11 @@
 </template>
 
 <script>
-import * as ra from "../helpers/revosectData.js";
 import {
     findWorkshopId,
     taskDeepLink,
-} from "@/helpers/functions.js";
+} from "@/helpers/taskLinks.js";
+import { rankImage } from "../helpers/rankAssets.js";
 import BenchmarkControls from "../components/BenchmarkControls.vue";
 import { openRunDetails } from "../helpers/runDetails.js";
 export default {
@@ -75,15 +75,7 @@ export default {
     data() {
         return {
             actionError: "",
-            categories: ["Clicking", "Tracking", "Switching"],
-            subCategories: [
-                "Static",
-                "Dynamic",
-                "Precise",
-                "Reactive",
-                "Flick",
-                "Track",
-            ],
+            expandedTasks: {},
             dropdownElements: ["Easy", "Medium", "Hard"],
         };
     },
@@ -97,34 +89,7 @@ export default {
             const label = this.dropdownElements.find(value => value.toLowerCase() === this.$route.query.level) || "Hard";
             return { value: label.toLowerCase(), label };
         },
-        rankList() {
-            switch (this.currentTab.value) {
-                case "hard":
-                    return [
-                        "Mythic",
-                        "Immortal",
-                        "Archon",
-                        "Ethereal",
-                        "Divine",
-                    ];
-
-                case "medium":
-                    return ["Ace", "Legend", "Sentinel", "Valour"];
-
-                case "easy":
-                    return ["Bronze", "Silver", "Gold", "Platinum"];
-            }
-        },
-        pointList() {
-            switch (this.currentTab.value) {
-                case "hard":
-                    return ra.hardSubPoints;
-                case "medium":
-                    return ra.mediumPoints;
-                case "easy":
-                    return ra.easySubPoints;
-            }
-        },
+        rankList() { return this.RABenchmarks.rankList || []; },
         RABenchmarks() {
             return this.selectedSet.results[`RA${this.currentTab.label}`];
         },
@@ -145,22 +110,20 @@ export default {
         subCategoryPoints() {
             return this.RABenchmarks.subCategoryPoints;
         },
-        displaySubCategories() {
-            return this.currentTab.value === "easy"
-                ? ["Static", "Dynamic", "Precise", "Flick"]
-                : this.subCategories;
-        },
+        displaySubCategories() { return this.RABenchmarks.subCategoryNames || []; },
+    },
+    watch: {
+        selectedSet() { this.expandedTasks = {}; },
+        currentTab() { this.expandedTasks = {}; },
     },
     methods: {
-        getImagePath(rank) {
-            return `/rank-img/ra/${rank.toLowerCase()}.png`;
-        },
+        getImagePath(rank) { return rankImage('revosect', rank); },
         selectSet(id) { this.$router.push({ query: { benchmark: id, level: this.currentTab.value } }); },
         selectLevel(level) { this.$router.push({ query: { benchmark: this.selectedSet.id, level } }); },
         historyLink(taskId) { return `/profile/${encodeURIComponent(this.currentPlayerInfo.username)}/tasks/${encodeURIComponent(taskId)}/runs`; },
         showBestRun(bench) { openRunDetails({ username: this.currentPlayerInfo.username, taskId: bench.id, taskName: bench.name, weapon: bench.weapon, score: bench.maxScore }); },
         toggleBenchDetails(bench) {
-            bench.detailsOpen = !bench.detailsOpen;
+            this.expandedTasks[bench.id] = !this.expandedTasks[bench.id];
         },
         async handlePlayScenario(bench) {
             this.actionError = "";

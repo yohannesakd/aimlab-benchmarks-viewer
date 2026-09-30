@@ -41,6 +41,7 @@
 </style>
 
 <script>
+import { fetchData } from "../helpers/api.js";
 export default {
   props: { username: String },
   data() {
@@ -67,9 +68,7 @@ export default {
       this.isLoading = true;
       this.loadError = "";
       try {
-        const response = await fetch(`/api/profiles/${encodeURIComponent(username)}/activity`);
-        const body = await response.json().catch(() => null);
-        if (!response.ok || !body) throw new Error("Training activity is unavailable. Try again.");
+        const body = await fetchData(`/api/profiles/${encodeURIComponent(username)}/activity`);
         if (version === this.requestVersion) this.activity = body;
       } catch (error) {
         if (version === this.requestVersion) this.loadError = error.message;

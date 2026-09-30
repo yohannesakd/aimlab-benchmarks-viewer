@@ -10,7 +10,7 @@
     <div v-else-if="error" class="modal-status" role="alert">
       <p>{{ error }}</p><button type="button" class="text-link" @click="load">Try again</button>
     </div>
-    <div v-else-if="run" class="modal-content">
+    <div v-else-if="selection && run" class="modal-content">
       <div class="run-summary"><strong>{{ run.score.toLocaleString() }} points</strong><router-link class="text-link" :to="`/profile/${encodeURIComponent(selection.username)}`" @click="close">{{ selection.username }}</router-link><time>{{ dateLabel }}</time></div>
       <section v-if="performance.length">
         <h3>Performance</h3>
@@ -32,7 +32,7 @@
 <script>
 import { selectedRun, closeRunDetails } from "../helpers/runDetails.js";
 import { fetchData } from "../helpers/api.js";
-import { replayDeepLink } from "../helpers/functions.js";
+import { replayDeepLink } from "../helpers/taskLinks.js";
 
 export default {
   data() { return { run: null, loading: false, error: "", controller: null, previousOverflow: null }; },
@@ -68,6 +68,9 @@ export default {
     selection: { async handler(selection) {
       this.controller?.abort();
       if (!selection) {
+        this.run = null;
+        this.loading = false;
+        this.error = "";
         this.$refs.dialog.close();
         this.restoreScroll();
         return;

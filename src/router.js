@@ -1,20 +1,20 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-import HomePage from "./pages/HomePage.vue";
-import ProfileSearch from "./pages/ProfileSearch.vue";
-import TaskSearch from "./pages/TaskSearch.vue";
-import PlayerProfile from "./pages/PlayerProfile.vue";
-import PlayerTasksOverview from "./pages/PlayerTasksOverview.vue";
-import PlayerActivityPage from "./pages/PlayerActivityPage.vue";
-import RevosectBenchmarksPage from "./pages/RevosectBenchmarksPage.vue";
-import VoltaicBenchmarksPage from "./pages/VoltaicBenchmarksPage.vue";
-import LeaderboardsPage from "./pages/LeaderboardsPage.vue";
-import BenchmarkLeaderboardsPage from "./pages/BenchmarkLeaderboardsPage.vue";
-import TaskView from "./pages/TaskView.vue";
-import PlayerRunsPage from "./pages/PlayerRunsPage.vue";
-import AboutPage from "./pages/AboutPage.vue";
+const HomePage = () => import('./pages/HomePage.vue');
+const ProfileSearch = () => import('./pages/ProfileSearch.vue');
+const TaskSearch = () => import('./pages/TaskSearch.vue');
+const PlayerProfile = () => import('./pages/PlayerProfile.vue');
+const PlayerTasksOverview = () => import('./pages/PlayerTasksOverview.vue');
+const PlayerActivityPage = () => import('./pages/PlayerActivityPage.vue');
+const RevosectBenchmarksPage = () => import('./pages/RevosectBenchmarksPage.vue');
+const VoltaicBenchmarksPage = () => import('./pages/VoltaicBenchmarksPage.vue');
+const LeaderboardsPage = () => import('./pages/LeaderboardsPage.vue');
+const BenchmarkLeaderboardsPage = () => import('./pages/BenchmarkLeaderboardsPage.vue');
+const TaskView = () => import('./pages/TaskView.vue');
+const PlayerRunsPage = () => import('./pages/PlayerRunsPage.vue');
+const AboutPage = () => import('./pages/AboutPage.vue');
 
-import BenchmarkCatalogPage from './pages/BenchmarkCatalogPage.vue';
+const BenchmarkCatalogPage = () => import('./pages/BenchmarkCatalogPage.vue');
 
 const router = createRouter({
   history: createWebHistory(),

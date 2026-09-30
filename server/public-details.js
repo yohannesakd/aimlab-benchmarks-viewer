@@ -1,3 +1,4 @@
+import { createRequestCache } from "./request-cache.js";
 import { queryAimlabs } from "./aimlabs-graphql.js";
 
 const cacheLifeMs = 60_000;
@@ -43,7 +44,7 @@ const activityQuery = `
   }
 `;
 
-const cache = new Map();
+const cached = createRequestCache({ ttlMs: cacheLifeMs, maxEntries: maxCacheEntries });
 
 function send(response, status, body, headers = {}) {
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8", ...headers });
@@ -51,18 +52,16 @@ function send(response, status, body, headers = {}) {
 }
 
 async function requestDetails(key, query, variables, normalize) {
-  const cached = cache.get(key);
-  if (cached && Date.now() - cached.savedAt < cacheLifeMs) return cached.result;
-  const trainer = await queryAimlabs(query, variables, "Aimlabs did not return public details");
-  const result = normalize(trainer);
-  if (!result) {
-    const error = new Error("Not found");
-    error.status = 404;
-    throw error;
-  }
-  if (cache.size >= maxCacheEntries) cache.delete(cache.keys().next().value);
-  cache.set(key, { savedAt: Date.now(), result });
-  return result;
+  return cached(key, async () => {
+    const trainer = await queryAimlabs(query, variables, "Aimlabs did not return public details");
+    const result = normalize(trainer);
+    if (!result) {
+      const error = new Error("Not found");
+      error.status = 404;
+      throw error;
+    }
+    return result;
+  });
 }
 
 function achievementValue(metrics, slug) {

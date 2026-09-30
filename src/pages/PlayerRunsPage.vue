@@ -68,6 +68,7 @@
 </style>
 
 <script>
+import { fetchData } from "../helpers/api.js";
 import { openRunDetails } from "../helpers/runDetails.js";
 
 export default {
@@ -116,10 +117,7 @@ export default {
       const path = `/api/profiles/${encodeURIComponent(this.username)}/tasks/${encodeURIComponent(this.taskId)}/runs`;
       const url = this.afterCursor ? `${path}?after=${encodeURIComponent(this.afterCursor)}` : path;
       try {
-        const response = await fetch(url);
-        const body = await response.json().catch(() => null);
-        if (!response.ok) throw new Error(body?.error || "Run history is unavailable. Try again.");
-        if (!body) throw new Error("Run history is unavailable. Try again.");
+        const body = await fetchData(url);
         if (version === this.requestVersion) this.history = body;
       } catch (error) {
         if (version === this.requestVersion) this.loadError = error.message;

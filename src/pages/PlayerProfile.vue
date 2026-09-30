@@ -12,15 +12,14 @@
 
     <p v-if="saveError" class="muted season-note" role="status">{{ saveError }}</p>
     <div v-if="isLoading" class="panel status-panel"><loading-spinner></loading-spinner></div>
-    <div v-else-if="loadError" class="panel status-panel" role="alert">{{ loadError }}</div>
-    <template v-else>
+    <div v-if="loadError" class="panel status-panel" role="alert">{{ loadError }} <button class="text-link" @click="loadPlayer(username)">Try again</button></div>
+    <template v-if="!isLoading && currentPlayerInfo.username === username">
       <section class="panel profile-summary" aria-label="Player statistics">
         <div class="profile-identity">
           <img v-if="publicDetails?.imageUrl" class="profile-avatar" :src="publicDetails.imageUrl" alt="" />
           <div class="profile-name">
             <strong class="profile-username">{{ currentPlayerInfo.username }}</strong>
             <span class="muted profile-aimlab">Aimlab {{ currentPlayerInfo.rank }} · {{ Math.floor(currentPlayerInfo.skill || 0) }} skill</span>
-            <progress-bar class="profile-progress" :value="playerSkill" color="bg-mainCyan"></progress-bar>
           </div>
         </div>
         <dl class="profile-stats">
@@ -51,7 +50,6 @@
 .profile-name { min-width: 0; }
 .profile-username { display: block; font-size: 1.1rem; font-weight: 600; overflow-wrap: anywhere; }
 .profile-aimlab { display: block; margin-top: 3px; font-size: .75rem; }
-.profile-progress { max-width: 210px; height: 4px; margin-top: 9px; background: var(--raised); }
 .profile-stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0; }
 .profile-stats > div { min-width: 0; padding: 17px 12px; border-right: 1px solid var(--line); }
 .profile-stats > div:last-child { border-right: 0; }
@@ -82,6 +80,8 @@ export default {
       isLoading: false,
       loadError: "",
       requestVersion: 0,
+      profileController: null,
+      detailsController: null,
       publicDetails: null,
       detailsError: "",
       detailsVersion: 0,
@@ -98,14 +98,6 @@ export default {
     ...mapGetters([
       "currentPlayerInfo",
     ]),
-    playerSkill() {
-      if (this.currentPlayerInfo.skill) {
-        if (this.currentPlayerInfo.skill == 1000) return 100;
-        return this.currentPlayerInfo.skill % 100;
-      } else {
-        return 0;
-      }
-    },
     tasksPlayed() {
       return this.$store.getters.tasksPlayed;
     },
@@ -122,6 +114,8 @@ export default {
   beforeUnmount() {
     this.requestVersion++;
     this.detailsVersion++;
+    this.profileController?.abort();
+    this.detailsController?.abort();
   },
   methods: {
     toggleSavedProfile() {
@@ -133,12 +127,12 @@ export default {
     },
     async loadPublicDetails(username) {
       const version = ++this.detailsVersion;
+      this.detailsController?.abort();
+      this.detailsController = new AbortController();
       this.publicDetails = null;
       this.detailsError = "";
       try {
-        const response = await fetch(`/api/profiles/${encodeURIComponent(username)}/details`);
-        const details = await response.json().catch(() => null);
-        if (!response.ok || !details) throw new Error("Additional Aimlabs details unavailable");
+        const details = await fetchData(`/api/profiles/${encodeURIComponent(username)}/details`, { signal: this.detailsController.signal });
         if (version === this.detailsVersion) this.publicDetails = details;
       } catch (error) {
         if (version === this.detailsVersion) this.detailsError = error.message;
@@ -149,26 +143,20 @@ export default {
     },
     async loadPlayer(username) {
       const version = ++this.requestVersion;
-      if (username === this.currentPlayerInfo.username) {
-        this.isLoading = false;
-        this.loadError = "";
-        return;
-      }
-      this.isLoading = true;
+      this.profileController?.abort();
+      this.profileController = new AbortController();
+      this.isLoading = username !== this.currentPlayerInfo.username;
       this.loadError = "";
 
       try {
-        const data = await fetchData(`/api/profiles/${encodeURIComponent(username)}`);
+        const data = await fetchData(`/api/profiles/${encodeURIComponent(username)}`, { signal: this.profileController.signal });
         if (version !== this.requestVersion) return;
-        const playerInfo = data.playerInfo;
-        this.$store.dispatch("updateCurrentPlayerInfo", playerInfo);
-        this.$store.dispatch("updateCurrentPlayerTasks", data.tasks);
-        this.$store.dispatch("updateTotals", data.totals);
-        this.$store.dispatch("setPlayerBenchmarks", data.benchmarkSets);
+        this.$store.dispatch("setProfileSnapshot", { ...data, fetchedAt: data.fetchedAt || new Date().toISOString() });
       } catch (error) {
         if (version === this.requestVersion) {
-          console.error(error);
-          this.loadError = "Could not load this profile. Try again.";
+          this.loadError = username === this.currentPlayerInfo.username
+            ? `Could not refresh. Showing the profile fetched at ${new Date(this.$store.getters.profileFetchedAt).toLocaleString()}.`
+            : "Could not load this profile.";
         }
       } finally {
         if (version === this.requestVersion) this.isLoading = false;

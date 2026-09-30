@@ -72,7 +72,6 @@ export default {
     currentPlayerTasks() {
       let taskList = [...this.$store.getters.currentPlayerTasks];
       if (this.searchQuery) {
-        this.currentPage = 0;
         return taskList.filter((task) =>
           task.name.toLowerCase().includes(this.searchQuery.toLowerCase())
         );
@@ -111,6 +110,10 @@ export default {
         pages.push(this.paginatedTaskList.pageCount + 1);
       return pages;
     },
+  },
+  watch: {
+    searchQuery() { this.currentPage = 0; },
+    '$store.getters.currentPlayerTasks'() { this.currentPage = 0; },
   },
 };
 </script>

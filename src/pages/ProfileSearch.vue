@@ -26,7 +26,6 @@
 
 <script>
 import { fetchData } from "../helpers/api.js";
-import debounce from "lodash/debounce";
 export default {
   data() {
     return {
@@ -34,7 +33,8 @@ export default {
       playerInfo: {},
       isLoading: false,
       searchError: false,
-      debouncedSearch: null,
+      searchTimer: null,
+      requestVersion: 0,
     };
   },
   computed: {
@@ -42,15 +42,19 @@ export default {
       return "/profile/" + encodeURIComponent(this.playerInfo.username);
     },
   },
-  created() {
-    this.debouncedSearch = debounce(() => this.searchUser(), 600);
-  },
   beforeUnmount() {
-    this.debouncedSearch.cancel();
+    clearTimeout(this.searchTimer);
+    this.requestVersion++;
   },
   methods: {
+    debouncedSearch() {
+      clearTimeout(this.searchTimer);
+      this.requestVersion++;
+      this.searchTimer = setTimeout(() => this.searchUser(), 600);
+    },
     async searchUser() {
       const username = this.usernameInput;
+      const version = ++this.requestVersion;
       this.playerInfo = {};
       this.searchError = false;
       if (!username) {
@@ -60,17 +64,17 @@ export default {
       this.isLoading = true;
       try {
         const data = await fetchData(`/api/profiles/${encodeURIComponent(username)}/lookup`);
-        if (username !== this.usernameInput) return;
+        if (version !== this.requestVersion) return;
         this.playerInfo = data;
         window.umami?.track("profile-search", { result: "found" });
       } catch (error) {
-        if (username === this.usernameInput) {
+        if (version === this.requestVersion) {
           console.error(error);
           this.searchError = error.status !== 404;
           window.umami?.track("profile-search", { result: "error" });
         }
       } finally {
-        if (username === this.usernameInput) this.isLoading = false;
+        if (version === this.requestVersion) this.isLoading = false;
       }
     },
   },

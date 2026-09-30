@@ -28,21 +28,13 @@ import {
     mediumBench,
     easyBench,
 } from "./revosectData.js";
-import { fetchData } from "./api.js";
-import _ from "lodash";
+function groupBy(items, key) {
+    const groups = {};
+    for (const item of items) (groups[item[key]] ||= []).push(item);
+    return groups;
+}
 
 
-export async function findWorkshopId(taskId) {
-    const task = await fetchData(`/api/tasks/${encodeURIComponent(taskId)}`);
-    if (!task.workshop_id) throw new Error("Task has no workshop ID");
-    return task.workshop_id;
-}
-export function taskDeepLink(workshopId) {
-    return `https://go.aimlab.gg/v1/redirects?link=aimlab://workshop?id=${workshopId}&source=EEDCC708991834C0&link=steam://rungameid/714010`;
-}
-export function replayDeepLink(playId) {
-    return `https://go.aimlab.gg/v1/redirects?link=aimlab%3a%2f%2fcompare%3fid%3d${playId}%26source%3d84966503A24BD515&link=steam%3a%2f%2frungameid%2f714010`;
-}
 const benchmarkTaskWeapons = new Set(
     [
         ...advancedBench,
@@ -158,7 +150,7 @@ export function caclulateVT(playerTasks, playerBench, mode) {
         }
     }
     playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
-    const grouped = _.groupBy(playerBench, "categoryID");
+    const grouped = groupBy(playerBench, "categoryID");
     const allEnergyList = playerBench.map((bench) => bench.energy);
     const categoryEnergyList = Object.entries(grouped).map(([_, group]) => {
         return Math.max(...group.map(({ energy }) => energy));
@@ -327,7 +319,7 @@ export function calculateRevosectBenchmarks(playerData, mode) {
 
     playerBenchmarks.sort((a, b) => a.scenarioID - b.scenarioID);
     const allPointsList = playerBenchmarks.map((bench) => bench.points);
-    const subCategoryGroupedBenchmarks = _.groupBy(
+    const subCategoryGroupedBenchmarks = groupBy(
         playerBenchmarks,
         "categoryID"
     );
@@ -396,10 +388,13 @@ export function calculateRevosectBenchmarks(playerData, mode) {
     return {
         overallPoints,
         overallRank,
+        rankingAvailable: true,
+        rankList: benchmarkSubPointsList.map(points => ({ hard: hardSubRanks, medium: mediumSubRanks, easy: easySubRanks }[mode][points])),
+        rankRequirements: benchmarkPointsList.map((points, index) => ({ rank: benchmarkRankList[points], points, minimumSubcategoryPoints: benchmarkSubPointsList[index] })),
+        subCategoryNames: mode === 'easy' ? ['Static', 'Dynamic', 'Precise', 'Flick'] : ['Static', 'Dynamic', 'Precise', 'Reactive', 'Flick', 'Track'],
         allPoints: allPointsList,
         subCategoryPoints: aggregateSubCategoryPoints,
         benchmarks: playerBenchmarks,
-        detailsOpen: false,
     };
 }
 function getPlayerBenchmarkResults(playerTasks, benchData, mode) {

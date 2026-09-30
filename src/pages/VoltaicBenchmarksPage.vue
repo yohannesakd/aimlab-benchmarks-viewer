@@ -33,11 +33,11 @@
           <button v-if="bench.count" type="button" class="bench-score text-link" :aria-label="`Open run for ${bench.name}: ${bench.maxScore} points`" @click="showBestRun(bench)">{{ bench.maxScore.toLocaleString() }}</button><span v-else class="bench-score">—</span>
           <span class="bench-rank" :class="colorLookup[bench.rank]"><img :src="getImagePath(bench.rank, 'badge')" alt="" />{{ bench.rank }}</span>
           <span class="bench-points"><span class="bench-point-value">{{ bench.energy }}</span><progress-bar class="progress-bar" :value="bench.energyProgress.value" :max="bench.energyProgress.max" color="bg-mainCyan"></progress-bar></span>
-          <button type="button" class="bench-expand" :aria-expanded="!!bench.detailsOpen" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
-            <chevron-icon direction="down" class="h-4 w-4" :class="{ 'rotate-180': bench.detailsOpen }"></chevron-icon>
+          <button type="button" class="bench-expand" :aria-expanded="!!expandedTasks[bench.id]" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
+            <chevron-icon direction="down" class="h-4 w-4" :class="{ 'rotate-180': expandedTasks[bench.id] }"></chevron-icon>
           </button>
         </div>
-        <div v-if="bench.detailsOpen" class="bench-details">
+        <div v-if="expandedTasks[bench.id]" class="bench-details">
           <p class="field-label">Rank score requirements</p>
           <div class="bench-threshold-wrap">
             <div class="bench-thresholds" :style="{ gridTemplateColumns: 'repeat(' + rankList.length + ', minmax(90px, 1fr))' }">
@@ -68,7 +68,8 @@
 import {
     findWorkshopId,
     taskDeepLink,
-} from "../helpers/functions";
+} from "../helpers/taskLinks.js";
+import { rankImage } from "../helpers/rankAssets.js";
 import BenchmarkControls from "../components/BenchmarkControls.vue";
 import { openRunDetails } from "../helpers/runDetails.js";
 export default {
@@ -76,6 +77,7 @@ export default {
     data() {
         return {
             actionError: "",
+            expandedTasks: {},
             dropdownElements: ["Novice", "Intermediate", "Advanced"],
         };
     },
@@ -110,37 +112,20 @@ export default {
             };
         },
         mappedEnergy() { return this.VTBenchmarks.categories; },
-        rankList() {
-            if (this.VTBenchmarks.rankList) return this.VTBenchmarks.rankList;
-            switch (this.currentTab.value) {
-                case "advanced":
-                    return ["Grandmaster", "Nova", "Astra", "Celestial"];
-
-                case "intermediate":
-                    return ["Platinum", "Diamond", "Jade", "Master"];
-
-                case "novice":
-                    return ["Iron", "Bronze", "Silver", "Gold"];
-            }
-        },
+        rankList() { return this.VTBenchmarks.rankList; },
+    },
+    watch: {
+        selectedSet() { this.expandedTasks = {}; },
+        currentTab() { this.expandedTasks = {}; },
     },
     methods: {
-        getImagePath(rank, option) {
-            if (!rank) return "";
-            let rankType = rank.replace(/ /g, "");
-            if (option == "badge") {
-                return `/rank-img/${rankType.toLowerCase()}_badge.png`;
-            } else if (option == "medal") {
-                if (rankType.endsWith("Complete")) return `/rank-img/${rankType.toLowerCase()}_badge.png`;
-                return `/rank-img/${rankType.toLowerCase()}.png`;
-            }
-        },
+        getImagePath(rank, option) { return rankImage('voltaic', rank, option); },
         selectSet(id) { this.$router.push({ query: { benchmark: id, level: this.currentTab.value } }); },
         selectLevel(level) { this.$router.push({ query: { benchmark: this.selectedSet.id, level } }); },
         historyLink(taskId) { return `/profile/${encodeURIComponent(this.currentPlayerInfo.username)}/tasks/${encodeURIComponent(taskId)}/runs`; },
         showBestRun(bench) { openRunDetails({ username: this.currentPlayerInfo.username, taskId: bench.id, taskName: bench.name, weapon: bench.weapon, score: bench.maxScore }); },
         toggleBenchDetails(bench) {
-            bench.detailsOpen = !bench.detailsOpen;
+            this.expandedTasks[bench.id] = !this.expandedTasks[bench.id];
         },
         async handlePlayScenario(bench) {
             this.actionError = "";

@@ -1,7 +1,8 @@
 import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { benchmarkSets, seasonModes, sortColumnsFor } from "./refresh-database.js";
+import { benchmarkSets, seasonModes, sortColumnsFor } from "./benchmark-registry.js";
+import { validatePublication } from './benchmark-publication.js';
 
 const dataDir = resolve(process.env.AIMLAB_DATA_DIR || "data");
 const pageSize = 25;
@@ -12,26 +13,33 @@ async function databaseFor(mode) {
   const file = await stat(path);
   let cached = openDatabases.get(mode);
   if (!cached || cached.modified !== file.mtimeMs) {
-    cached?.database.close();
     const database = new DatabaseSync(path, { readOnly: true });
-    cached = {
-      database,
-      modified: file.mtimeMs,
-      total: database.prepare("SELECT count(*) AS total FROM players").get().total,
-      generatedAt: database.prepare("SELECT value FROM metadata WHERE key = 'generatedAt'").get().value,
-      categories: JSON.parse(database.prepare("SELECT value FROM metadata WHERE key = 'categories'").get().value),
-    };
+    let replacement;
+    try {
+      const metadata = Object.fromEntries(database.prepare('SELECT key, value FROM metadata').all().map(row => [row.key, row.value]));
+      replacement = {
+        database,
+        modified: file.mtimeMs,
+        provenance: validatePublication(mode, metadata, process.env.AIMLAB_REQUIRE_VERSIONED_DATA === '1'),
+        total: database.prepare('SELECT count(*) AS total FROM players').get().total,
+        generatedAt: metadata.generatedAt,
+        categories: JSON.parse(metadata.categories),
+      };
+    } catch (error) { database.close(); throw error; }
+    cached?.database.close();
+    cached = replacement;
     openDatabases.set(mode, cached);
   }
   return cached;
 }
 
 export async function getLeaderboardPage(mode, page, sort) {
-  if (!benchmarkSets[mode]) throw new RangeError("Unknown benchmark mode");
+  if (!Object.hasOwn(benchmarkSets, mode)) throw new RangeError("Unknown benchmark mode");
   if (!Number.isSafeInteger(page) || page < 1) throw new RangeError("Invalid page");
-  const column = sortColumnsFor(mode)[sort];
-  if (!column) throw new RangeError("Invalid sort");
-  const { database, total, generatedAt, categories } = await databaseFor(mode);
+  const columns = sortColumnsFor(mode);
+  if (!Object.hasOwn(columns, sort)) throw new RangeError("Invalid sort");
+  const column = columns[sort];
+  const { database, total, generatedAt, categories, provenance } = await databaseFor(mode);
   const pageCount = Math.ceil(total / pageSize);
   if (page > Math.max(1, pageCount)) throw new RangeError("Page is out of range");
   const rows = database.prepare(`
@@ -44,6 +52,7 @@ export async function getLeaderboardPage(mode, page, sort) {
     mode,
     benchmarkSet: seasonModes[mode]?.definition.id || "legacy",
     generatedAt,
+    provenance,
     total,
     page,
     pageSize,
@@ -78,7 +87,7 @@ export async function handleLeaderboardRequest(request, response, pathname, sear
     });
     response.end(JSON.stringify(result));
   } catch (error) {
-    const status = error instanceof RangeError ? 400 : error.code === "ENOENT" ? 503 : 500;
+    const status = error instanceof RangeError ? 400 : error.status === 503 || error.code === "ENOENT" ? 503 : 500;
     if (status === 500) console.error(error);
     response.writeHead(status, { "Content-Type": "application/json" });
     response.end(JSON.stringify({ error: status === 503 ? "Leaderboard is being prepared" : status === 400 ? error.message : "Leaderboard request failed" }));

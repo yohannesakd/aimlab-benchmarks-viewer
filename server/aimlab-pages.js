@@ -4,18 +4,29 @@ const pageNames = Array.from(
   { length: pagesPerRequest },
   (_, index) => `page${index}`
 );
-const query = `query getAimlabLeaderboards(${pageNames
-  .map((name) => `$${name}: LeaderboardInput!`)
-  .join(", ")}) {
-  aimlab {
-    ${pageNames
-      .map(
-        (name) =>
-          `${name}: leaderboard(input: $${name}) { metadata { totalRows } data }`
-      )
-      .join("\n    ")}
+const providers = {
+  legacy: { endpoint: 'https://api.aimlab.gg/graphql', input: 'LeaderboardInput', scope: 'aimlab' },
+  trainer: { endpoint: 'https://api.aimlabs.com/graphql', input: 'Trainer_LeaderboardInput', scope: 'Trainer { aimlab' },
+};
+function queryFor(provider) {
+  return `query getAimlabLeaderboards(${pageNames.map(name => `$${name}: ${provider.input}!`).join(', ')}) {
+    ${provider.scope} {
+      ${pageNames.map(name => `${name}: leaderboard(input: $${name}) { metadata { totalRows } data }`).join('\n')}
+    } ${provider.input === 'Trainer_LeaderboardInput' ? '}' : ''}
+  }`;
+}
+
+// Bulk pages have a separate budget from 1 MB interactive reads.
+async function readBulkJson(response) {
+  const chunks = [];
+  let bytes = 0;
+  for await (const chunk of response.body) {
+    bytes += chunk.length;
+    if (bytes > 8_000_000) throw new Error('Aimlabs bulk response exceeded 8 MB');
+    chunks.push(chunk);
   }
-}`;
+  return { body: JSON.parse(Buffer.concat(chunks).toString('utf8')), bytes };
+}
 
 let nextRequestAt = 0;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -25,17 +36,19 @@ async function pace() {
   nextRequestAt = Date.now() + 500;
 }
 
-export async function fetchLeaderboardPage(bench, offset) {
+export async function fetchLeaderboardPage(bench, offset, { provider = 'legacy', onResponse } = {}) {
+  if (!Object.hasOwn(providers, provider)) throw new Error('Unknown collector provider');
+  const configuration = providers[provider];
   for (let attempt = 0; attempt < 6; attempt++) {
     await pace();
-    const response = await fetch("https://api.aimlab.gg/graphql", {
+    const response = await fetch(configuration.endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "User-Agent": "AimlabBenchmarksViewer/1.0",
       },
       body: JSON.stringify({
-        query,
+        query: queryFor(configuration),
         variables: Object.fromEntries(
           pageNames.map((name, index) => [
             name,
@@ -44,7 +57,7 @@ export async function fetchLeaderboardPage(bench, offset) {
               limit: pageSize,
               offset: offset + index * pageSize,
               taskId: bench.id,
-              taskMode: 0,
+              taskMode: bench.mode ?? 0,
               weaponId: bench.weapon,
             },
           ])
@@ -55,7 +68,9 @@ export async function fetchLeaderboardPage(bench, offset) {
 
     let body;
     try {
-      body = await response.json();
+      const result = await readBulkJson(response);
+      body = result.body;
+      onResponse?.({ provider, bytes: result.bytes, status: response.status });
     } catch (error) {
       if (response.status !== 429) throw error;
       body = {};
@@ -77,7 +92,8 @@ export async function fetchLeaderboardPage(bench, offset) {
         `Aimlab returned HTTP ${response.status} for ${bench.name}`
       );
     if (errors.length) throw new Error(errors.join("; "));
-    const first = body.data?.aimlab?.[pageNames[0]];
+    const aimlab = provider === 'trainer' ? body.data?.Trainer?.aimlab : body.data?.aimlab;
+    const first = aimlab?.[pageNames[0]];
     if (
       !Array.isArray(first?.data) ||
       !Number.isInteger(first.metadata?.totalRows)
@@ -90,7 +106,7 @@ export async function fetchLeaderboardPage(bench, offset) {
     const data = [];
     for (const [index, name] of pageNames.entries()) {
       if (offset + index * pageSize >= totalRows) break;
-      const page = body.data.aimlab[name];
+      const page = aimlab[name];
       if (
         !Array.isArray(page?.data) ||
         !Number.isInteger(page.metadata?.totalRows)

@@ -18,7 +18,7 @@
       <section v-else class="panel leaderboard-panel">
         <div class="standings-heading"><h2>{{ selectedSet.label }} · {{ levelLabel }}</h2><time v-if="pageData.generatedAt" :datetime="pageData.generatedAt">Updated {{ formatDate(pageData.generatedAt) }}</time></div>
         <div class="leaderboard-row leaderboard-row--head" aria-hidden="true"><span>Rank</span><span>Player</span><span>{{ community === 'voltaic' ? 'Energy' : 'Points' }}</span><span>Overall rank</span></div>
-        <router-link v-for="(player, index) in pageData.players" :key="player.username" class="leaderboard-row leaderboard-row--player" :to="{ path: '/profile/' + encodeURIComponent(player.username) + '/' + community, query: { benchmark: selectedSet.id, level } }">
+        <router-link v-for="(player, index) in pageData.players" :key="player.username" class="leaderboard-row leaderboard-row--player" :aria-label="`${(page - 1) * 25 + index + 1}. ${player.username}: ${player.selectedPoints} ${community === 'voltaic' ? 'energy' : 'points'}, overall rank ${player.overallRank}`" :to="{ path: '/profile/' + encodeURIComponent(player.username) + '/' + community, query: { benchmark: selectedSet.id, level } }">
           <span>{{ (page - 1) * 25 + index + 1 }}</span><span class="player-name">{{ player.username }}</span><span class="points">{{ player.selectedPoints.toLocaleString() }}</span><span class="rank-badge"><img :src="rankImage(player.overallRank)" alt="" /><span>{{ player.overallRank }}</span></span>
         </router-link>
         <p v-if="!pageData.total" class="status-panel">No standings yet.</p>
@@ -34,6 +34,7 @@
   </section>
 </template>
 <script>
+import { rankImage } from '../helpers/rankAssets.js';
 import BenchmarkControls from '../components/BenchmarkControls.vue';
 import { fetchData } from '../helpers/api.js';
 export default {
@@ -100,7 +101,7 @@ export default {
       } finally { if (version === this.requestVersion) this.loading = false; }
     },
     goToPage() { if (Number.isInteger(this.goToPageInput)) this.changePage(Math.min(Math.max(this.goToPageInput, 1), this.pageData.pageCount || 1)); this.goToPageInput = null; },
-    rankImage(rank) { return this.community === 'voltaic' ? `/rank-img/${rank.replace(/ /g, '').toLowerCase()}_badge.png` : `/rank-img/ra/${rank.toLowerCase()}.png`; },
+    rankImage(rank) { return rankImage(this.community, rank); },
     formatDate(value) { return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); },
   },
 };

@@ -5,13 +5,13 @@ import {
   caclulateVT,
   cleanUpBenchmarkTasks,
   cleanUpUserTasks,
-} from "../src/helpers/functions.js";
-import { easyBench, hardBench, mediumBench } from "../src/helpers/revosectData.js";
+} from "../server/benchmark-calculations.js";
+import { easyBench, hardBench, mediumBench } from "../server/revosectData.js";
 import {
   advancedBench,
   intermediateBench,
   noviceBench,
-} from "../src/helpers/voltaicData.js";
+} from "../server/voltaicData.js";
 
 const playsAt = (benchmarks, scoreIndex) =>
   benchmarks.map((bench) => ({

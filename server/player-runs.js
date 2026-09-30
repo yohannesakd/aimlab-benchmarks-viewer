@@ -1,3 +1,4 @@
+import { createRequestCache } from "./request-cache.js";
 import { queryAimlabs } from "./aimlabs-graphql.js";
 
 const pageSize = 12;
@@ -30,7 +31,7 @@ const query = `
   }
 `;
 
-const cache = new Map();
+const cached = createRequestCache({ ttlMs: cacheLifeMs, maxEntries: maxCacheEntries });
 
 function send(response, status, body, extraHeaders = {}) {
   response.writeHead(status, {
@@ -52,6 +53,7 @@ function reportedMetrics(data) {
   return metrics;
 }
 
+/** @returns {import('./api-contracts.js').PublicRun} */
 export function publicRun(play) {
   return {
     id: play.id,
@@ -76,8 +78,7 @@ export function publicRun(play) {
 
 export async function getPlayerTaskRuns(username, taskId, after = null) {
   const key = JSON.stringify([username, taskId, after]);
-  const cached = cache.get(key);
-  if (cached && Date.now() - cached.savedAt < cacheLifeMs) return cached.result;
+  return cached(key, async () => {
   const trainer = await queryAimlabs(query, { username, taskId, after, first: pageSize },
     "Aimlabs did not return run history");
   const profile = trainer.aimlabProfile;
@@ -98,9 +99,8 @@ export async function getPlayerTaskRuns(username, taskId, after = null) {
     runs: plays.map(publicRun),
     fetchedAt: new Date().toISOString(),
   };
-  if (cache.size >= maxCacheEntries) cache.delete(cache.keys().next().value);
-  cache.set(key, { savedAt: Date.now(), result });
   return result;
+  });
 }
 
 export async function handlePlayerRunsRequest(request, response, pathname, searchParams) {
