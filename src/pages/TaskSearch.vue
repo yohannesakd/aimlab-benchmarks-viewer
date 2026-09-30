@@ -2,9 +2,7 @@
   <main class="page-shell">
     <div class="search-layout">
       <div class="page-intro">
-        <p class="eyebrow">Scenario lookup</p>
         <h1 class="page-title">Find a task</h1>
-        <p class="page-subtitle">Search Aimlab scenarios to view their details and leaderboard.</p>
       </div>
       <div class="panel panel-body">
         <form class="search-form" @submit.prevent="searchTask">
@@ -12,7 +10,6 @@
           <input id="taskname" class="text-field" type="text" autocomplete="off" placeholder="Enter a task or scenario name" v-model.trim="taskNameInput" />
           <button class="btn-primary" type="submit">Search</button>
         </form>
-        <p class="result-meta mt-3">Specific names give the best results.</p>
       </div>
       <div v-if="searchStatus" class="panel search-result status-panel" role="status">{{ searchStatus }}</div>
       <div v-if="taskList.length" class="panel search-result">
@@ -20,7 +17,7 @@
         <router-link v-for="task in taskList" :key="task.id" class="result-row" :to="taskLeaderboardLink(task.id)">
           <div>
             <h3 class="result-title">{{ task.name }}</h3>
-            <p class="result-meta">By {{ task.author?.username || "Unknown creator" }}</p>
+            <p v-if="task.author?.username" class="result-meta">{{ task.author.username }}</p>
           </div>
           <div class="result-action">
             <img v-if="task.image_url" :src="task.image_url" alt="" class="task-thumbnail" />

@@ -25,7 +25,6 @@ button:disabled { cursor: not-allowed; }
 .page-intro { margin-bottom: 28px; }
 .page-title { font-size: clamp(1.9rem, 3.5vw, 2.5rem); font-weight: 600; letter-spacing: -.025em; line-height: 1.2; }
 .page-subtitle { margin-top: 8px; color: var(--muted); line-height: 1.6; }
-.eyebrow { color: var(--accent); font-size: .75rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
 .section-title { font-size: 1.2rem; font-weight: 600; letter-spacing: -.01em; }
 .muted { color: var(--muted); }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; }
@@ -49,8 +48,6 @@ button:disabled { cursor: not-allowed; }
 .filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px; padding: 20px; }
 .filter-bar > div { min-width: 180px; }
 .filter-bar .dropdown { width: 100%; }
-.filter-status { margin-left: auto; align-self: center; color: var(--muted); font-size: .78rem; }
-.filter-status::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 9px; border-radius: 50%; background: var(--accent); vertical-align: middle; }
 .leaderboard-panel { overflow: hidden; }
 .leaderboard-heading { padding: 17px 20px; border-bottom: 1px solid var(--line); font-size: 1.12rem; font-weight: 600; }
 .leaderboard-row { display: grid; grid-template-columns: 90px minmax(0, 1.6fr) minmax(90px, .7fr) minmax(130px, 1fr); align-items: center; gap: 12px; min-height: 50px; padding: 8px 20px; border-bottom: 1px solid var(--line); }
@@ -102,16 +99,18 @@ button:disabled { cursor: not-allowed; }
 .bench-categories-grid strong { color: var(--text); }
 .bench-table { overflow: hidden; }
 .bench-table-head, .bench-main { display: grid; grid-template-columns: minmax(0, 2fr) 90px minmax(110px, 1fr) minmax(120px, 1fr) 34px; align-items: center; gap: 12px; }
+.bench-table-head > :nth-child(2) { text-align: right; }
 .bench-table-head { padding: 11px 16px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: .75rem; }
 .bench-main { min-height: 60px; padding: 9px 16px; }
 .bench-row { border-bottom: 1px solid var(--line); }
 .bench-row:last-child { border-bottom: 0; }
 .bench-name { min-width: 0; font-weight: 600; }
-.bench-score { font-variant-numeric: tabular-nums; text-align: left; }
+.bench-score { font-variant-numeric: tabular-nums; text-align: right; justify-self: stretch; }
 .bench-rank { display: flex; align-items: center; gap: 7px; min-width: 0; font-size: .83rem; }
 .bench-rank img { width: 22px; height: 22px; object-fit: contain; }
-.bench-points { position: relative; display: flex; align-items: center; gap: 9px; font-variant-numeric: tabular-nums; }
-.bench-points .progress-bar { flex: 1; height: 5px; min-width: 20px; background: var(--raised); }
+.bench-points { display: grid; grid-template-columns: 5ch minmax(20px, 1fr); align-items: center; gap: 9px; font-variant-numeric: tabular-nums; }
+.bench-point-value { text-align: right; }
+.bench-points .progress-bar { height: 5px; min-width: 20px; background: var(--raised); }
 .bench-expand { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 2px; }
 .bench-expand:hover { color: var(--accent); border-color: var(--accent); }
 .bench-details { padding: 15px 16px 18px; border-top: 1px solid var(--line); background: #172537; }
@@ -134,7 +133,6 @@ button:disabled { cursor: not-allowed; }
   .page-title { font-size: 2rem; }
   .filter-bar { gap: 12px; }
   .filter-bar > div { width: 100%; }
-  .filter-status { width: 100%; margin-left: 0; }
   .leaderboard-row--head { display: none; }
   .leaderboard-row { grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; min-height: 70px; padding: 10px 14px; }
   .leaderboard-row .player-name { grid-column: 2; grid-row: 1; }
@@ -154,7 +152,7 @@ button:disabled { cursor: not-allowed; }
   .bench-name { grid-column: 1; grid-row: 1; }
   .bench-score { grid-column: 2; grid-row: 1; }
   .bench-rank { grid-column: 1; grid-row: 2; }
-  .bench-points { grid-column: 2; grid-row: 2; }
+  .bench-points { grid-column: 2; grid-row: 2; display: block; text-align: right; }
   .bench-points .progress-bar { display: none; }
   .bench-expand { grid-column: 3; grid-row: 1 / 3; }
 }

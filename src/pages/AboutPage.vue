@@ -13,7 +13,6 @@
           track their progress in benchmarks and get easy access to different
           tasks and leaderboards hoping to end the era of google sheets.
         </p>
-        <p>Thank you for Visiting!</p>
         <div
           class="flex gap-4 items-center justify-end absolute bottom-0 right-0"
         >

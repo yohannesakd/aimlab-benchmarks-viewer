@@ -4,7 +4,7 @@
     <div v-else-if="taskError" class="panel status-panel" role="alert">{{ taskError }}</div>
     <template v-else>
       <div class="page-intro task-intro">
-        <div><p class="eyebrow">Task leaderboard</p><h1 class="page-title">{{ currentTask.name }}</h1><p class="page-subtitle">{{ currentTask.author?.username ? `Created by ${currentTask.author.username}` : "Aimlabs task" }}</p></div>
+        <div><h1 class="page-title">{{ currentTask.name }}</h1><p v-if="currentTask.author?.username" class="page-subtitle">{{ currentTask.author.username }}</p></div>
         <button type="button" class="btn-secondary" @click="handleSwitchTask">Switch task</button>
       </div>
       <div v-if="currentTask.description || currentTask.workshop_id" class="panel task-summary">
@@ -89,7 +89,7 @@ export default {
       "currentTask",
       "currentTaskLeaderboard",
     ]),
-    leaderboardIdentity() { return JSON.stringify([this.taskId, this.$route.query.weapon]); },
+    leaderboardIdentity() { return JSON.stringify([this.taskId, this.$route.query.weapon, this.$route.query.mode]); },
     taskLink() {
       return taskDeepLink(this.currentTask.workshop_id);
     },
@@ -136,7 +136,7 @@ export default {
       }
     },
     showRun(task) {
-      openRunDetails({ username: task.username, taskId: this.taskId, taskName: this.currentTask.name, weapon: this.currentTaskLeaderboard.weaponId, playId: task.playId, score: task.score });
+      openRunDetails({ username: task.username, taskId: this.taskId, taskName: this.currentTask.name, weapon: this.currentTaskLeaderboard.weaponId, mode: this.currentTaskLeaderboard.mode, playId: task.playId, score: task.score });
     },
     handleSwitchTask() {
       this.$router.push("/tasks");
@@ -189,6 +189,7 @@ export default {
       try {
         const params = new URLSearchParams({ page: this.currentPage });
         if (this.$route.query.weapon) params.set("weapon", this.$route.query.weapon);
+        if (this.$route.query.mode !== undefined) params.set("mode", this.$route.query.mode);
         const response = await fetchData(`/api/tasks/${encodeURIComponent(task.id)}/leaderboard?${params}`);
         if (version !== this.leaderboardRequestVersion || task.id !== this.taskId) return;
         this.$store.dispatch("setCurrentTaskLeaderboard", response);

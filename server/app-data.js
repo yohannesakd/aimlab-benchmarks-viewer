@@ -63,7 +63,7 @@ export function calculateProfile(playerInfo, rows) {
   for (const mode of ["hard", "medium", "easy"]) {
     benchmarks[`RA${mode[0].toUpperCase()}${mode.slice(1)}`] = calculateRevosectBenchmarks({ tasks: benchmarkTasks, id: playerInfo.id }, mode);
   }
-  return { playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", label: "Season / Series 2 (archived thresholds)", results: benchmarks }, ...voltaicSeasons.map(definition => calculateVoltaicSeason(definition, rows)), calculateRevosectSeason(rows)] };
+  return { playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", label: "Archive", results: benchmarks }, ...voltaicSeasons.map(definition => calculateVoltaicSeason(definition, rows)), calculateRevosectSeason(rows)] };
 }
 
 export function getProfile(username) {
@@ -99,12 +99,13 @@ async function leaderboard(input) {
   return result;
 }
 
-export function getTaskLeaderboard(taskId, page = 0, weapon = null) {
-  return cached(JSON.stringify(["leaderboard", taskId, page, weapon]), async () => {
+export function getTaskLeaderboard(taskId, page = 0, weapon = null, mode = 0) {
+  return cached(JSON.stringify(["leaderboard", taskId, page, weapon, mode]), async () => {
     const task = await getTask(taskId);
-    const result = await leaderboard({ taskId, weaponId: weapon ?? task.weapon_id, limit: 25, offset: page * 25 });
+    const result = await leaderboard({ taskId, weaponId: weapon ?? task.weapon_id, taskMode: mode, limit: 25, offset: page * 25 });
     return {
       weaponId: weapon ?? task.weapon_id,
+      mode,
       pagination: { ...result.metadata, pageCount: Math.max(0, Math.ceil(result.metadata.totalRows / 25) - 1) },
       data: result.data.map((row) => ({ rank: row.rank, username: row.username, score: row.score,
         accuracy: Number.isFinite(row.accuracy) ? `${Math.round(row.accuracy * 100) / 100}%` : "—",
@@ -124,13 +125,13 @@ function leaderboardRun(row) {
     detailsSource: "leaderboard", replayAvailable: null };
 }
 
-export function getRunDetails(taskId, username, playId, weapon, score) {
-  return cached(JSON.stringify(["run", taskId, username, playId, weapon, score]), async () => {
+export function getRunDetails(taskId, username, playId, weapon, score, mode = playId ? null : 0) {
+  return cached(JSON.stringify(["run", taskId, username, playId, weapon, score, mode]), async () => {
     let row;
     if (!playId) {
-      const result = await leaderboard({ taskId, username, weaponId: weapon, limit: 1 });
+      const result = await leaderboard({ taskId, username, weaponId: weapon, taskMode: mode, limit: 1 });
       row = result.data.find((entry) => entry.username === username);
-      if (!row || (score !== null && row.score !== score)) return notFound("Aimlabs no longer lists this exact benchmark score. You can still browse this task’s run history.");
+      if (!row || (score !== null && row.score !== score)) return notFound("Aimlabs no longer lists this score.");
       playId = row.play_id;
     }
     const trainer = await queryAimlabs(`query RunDetails($playId: ID!) { Trainer { publishedReplay(replayId: $playId) {
@@ -138,11 +139,11 @@ export function getRunDetails(taskId, username, playId, weapon, score) {
     } } }`, { playId }, "Run details failed");
     const replay = trainer.publishedReplay;
     if (replay) {
-      if (replay.publisher.username !== username || replay.play.taskSlug !== taskId || replay.play.id !== playId || (weapon && replay.play.manifest.weaponId !== weapon) || (score !== null && replay.play.score !== score)) return notFound("This run does not match the selected score or player.");
+      if (replay.publisher.username !== username || replay.play.taskSlug !== taskId || replay.play.id !== playId || (mode !== null && replay.play.convertedMode !== mode) || (weapon && replay.play.manifest.weaponId !== weapon) || (score !== null && replay.play.score !== score)) return notFound("This run does not match the selected score or player.");
       return { ...publicRun(replay.play), detailsSource: "replay" };
     }
     if (!row) {
-      const result = await leaderboard({ taskId, playId, limit: 1 });
+      const result = await leaderboard({ taskId, playId, weaponId: weapon, taskMode: mode ?? 0, limit: 1 });
       row = result.data.find((entry) => entry.play_id === playId && entry.username === username);
     }
     if (!row || (row.task_id && row.task_id !== taskId) || (score !== null && row.score !== score)) return notFound("Aimlabs has no public details for this run.");
@@ -163,10 +164,12 @@ export async function handleAppDataRequest(request, response, pathname, params) 
     const id = decodeURIComponent((profile || task || catalog)[1]);
     const invalid = (value, limit) => !value || value.length > limit || /[\x00-\x1f]/.test(value);
     if (invalid(id, profile ? 64 : 256)) throw new URIError("Invalid request");
+    const mode = params.has("mode") ? Number(params.get("mode")) : 0;
+    if (task && ["/leaderboard", "/run"].includes(task[2]) && (!Number.isInteger(mode) || mode < 0 || mode > 2147483647)) throw new URIError("Invalid task mode");
     if (catalog) {
       const prefix = id === 'voltaic' ? 'VT' : 'RA';
       const sets = calculateProfile({ id: 'catalog' }, []).benchmarkSets.filter(set => !set.community || set.community === id);
-      body = { sets: sets.map(set => ({ ...set, label: set.id === 'legacy' ? `${id === 'voltaic' ? 'Season' : 'Series'} 2 (archived thresholds)` : set.label, results: Object.fromEntries(Object.entries(set.results).filter(([key]) => key.startsWith(prefix))) })) };
+      body = { sets: sets.map(set => ({ ...set, label: set.id === 'legacy' ? (id === 'voltaic' ? 'Archive' : 'Series 2') : set.label, results: Object.fromEntries(Object.entries(set.results).filter(([key]) => key.startsWith(prefix))) })) };
     } else if (profile) body = profile[2] ? await getProfileLookup(id) : await getProfile(id);
     else if (id === "search" && !task[2]) {
       const name = params.get("name");
@@ -177,14 +180,14 @@ export async function handleAppDataRequest(request, response, pathname, params) 
       if (!Number.isInteger(page) || page < 0 || page > 1_000_000) throw new URIError("Invalid page");
       const weapon = params.get("weapon");
       if (weapon !== null && invalid(weapon, 128)) throw new URIError("Invalid weapon");
-      body = await getTaskLeaderboard(id, page, weapon);
+      body = await getTaskLeaderboard(id, page, weapon, mode);
     } else if (task[2] === "/run") {
       const username = params.get("username");
       const playId = params.get("playId");
       const weapon = params.get("weapon");
       const score = params.has("score") ? Number(params.get("score")) : null;
       if (invalid(username, 64) || (playId !== null && invalid(playId, 128)) || (weapon !== null && invalid(weapon, 128)) || (score !== null && (!Number.isFinite(score) || score < 0))) throw new URIError("Invalid run request");
-      body = await getRunDetails(id, username, playId, weapon, score);
+      body = await getRunDetails(id, username, playId, weapon, score, params.has("mode") ? mode : undefined);
     } else body = await getTask(id);
     headers["Cache-Control"] = "public, max-age=30";
   } catch (error) {

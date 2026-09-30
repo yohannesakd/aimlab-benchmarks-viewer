@@ -3,7 +3,6 @@
     <div class="panel-header">
       <div>
         <h2 class="section-title">Training activity</h2>
-        <p class="result-meta">Days played each year.</p>
       </div>
     </div>
     <div v-if="isLoading" class="status-panel"><loading-spinner /></div>

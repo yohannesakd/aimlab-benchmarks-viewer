@@ -13,7 +13,6 @@
         <label class="field-label">Subcategory</label>
         <dropdown label="Subcategory" :options="subCategoriesRA[categoriesRA[selectedCategoryRA]].map((label, value) => ({ label, value }))" :model-value="selectedSubCategoryRA" @update:model-value="changeSubCategory($event)" />
       </div>
-      <span class="filter-status">Refreshed daily</span>
     </div>
 
     <div v-if="leaderboardLoading" class="panel status-panel" aria-live="polite"><loading-spinner></loading-spinner></div>

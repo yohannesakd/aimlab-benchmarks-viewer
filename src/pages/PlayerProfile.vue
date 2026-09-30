@@ -2,7 +2,6 @@
   <main class="page-shell">
     <div class="page-intro profile-heading">
       <div>
-        <p class="eyebrow">Player overview</p>
         <h1 class="page-title">Player profile</h1>
       </div>
       <div class="profile-heading-actions">
@@ -19,7 +18,6 @@
         <div class="profile-identity">
           <img v-if="publicDetails?.imageUrl" class="profile-avatar" :src="publicDetails.imageUrl" alt="" />
           <div class="profile-name">
-            <span class="result-meta">Username</span>
             <strong class="profile-username">{{ currentPlayerInfo.username }}</strong>
             <span class="muted profile-aimlab">Aimlab {{ currentPlayerInfo.rank }} · {{ Math.floor(currentPlayerInfo.skill || 0) }} skill</span>
             <progress-bar class="profile-progress" :value="playerSkill" color="bg-mainCyan"></progress-bar>
