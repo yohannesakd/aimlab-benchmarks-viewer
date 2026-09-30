@@ -42,7 +42,7 @@
           <div class="bench-threshold-wrap">
             <div class="bench-thresholds" :style="{ gridTemplateColumns: 'repeat(' + rankList.length + ', minmax(90px, 1fr))' }">
               <span v-for="rank in rankList" :key="rank" :class="colorLookup[rank]">{{ rank }}</span>
-              <span v-for="(score, scoreIndex) in bench.scores.slice(1)" :key="scoreIndex">{{ score }}</span>
+              <span v-for="(score, scoreIndex) in selectedSet.id === 'legacy' ? bench.scores.slice(1) : bench.scores" :key="scoreIndex">{{ score }}</span>
             </div>
           </div>
           <div class="bench-extra">
@@ -53,7 +53,7 @@
               <span v-if="bench.count">Average accuracy: {{ Math.floor(bench.avgAcc) }}%</span>
             </div>
             <div class="bench-actions">
-              <button type="button" @click="handlePlayScenario(bench.id)"><play-icon class="h-4 w-4"></play-icon>Play</button>
+              <button type="button" @click="handlePlayScenario(bench)"><play-icon class="h-4 w-4"></play-icon>Play</button>
               <button type="button" :disabled="!bench.count" @click="showBestRun(bench)">View best run</button>
               <router-link :to="historyLink(bench.id)">View runs</router-link>
               <router-link :to="'/tasks/' + encodeURIComponent(bench.id) + '/leaderboard'">View leaderboard</router-link>
@@ -84,8 +84,8 @@ export default {
         currentPlayerInfo() {
             return this.$store.getters.currentPlayerInfo;
         },
-        benchmarkSets() { return this.$store.getters.benchmarkSets; },
-        selectedSet() { return this.benchmarkSets.find(set => set.id === this.$route.query.benchmark) || this.benchmarkSets[0]; },
+        benchmarkSets() { return this.$store.getters.benchmarkSets.filter(set => !set.community || set.community === 'voltaic').map(set => set.id === 'legacy' ? { ...set, label: 'Season 2 (archived thresholds)' } : set); },
+        selectedSet() { return this.benchmarkSets.find(set => set.id === this.$route.query.benchmark) || this.benchmarkSets.find(set => set.id === "aimlabs_s3") || this.benchmarkSets[0]; },
         currentTab() {
             const label = this.dropdownElements.find(value => value.toLowerCase() === this.$route.query.level) || "Advanced";
             return { value: label.toLowerCase(), label };
@@ -112,6 +112,7 @@ export default {
         },
         mappedEnergy() { return this.VTBenchmarks.categories; },
         rankList() {
+            if (this.VTBenchmarks.rankList) return this.VTBenchmarks.rankList;
             switch (this.currentTab.value) {
                 case "advanced":
                     return ["Grandmaster", "Nova", "Astra", "Celestial"];
@@ -142,10 +143,10 @@ export default {
         toggleBenchDetails(bench) {
             bench.detailsOpen = !bench.detailsOpen;
         },
-        async handlePlayScenario(taskId) {
+        async handlePlayScenario(bench) {
             this.actionError = "";
             try {
-                const workshopId = await findWorkshopId(taskId);
+                const workshopId = bench.workshopId || await findWorkshopId(bench.id);
                 window.open(taskDeepLink(workshopId), "_blank");
             } catch (error) {
                 console.error(error);

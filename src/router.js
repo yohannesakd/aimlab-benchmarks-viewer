@@ -15,6 +15,8 @@ import TaskView from "./pages/TaskView.vue";
 import PlayerRunsPage from "./pages/PlayerRunsPage.vue";
 import AboutPage from "./pages/AboutPage.vue";
 
+import BenchmarkCatalogPage from './pages/BenchmarkCatalogPage.vue';
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -93,6 +95,7 @@ const router = createRouter({
         },
       ],
     },
+    { path: "/benchmarks/:community(voltaic|revosect)", component: BenchmarkCatalogPage, props: true },
     { path: "/about", component: AboutPage },
     { path: "/:notFound(.*)", component: null },
   ],

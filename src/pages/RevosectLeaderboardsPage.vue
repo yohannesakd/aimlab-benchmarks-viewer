@@ -3,21 +3,15 @@
     <div class="panel filter-bar">
       <div>
         <label class="field-label">Level</label>
-        <dropdown :selectedTab="{ label: benchmarksRA[selectedBenchmarkRA] }">
-          <li v-for="(element, index) in benchmarksRA" :key="element" @click="changeBenchmark(index)">{{ element }}</li>
-        </dropdown>
+        <dropdown label="Level" :options="benchmarksRA.map((label, value) => ({ label, value }))" :model-value="selectedBenchmarkRA" @update:model-value="changeBenchmark($event)" />
       </div>
       <div>
         <label class="field-label">Category</label>
-        <dropdown :selectedTab="{ label: categoriesRA[selectedCategoryRA] }">
-          <li v-for="(element, index) in categoriesRA" :key="element" @click="changeCategory(index)">{{ element }}</li>
-        </dropdown>
+        <dropdown label="Category" :options="categoriesRA.map((label, value) => ({ label, value }))" :model-value="selectedCategoryRA" @update:model-value="changeCategory($event)" />
       </div>
       <div v-if="selectedCategoryRA !== 3">
         <label class="field-label">Subcategory</label>
-        <dropdown :selectedTab="{ label: subCategoriesRA[categoriesRA[selectedCategoryRA]][selectedSubCategoryRA] }">
-          <li v-for="(element, index) in subCategoriesRA[categoriesRA[selectedCategoryRA]]" :key="element" @click="changeSubCategory(index)">{{ element }}</li>
-        </dropdown>
+        <dropdown label="Subcategory" :options="subCategoriesRA[categoriesRA[selectedCategoryRA]].map((label, value) => ({ label, value }))" :model-value="selectedSubCategoryRA" @update:model-value="changeSubCategory($event)" />
       </div>
       <span class="filter-status">Refreshed daily</span>
     </div>
@@ -25,7 +19,7 @@
     <div v-if="leaderboardLoading" class="panel status-panel" aria-live="polite"><loading-spinner></loading-spinner></div>
     <div v-else-if="leaderboardError" class="panel status-panel" role="alert">{{ leaderboardError }}</div>
     <div v-else class="panel leaderboard-panel">
-      <h2 class="leaderboard-heading">Revosect · {{ benchmarksRA[selectedBenchmarkRA] }}</h2>
+      <h2 class="leaderboard-heading">Revosect · Archived Series 2 · {{ benchmarksRA[selectedBenchmarkRA] }}</h2>
       <div class="leaderboard-row leaderboard-row--head" aria-hidden="true">
         <span>Rank</span><span>Player</span><span>Points</span><span>Overall rank</span>
       </div>
@@ -33,7 +27,7 @@
         v-for="(player, index) in paginatedPlayerList.data"
         :key="index"
         class="leaderboard-row leaderboard-row--player"
-        :to="'/profile/' + player.username + '/'"
+        :to="{ path: '/profile/' + encodeURIComponent(player.username) + '/revosect', query: { benchmark: 'legacy', level: benchmark[selectedBenchmarkRA].toLowerCase() } }"
       >
         <span>{{ paginatedPlayerList.start + index + 1 }}</span>
         <span class="player-name">{{ player.username }}</span>
@@ -78,7 +72,12 @@ export default {
         };
     },
     watch: {
+        '$route.query.level': {
+            immediate: true,
+            handler(level) { this.changeBenchmark(Math.max(0, ['easy', 'medium', 'hard'].indexOf(level))); },
+        },
         selectedBenchmarkRA() {
+            this.$router.replace({ query: { ...this.$route.query, level: this.benchmark[this.selectedBenchmarkRA].toLowerCase() } });
             this.resetAndLoad();
         },
         selectedCategoryRA() {

@@ -5,9 +5,13 @@
         <p class="eyebrow">Player overview</p>
         <h1 class="page-title">Player profile</h1>
       </div>
-      <button type="button" class="btn-secondary" @click="handleSwitchProfile">Switch profile</button>
+      <div class="profile-heading-actions">
+        <button v-if="!isLoading && !loadError" type="button" class="btn-secondary" @click="toggleSavedProfile">{{ savedProfile === currentPlayerInfo.username ? 'Remove saved profile' : 'Save profile' }}</button>
+        <button type="button" class="btn-secondary" @click="handleSwitchProfile">Switch profile</button>
+      </div>
     </div>
 
+    <p v-if="saveError" class="muted season-note" role="status">{{ saveError }}</p>
     <div v-if="isLoading" class="panel status-panel"><loading-spinner></loading-spinner></div>
     <div v-else-if="loadError" class="panel status-panel" role="alert">{{ loadError }}</div>
     <template v-else>
@@ -42,6 +46,7 @@
 </template>
 <style scoped>
 .profile-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.profile-heading-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .profile-summary { display: grid; grid-template-columns: minmax(230px, 1.8fr) minmax(0, 6fr); margin-bottom: 18px; }
 .profile-identity { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 16px 18px; border-right: 1px solid var(--line); }
 .profile-avatar { flex: 0 0 44px; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 2px; object-fit: cover; }
@@ -66,6 +71,7 @@
 </style>
 
 <script>
+import { savedProfile, saveProfile } from '../helpers/savedProfile.js';
 import { mapGetters } from "vuex";
 import { fetchData } from "../helpers/api.js";
 export default {
@@ -74,6 +80,7 @@ export default {
   },
   data() {
     return {
+      saveError: "",
       isLoading: false,
       loadError: "",
       requestVersion: 0,
@@ -89,6 +96,7 @@ export default {
     };
   },
   computed: {
+    savedProfile() { return savedProfile.value; },
     ...mapGetters([
       "currentPlayerInfo",
     ]),
@@ -118,6 +126,10 @@ export default {
     this.detailsVersion++;
   },
   methods: {
+    toggleSavedProfile() {
+      const username = savedProfile.value === this.currentPlayerInfo.username ? '' : this.currentPlayerInfo.username;
+      this.saveError = saveProfile(username) ? '' : 'This browser could not save the profile. Check its storage settings.';
+    },
     daysLabel(value) {
       return Number.isFinite(value) ? `${value.toLocaleString()} ${value === 1 ? "day" : "days"}` : "Unavailable";
     },

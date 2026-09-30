@@ -9,7 +9,7 @@
         <span></span><span></span><span></span>
       </button>
       <nav id="site-nav" class="site-nav" :class="{ 'site-nav-open': menuOpen }" aria-label="Main navigation">
-        <router-link v-for="link in navLinks" :key="link.label" :to="link.to" class="site-nav-link" :class="{ 'is-current': $route.path.startsWith(link.to) }">{{ link.label }}</router-link>
+        <router-link v-for="link in navLinks" :key="link.label" :to="link.to" class="site-nav-link" :class="{ 'is-current': $route.path.startsWith(link.activePath || link.to) }">{{ link.label }}</router-link>
       </nav>
     </div>
   </header>
@@ -24,6 +24,7 @@ export default {
         { label: "Home", to: "/home" },
         { label: "Profile", to: "/profile" },
         { label: "Tasks", to: "/tasks" },
+        { label: "Benchmarks", to: "/benchmarks/voltaic", activePath: "/benchmarks" },
         { label: "Leaderboards", to: "/leaderboards" },
       ],
     };
