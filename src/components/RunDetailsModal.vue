@@ -24,7 +24,7 @@
     </div>
     <div v-if="selection" class="modal-footer">
       <router-link v-if="$route.path !== historyLink" class="text-link" :to="historyLink" @click="close">Player’s run history →</router-link>
-      <router-link v-if="!$route.path.startsWith('/tasks/')" class="text-link" :to="{ path: `/tasks/${encodeURIComponent(selection.taskId)}/leaderboard`, query: { weapon: selection.weapon, mode: selection.mode } }" @click="close">Task leaderboard →</router-link>
+      <router-link v-if="!$route.path.startsWith('/tasks/')" class="text-link" :to="{ path: `/tasks/${encodeURIComponent(selection.taskId)}/leaderboard`, query: { weapon: run?.weaponId ?? selection.weapon, mode: run?.convertedMode ?? selection.mode } }" @click="close">Task leaderboard →</router-link>
     </div>
   </dialog>
 </template>

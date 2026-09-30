@@ -141,6 +141,9 @@ test('overview best runs preserve the winning mode and reject a different-mode r
     const run = await getRunDetails('overview-alt-task', 'FixturePlayer', null, 'alternate-weapon', 400, 1);
     assert.equal(run.score, 400);
     assert.equal(run.convertedMode, 1);
+    const linkedRun = await getRunDetails('overview-alt-task', 'FixturePlayer', 'overview-alt-run', null, null);
+    assert.equal(linkedRun.convertedMode, 1);
+    assert.equal(linkedRun.weaponId, 'alternate-weapon');
     await assert.rejects(getRunDetails('overview-alt-task', 'FixturePlayer', 'overview-alt-run', 'alternate-weapon', 400, 0), error => error.status === 404);
   } finally { globalThis.fetch = originalFetch; }
 });

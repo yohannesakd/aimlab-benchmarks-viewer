@@ -1,7 +1,7 @@
 <template>
   <main class="page-shell home-page">
     <section class="home-hero">
-      <h1 class="page-title home-title">Track your aim.</h1>
+      <h1 class="page-title home-title">Aimlab Tracker</h1>
       <form class="home-search" @submit.prevent="openProfile">
         <label class="sr-only" for="home-username">Search Aimlab username</label>
         <input id="home-username" class="text-field" v-model.trim="username" type="text" autocomplete="off" placeholder="Search Aimlab username" />

@@ -125,7 +125,7 @@ function leaderboardRun(row) {
     detailsSource: "leaderboard", replayAvailable: null };
 }
 
-export function getRunDetails(taskId, username, playId, weapon, score, mode = 0) {
+export function getRunDetails(taskId, username, playId, weapon, score, mode = playId ? null : 0) {
   return cached(JSON.stringify(["run", taskId, username, playId, weapon, score, mode]), async () => {
     let row;
     if (!playId) {
@@ -139,11 +139,11 @@ export function getRunDetails(taskId, username, playId, weapon, score, mode = 0)
     } } }`, { playId }, "Run details failed");
     const replay = trainer.publishedReplay;
     if (replay) {
-      if (replay.publisher.username !== username || replay.play.taskSlug !== taskId || replay.play.id !== playId || replay.play.convertedMode !== mode || (weapon && replay.play.manifest.weaponId !== weapon) || (score !== null && replay.play.score !== score)) return notFound("This run does not match the selected score or player.");
+      if (replay.publisher.username !== username || replay.play.taskSlug !== taskId || replay.play.id !== playId || (mode !== null && replay.play.convertedMode !== mode) || (weapon && replay.play.manifest.weaponId !== weapon) || (score !== null && replay.play.score !== score)) return notFound("This run does not match the selected score or player.");
       return { ...publicRun(replay.play), detailsSource: "replay" };
     }
     if (!row) {
-      const result = await leaderboard({ taskId, playId, weaponId: weapon, taskMode: mode, limit: 1 });
+      const result = await leaderboard({ taskId, playId, weaponId: weapon, taskMode: mode ?? 0, limit: 1 });
       row = result.data.find((entry) => entry.play_id === playId && entry.username === username);
     }
     if (!row || (row.task_id && row.task_id !== taskId) || (score !== null && row.score !== score)) return notFound("Aimlabs has no public details for this run.");
@@ -187,7 +187,7 @@ export async function handleAppDataRequest(request, response, pathname, params) 
       const weapon = params.get("weapon");
       const score = params.has("score") ? Number(params.get("score")) : null;
       if (invalid(username, 64) || (playId !== null && invalid(playId, 128)) || (weapon !== null && invalid(weapon, 128)) || (score !== null && (!Number.isFinite(score) || score < 0))) throw new URIError("Invalid run request");
-      body = await getRunDetails(id, username, playId, weapon, score, mode);
+      body = await getRunDetails(id, username, playId, weapon, score, params.has("mode") ? mode : undefined);
     } else body = await getTask(id);
     headers["Cache-Control"] = "public, max-age=30";
   } catch (error) {
