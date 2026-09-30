@@ -1,10 +1,10 @@
 import { queryAimlabs } from "./aimlabs-graphql.js";
 import { GET_USER_INFO, GET_USER_PLAYS_AGG, GET_TASK_BY_ID, GET_TASKS_BY_NAME, GET_TASK_LEADERBOARD } from "./app-queries.js";
-import { cleanUpUserTasks, cleanUpBenchmarkTasks, caclulateVT, calculateRevosectBenchmarks } from "../src/helpers/functions.js";
-import { advancedBench, intermediateBench, noviceBench, advancedRanks, intermediateRanks, noviceRanks, categories, advancedEnergy, intermediateEnergy, noviceEnergy } from "../src/helpers/voltaicData.js";
+import { cleanUpUserTasks, cleanUpBenchmarkTasks, calculateRevosectBenchmarks } from "../src/helpers/functions.js";
 import { publicRun, runFields } from "./player-runs.js";
 
 import { voltaicSeasons, calculateVoltaicSeason, calculateRevosectSeason } from './benchmark-seasons.js';
+import { sortColumnsFor } from './refresh-database.js';
 
 const cache = new Map();
 const pending = new Map();
@@ -41,29 +41,10 @@ export function calculateProfile(playerInfo, rows) {
   const tasks = cleanUpUserTasks(rows);
   const benchmarkTasks = cleanUpBenchmarkTasks(rows);
   const benchmarks = {};
-  for (const [key, mode, bench, ranks, energyList] of [
-    ["VTAdvanced", "advanced", advancedBench, advancedRanks, advancedEnergy],
-    ["VTIntermediate", "intermediate", intermediateBench, intermediateRanks, intermediateEnergy],
-    ["VTNovice", "novice", noviceBench, noviceRanks, noviceEnergy],
-  ]) {
-    const result = caclulateVT(benchmarkTasks, structuredClone(bench), mode);
-    result.categories = result.subCategoryEnergy.map((energy, index) => ({
-      category: categories[index], energy, rank: ranks[Math.floor(energy / 100) * 100] || "Unranked",
-    }));
-    for (const scenario of result.benchmarks) {
-      const energy = scenario.energy;
-      const firstRank = energyList[1];
-      scenario.energyProgress = {
-        value: energy >= energyList[4] ? 100 : energy < firstRank ? energy : energy % 100,
-        max: mode === "novice" || energy >= firstRank ? 100 : firstRank,
-      };
-    }
-    benchmarks[key] = result;
-  }
   for (const mode of ["hard", "medium", "easy"]) {
     benchmarks[`RA${mode[0].toUpperCase()}${mode.slice(1)}`] = calculateRevosectBenchmarks({ tasks: benchmarkTasks, id: playerInfo.id }, mode);
   }
-  return { playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", label: "Archive", results: benchmarks }, ...voltaicSeasons.map(definition => calculateVoltaicSeason(definition, rows)), calculateRevosectSeason(rows)] };
+  return { playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", community: "revosect", label: "Series 2", results: benchmarks }, ...voltaicSeasons.map(definition => calculateVoltaicSeason(definition, rows)), calculateRevosectSeason(rows)] };
 }
 
 export function getProfile(username) {
@@ -167,9 +148,16 @@ export async function handleAppDataRequest(request, response, pathname, params) 
     const mode = params.has("mode") ? Number(params.get("mode")) : 0;
     if (task && ["/leaderboard", "/run"].includes(task[2]) && (!Number.isInteger(mode) || mode < 0 || mode > 2147483647)) throw new URIError("Invalid task mode");
     if (catalog) {
-      const prefix = id === 'voltaic' ? 'VT' : 'RA';
-      const sets = calculateProfile({ id: 'catalog' }, []).benchmarkSets.filter(set => !set.community || set.community === id);
-      body = { sets: sets.map(set => ({ ...set, label: set.id === 'legacy' ? (id === 'voltaic' ? 'Archive' : 'Series 2') : set.label, results: Object.fromEntries(Object.entries(set.results).filter(([key]) => key.startsWith(prefix))) })) };
+      const ordinals = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth'];
+      body = { sets: calculateProfile({ id: 'catalog' }, []).benchmarkSets.filter(set => set.community === id).sort((a, b) => Number(a.id === 'legacy') - Number(b.id === 'legacy')).map(set => {
+        const result = Object.values(set.results)[0];
+        if (result.rankingAvailable === false) return set;
+        const mode = id === 'voltaic' ? `vt-${set.id}-novice` : 'ra-hard';
+        const columns = sortColumnsFor(mode);
+        const names = id === 'voltaic' ? result.categories.map(category => category.category) : ['Static', 'Dynamic', 'Precise', 'Reactive', 'Flick', 'Track'];
+        const rankingOptions = Object.keys(columns).map(value => ({ value, label: ordinals.includes(value) ? names[ordinals.indexOf(value)] : value[0].toUpperCase() + value.slice(1) }));
+        return { ...set, rankingOptions };
+      }) };
     } else if (profile) body = profile[2] ? await getProfileLookup(id) : await getProfile(id);
     else if (id === "search" && !task[2]) {
       const name = params.get("name");

@@ -1,22 +1,10 @@
 import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { benchmarkSets } from "./refresh-database.js";
+import { benchmarkSets, seasonModes, sortColumnsFor } from "./refresh-database.js";
 
 const dataDir = resolve(process.env.AIMLAB_DATA_DIR || "data");
 const pageSize = 25;
-const sortColumns = {
-  overall: "overall",
-  clicking: "(c1 + c2)",
-  tracking: "(c3 + c4)",
-  switching: "(c5 + c6)",
-  first: "c1",
-  second: "c2",
-  third: "c3",
-  fourth: "c4",
-  fifth: "c5",
-  sixth: "c6",
-};
 const openDatabases = new Map();
 
 async function databaseFor(mode) {
@@ -41,19 +29,20 @@ async function databaseFor(mode) {
 export async function getLeaderboardPage(mode, page, sort) {
   if (!benchmarkSets[mode]) throw new RangeError("Unknown benchmark mode");
   if (!Number.isSafeInteger(page) || page < 1) throw new RangeError("Invalid page");
-  const column = sortColumns[sort];
+  const column = sortColumnsFor(mode)[sort];
   if (!column) throw new RangeError("Invalid sort");
   const { database, total, generatedAt, categories } = await databaseFor(mode);
   const pageCount = Math.ceil(total / pageSize);
   if (page > Math.max(1, pageCount)) throw new RangeError("Page is out of range");
   const rows = database.prepare(`
-    SELECT username, overall, overall_rank, c1, c2, c3, c4, c5, c6,
+    SELECT username, overall, overall_rank, ${categories.map((_, index) => `c${index + 1}`).join(", ")},
       ${column} AS selected
     FROM players ORDER BY ${column} DESC, username ASC
     LIMIT ? OFFSET ?
   `).all(pageSize, (page - 1) * pageSize);
   return {
     mode,
+    benchmarkSet: seasonModes[mode]?.definition.id || "legacy",
     generatedAt,
     total,
     page,
@@ -70,9 +59,10 @@ export async function getLeaderboardPage(mode, page, sort) {
 }
 
 export async function handleLeaderboardRequest(request, response, pathname, searchParams) {
-  const match = pathname.match(/^\/api\/leaderboards\/(ra|vt)\/(easy|medium|hard|novice|intermediate|advanced)\/page$/);
+  const match = pathname.match(/^\/api\/leaderboards\/(ra|vt)\/(?:(legacy|aimlabs_s2|aimlabs_s3)\/)?(easy|medium|hard|novice|intermediate|advanced)\/page$/);
   if (!match) return false;
-  const mode = `${match[1]}-${match[2]}`;
+  const set = match[1] === 'vt' && (!match[2] || match[2] === 'legacy') ? 'aimlabs_s2' : match[2];
+  const mode = `${match[1]}-${set && set !== 'legacy' ? set + '-' : ''}${match[3]}`;
   if (request.method !== "GET" || !benchmarkSets[mode]) {
     response.writeHead(404, { "Content-Type": "application/json" });
     response.end(JSON.stringify({ error: "Not found" }));

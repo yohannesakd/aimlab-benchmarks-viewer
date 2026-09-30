@@ -6,6 +6,12 @@ import { calculateRevosectBenchmarks, caclulateVT } from "../src/helpers/functio
 import { categories as raCategories, easyBench, mediumBench, hardBench } from "../src/helpers/revosectData.js";
 import { categories as vtCategories, noviceBench, intermediateBench, advancedBench } from "../src/helpers/voltaicData.js";
 import { fetchLeaderboardPage } from "./aimlab-pages.js";
+import { voltaicSeasons, calculateVoltaicSeason } from "./benchmark-seasons.js";
+
+export const seasonModes = Object.fromEntries(voltaicSeasons.flatMap(definition => definition.tiers.map(tier => {
+  const level = tier.name.toLowerCase();
+  return [`vt-${definition.id}-${level}`, { definition, level, tier, subcategories: definition.categories.flatMap(category => category.subcategories) }];
+})));
 
 export const benchmarkSets = {
   "ra-easy": easyBench,
@@ -14,7 +20,24 @@ export const benchmarkSets = {
   "vt-novice": noviceBench,
   "vt-intermediate": intermediateBench,
   "vt-advanced": advancedBench,
+  ...Object.fromEntries(Object.entries(seasonModes).map(([mode, { definition, tier }]) => [mode, definition.scenarios.filter(scenario => scenario.tiers.some(item => item.tier_id === tier.id)).map(scenario => ({
+    id: scenario.task_id, weapon: scenario.weapon_id, name: scenario.name, categoryID: scenario.subcategory_id,
+    scores: scenario.tiers.find(item => item.tier_id === tier.id).thresholds, minimumScore: 0,
+  }))])),
 };
+
+export function sortColumnsFor(mode) {
+  const season = seasonModes[mode];
+  const columns = { overall: "overall" };
+  const ordinals = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth"];
+  if (season) {
+    for (const category of season.definition.categories) {
+      columns[category.name] = `(${category.subcategories.map(subcategory => `c${season.subcategories.findIndex(item => item.id === subcategory.id) + 1}`).join(" + ")})`;
+    }
+  } else Object.assign(columns, { clicking: "(c1 + c2)", tracking: "(c3 + c4)", switching: "(c5 + c6)" });
+  for (let index = 0; index < (season?.subcategories.length || 6); index++) columns[ordinals[index]] = `c${index + 1}`;
+  return columns;
+}
 
 const dataDir = resolve(process.env.AIMLAB_DATA_DIR || "data");
 
@@ -32,7 +55,7 @@ function openStaging(path, mode, benchmarks) {
       score REAL NOT NULL, PRIMARY KEY (user_id, scenario)
     );
   `);
-  const identity = JSON.stringify(benchmarks.map(({ id, weapon, scores }) => [id, weapon, scores[0]]));
+  const identity = JSON.stringify(benchmarks.map(({ id, weapon, scores, minimumScore, categoryID }) => seasonModes[mode] ? [id, weapon, scores, minimumScore, categoryID] : [id, weapon, scores[0]]));
   const saved = db.prepare("SELECT value FROM metadata WHERE key = 'identity'").get();
   if (saved && saved.value !== identity) {
     db.close();
@@ -48,6 +71,7 @@ function openStaging(path, mode, benchmarks) {
 async function collectAll(db, benchmarks, getPage, onProgress) {
   for (let index = 0; index < benchmarks.length; index++) {
     const bench = benchmarks[index];
+    const minimumScore = bench.minimumScore ?? bench.scores[0];
     const progress = db.prepare("SELECT offset, complete FROM progress WHERE scenario = ?").get(index);
     if (progress.complete) continue;
     const upsert = db.prepare(`
@@ -63,17 +87,18 @@ async function collectAll(db, benchmarks, getPage, onProgress) {
       if (!Array.isArray(page.data) || !Number.isInteger(page.metadata?.totalRows)) {
         throw new Error(`Invalid Aimlab page for ${bench.name}`);
       }
+      if (!page.data.length && offset < page.metadata.totalRows) throw new Error(`Empty Aimlab page for ${bench.name} at offset ${offset}`);
       let highestScore = -Infinity;
       db.exec("BEGIN");
       try {
         for (const entry of page.data) {
           if (!Number.isFinite(entry.score)) throw new Error(`Invalid Aimlab score for ${bench.name} at offset ${offset}`);
           highestScore = Math.max(highestScore, entry.score);
-          if (entry.score >= bench.scores[0] && entry.user_id && entry.username) {
+          if (entry.score >= minimumScore && entry.user_id && entry.username) {
             upsert.run(entry.user_id, index, entry.username, entry.score);
           }
         }
-        const done = highestScore < bench.scores[0] || offset + page.data.length >= page.metadata.totalRows;
+        const done = highestScore < minimumScore || offset + page.data.length >= page.metadata.totalRows;
         if (!done && page.data.length !== 2000) {
           throw new Error(`Incomplete Aimlab page for ${bench.name} at offset ${offset}`);
         }
@@ -91,16 +116,17 @@ async function collectAll(db, benchmarks, getPage, onProgress) {
 }
 
 function scorePlayers(db, mode, benchmarks, onProgress) {
+  const season = seasonModes[mode];
+  const categoryCount = season?.subcategories.length || 6;
   db.exec(`
     CREATE TABLE IF NOT EXISTS players (
       user_id TEXT PRIMARY KEY, username TEXT NOT NULL, overall INTEGER NOT NULL,
-      overall_rank TEXT NOT NULL, c1 INTEGER NOT NULL, c2 INTEGER NOT NULL,
-      c3 INTEGER NOT NULL, c4 INTEGER NOT NULL, c5 INTEGER NOT NULL, c6 INTEGER NOT NULL
+      overall_rank TEXT NOT NULL, ${Array.from({ length: categoryCount }, (_, index) => `c${index + 1} INTEGER NOT NULL`).join(", ")}
     );
     DELETE FROM players;
     CREATE INDEX IF NOT EXISTS scores_by_user ON scores (user_id);
   `);
-  const insert = db.prepare("INSERT INTO players VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+  const insert = db.prepare(`INSERT INTO players VALUES (${Array(categoryCount + 4).fill("?").join(", ")})`);
   const rows = db.prepare("SELECT user_id, username, scenario, score FROM scores ORDER BY user_id").iterate();
   let currentId = null;
   let username = "";
@@ -109,7 +135,13 @@ function scorePlayers(db, mode, benchmarks, onProgress) {
   function flush() {
     if (!currentId) return;
     let overall, rank, values;
-    if (mode.startsWith("ra-")) {
+    if (season) {
+      const rows = tasks.map(task => ({ group_by: { task_id: task.id, weapon_id: task.weapon, task_mode_mod: 0 }, aggregate: { count: 1, max: { score: task.maxScore, accuracy: 0 }, avg: { score: task.maxScore, accuracy: 0 } } }));
+      const result = calculateVoltaicSeason(season.definition, rows, season.level).results[`VT${season.tier.name}`];
+      overall = result.overallEnergy;
+      rank = result.overallRank;
+      values = result.categories.map(category => category.energy);
+    } else if (mode.startsWith("ra-")) {
       const result = calculateRevosectBenchmarks({ tasks }, mode.slice(3));
       overall = result.overallPoints;
       rank = result.overallRank;
@@ -138,7 +170,7 @@ function scorePlayers(db, mode, benchmarks, onProgress) {
         username = row.username;
         tasks = [];
       }
-      tasks.push({ id: benchmarks[row.scenario].id, maxScore: row.score, count: 1 });
+      tasks.push({ id: benchmarks[row.scenario].id, weapon: benchmarks[row.scenario].weapon, maxScore: row.score, count: 1 });
     }
     flush();
     db.exec("COMMIT");
@@ -146,21 +178,10 @@ function scorePlayers(db, mode, benchmarks, onProgress) {
     db.exec("ROLLBACK");
     throw error;
   }
-  db.exec(`
-    CREATE INDEX IF NOT EXISTS players_overall ON players (overall DESC, username);
-    CREATE INDEX IF NOT EXISTS players_clicking ON players ((c1 + c2) DESC, username);
-    CREATE INDEX IF NOT EXISTS players_tracking ON players ((c3 + c4) DESC, username);
-    CREATE INDEX IF NOT EXISTS players_switching ON players ((c5 + c6) DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c1 ON players (c1 DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c2 ON players (c2 DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c3 ON players (c3 DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c4 ON players (c4 DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c5 ON players (c5 DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c6 ON players (c6 DESC, username);
-  `);
+  for (const [name, column] of Object.entries(sortColumnsFor(mode))) db.exec(`CREATE INDEX IF NOT EXISTS players_${name} ON players (${column} DESC, username)`);
   db.prepare("INSERT OR REPLACE INTO metadata VALUES ('generatedAt', ?)").run(new Date().toISOString());
   db.prepare("INSERT OR REPLACE INTO metadata VALUES ('mode', ?)").run(mode);
-  db.prepare("INSERT OR REPLACE INTO metadata VALUES ('categories', ?)").run(JSON.stringify(mode.startsWith("ra-") ? raCategories : vtCategories));
+  db.prepare("INSERT OR REPLACE INTO metadata VALUES ('categories', ?)").run(JSON.stringify(season ? season.subcategories.map(category => category.name) : mode.startsWith("ra-") ? raCategories : vtCategories));
   db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
   return count;
 }
@@ -189,7 +210,7 @@ export async function refreshDatabase(mode, options = {}) {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const modes = process.argv.slice(2);
-  if (!modes.length) modes.push(...Object.keys(benchmarkSets));
+  if (!modes.length) modes.push(...Object.keys(benchmarkSets).filter(mode => mode.startsWith("ra-") || seasonModes[mode]));
   for (const mode of modes) {
     try {
       const result = await refreshDatabase(mode, {

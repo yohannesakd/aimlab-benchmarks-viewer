@@ -31,10 +31,11 @@ function calculateOverallEnergy(energies, tiers) {
   return Math.abs(mean - nearest) <= tolerance ? nearest : official;
 }
 
-export function calculateVoltaicSeason(definition, rows) {
+export function calculateVoltaicSeason(definition, rows, level = null) {
   const tiers = definition.tiers.map(tier => definition.ranks.filter(rank => rank.tier_id === tier.id).map(rank => rank.energy_threshold));
   const results = {};
   definition.tiers.forEach((tier, tierIndex) => {
+    if (level && tier.name.toLowerCase() !== level) return;
     const ranks = definition.ranks.filter(rank => rank.tier_id === tier.id);
     const subcategories = definition.categories.flatMap(category => category.subcategories);
     const benchmarks = definition.scenarios.filter(scenario => scenario.tiers.some(item => item.tier_id === tier.id)).map(scenario => {

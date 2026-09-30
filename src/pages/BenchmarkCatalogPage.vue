@@ -45,7 +45,7 @@ export default {
   computed: {
     levels() { return this.community === 'voltaic' ? ['Novice', 'Intermediate', 'Advanced'] : ['Easy', 'Medium', 'Hard']; },
     level() { return this.levels.map(value => value.toLowerCase()).includes(this.$route.query.level) ? this.$route.query.level : this.levels[0].toLowerCase(); },
-    selectedSet() { return this.sets.find(set => set.id === this.$route.query.benchmark) || this.sets.find(set => set.id === (this.community === 'voltaic' ? 'aimlabs_s3' : 'revosect_s4')) || this.sets[0]; },
+    selectedSet() { return this.sets.find(set => set.id === (this.community === 'voltaic' && this.$route.query.benchmark === 'legacy' ? 'aimlabs_s2' : this.$route.query.benchmark)) || this.sets.find(set => set.id === (this.community === 'voltaic' ? 'aimlabs_s3' : 'revosect_s4')) || this.sets[0]; },
     result() { const name = this.level[0].toUpperCase() + this.level.slice(1); return this.selectedSet.results[`${this.community === 'voltaic' ? 'VT' : 'RA'}${name}`]; },
     rankList() { return this.result.rankList || (this.community === 'voltaic' ? { novice: ['Iron', 'Bronze', 'Silver', 'Gold'], intermediate: ['Platinum', 'Diamond', 'Jade', 'Master'], advanced: ['Grandmaster', 'Nova', 'Astra', 'Celestial'] } : { easy: ['Bronze', 'Silver', 'Gold', 'Platinum'], medium: ['Ace', 'Legend', 'Sentinel', 'Valour'], hard: ['Mythic', 'Immortal', 'Archon', 'Ethereal', 'Divine'] })[this.level]; },
     hasRequirements() { return this.result.rankingAvailable !== false; },
@@ -70,7 +70,7 @@ export default {
     },
     selectSet(benchmark) { this.$router.push({ query: { benchmark, level: this.level } }); },
     selectLevel(level) { this.$router.push({ query: { benchmark: this.selectedSet.id, level } }); },
-    scoreRequirements(bench) { const scores = bench.scores || []; return this.community === 'voltaic' && this.selectedSet.id === 'legacy' ? scores.slice(1) : scores; },
+    scoreRequirements(bench) { return bench.scores || []; },
     openProfile() { if (this.username) this.$router.push({ path: `/profile/${encodeURIComponent(this.username)}/${this.community}`, query: { benchmark: this.selectedSet.id, level: this.level } }); },
   },
 };
