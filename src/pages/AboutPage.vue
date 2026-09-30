@@ -2,19 +2,21 @@
   <main class="page-shell">
     <base-card class="max-w-3xl tracking-wide mx-auto p-8">
       <div class="relative flex flex-col gap-4">
-        <h1 class="section-title">About this project</h1>
+        <h1 class="section-title">About Aimlab Tracker</h1>
         <p>
-          Hello! My name is Yohannes, known to the Aimtraining community as
-          Saibot. I'm a Frontend Developer currently in my Junior year of
-          College.
+          Browse player scores, run history and scenario leaderboards. Compare
+          Voltaic and Revosect benchmark results across seasons and difficulties,
+          and open individual runs to see their statistics.
         </p>
         <p>
-          I created this website with the intention of helping Aimlab players
-          track their progress in benchmarks and get easy access to different
-          tasks and leaderboards hoping to end the era of google sheets.
+          Player data comes from Aimlabs. Benchmark definitions and rank
+          requirements come from Voltaic and Revosect.
+        </p>
+        <p>
+          Created by Yohannes, known in the aim training community as Saibot.
         </p>
         <div
-          class="flex gap-4 items-center justify-end absolute bottom-0 right-0"
+          class="flex gap-4 items-center justify-end"
         >
           <a href="https://github.com/yohannesakd/" aria-label="Yohannes on GitHub"
             ><svg
