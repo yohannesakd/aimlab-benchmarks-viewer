@@ -16,7 +16,7 @@
         <div v-for="bench in result.benchmarks" :key="bench.id" class="catalog-row">
           <strong>{{ bench.name }}</strong>
           <div class="catalog-thresholds"><span v-for="(score, index) in scoreRequirements(bench)" :key="index"><small>{{ rankList[index] }}</small>{{ score.toLocaleString() }}</span><span v-if="!scoreRequirements(bench).length" class="muted">Awaiting requirements</span></div>
-          <router-link class="text-link" :to="'/tasks/' + encodeURIComponent(bench.id) + '/leaderboard'">Leaderboard →</router-link>
+          <router-link class="text-link" :to="{ path: '/tasks/' + encodeURIComponent(bench.id) + '/leaderboard', query: { weapon: bench.weapon } }">Leaderboard →</router-link>
         </div>
       </div>
       <p v-if="selectedSet.source" class="result-meta catalog-source">Definitions: <a class="text-link" :href="selectedSet.source" target="_blank" rel="noopener noreferrer">{{ community === 'voltaic' ? 'Voltaic' : 'Revosect' }}</a></p>

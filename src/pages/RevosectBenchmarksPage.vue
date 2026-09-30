@@ -56,7 +56,7 @@
               <button type="button" @click="handlePlayScenario(bench)"><play-icon class="h-4 w-4"></play-icon>Play</button>
               <button type="button" :disabled="!bench.count" @click="showBestRun(bench)">View best run</button>
               <router-link :to="historyLink(bench.id)">View runs</router-link>
-              <router-link :to="'/tasks/' + encodeURIComponent(bench.id) + '/leaderboard'">View leaderboard</router-link>
+              <router-link :to="{ path: '/tasks/' + encodeURIComponent(bench.id) + '/leaderboard', query: { weapon: bench.weapon } }">View leaderboard</router-link>
             </div>
           </div>
         </div>

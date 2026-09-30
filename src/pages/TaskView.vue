@@ -89,6 +89,7 @@ export default {
       "currentTask",
       "currentTaskLeaderboard",
     ]),
+    leaderboardIdentity() { return JSON.stringify([this.taskId, this.$route.query.weapon]); },
     taskLink() {
       return taskDeepLink(this.currentTask.workshop_id);
     },
@@ -114,8 +115,8 @@ export default {
     },
   },
   watch: {
-    taskId: { immediate: true, handler(taskId) {
-      this.loadTask(taskId);
+    leaderboardIdentity: { immediate: true, handler() {
+      this.loadTask(this.taskId);
     } },
     currentPage() {
       if (!this.headLoading && !this.taskError && this.currentTask.id === this.taskId) {
@@ -135,7 +136,7 @@ export default {
       }
     },
     showRun(task) {
-      openRunDetails({ username: task.username, taskId: this.taskId, taskName: this.currentTask.name, playId: task.playId, score: task.score });
+      openRunDetails({ username: task.username, taskId: this.taskId, taskName: this.currentTask.name, weapon: this.currentTaskLeaderboard.weaponId, playId: task.playId, score: task.score });
     },
     handleSwitchTask() {
       this.$router.push("/tasks");
@@ -186,7 +187,9 @@ export default {
       this.isLoading = true;
       this.leaderboardError = "";
       try {
-        const response = await fetchData(`/api/tasks/${encodeURIComponent(task.id)}/leaderboard?page=${this.currentPage}`);
+        const params = new URLSearchParams({ page: this.currentPage });
+        if (this.$route.query.weapon) params.set("weapon", this.$route.query.weapon);
+        const response = await fetchData(`/api/tasks/${encodeURIComponent(task.id)}/leaderboard?${params}`);
         if (version !== this.leaderboardRequestVersion || task.id !== this.taskId) return;
         this.$store.dispatch("setCurrentTaskLeaderboard", response);
       } catch (error) {

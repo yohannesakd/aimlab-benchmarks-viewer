@@ -51,7 +51,7 @@ The VPS owns Aimlabs requests, profile aggregation, weighted averages, totals, a
 - `GET /api/profiles/:username/lookup`: username and Aimlabs ranking.
 - `GET /api/profiles/:username`: task summaries, totals, and results grouped by benchmark set.
 - `GET /api/tasks/search?name=...` and `GET /api/tasks/:taskId`: search and task metadata.
-- `GET /api/tasks/:taskId/leaderboard?page=...`: 25 normalized scores per page.
+- `GET /api/tasks/:taskId/leaderboard?page=...`: 25 normalized scores per page. Benchmark links supply `weapon` to preserve the benchmark score population when Aimlabs’ task default differs.
 - `GET /api/tasks/:taskId/run?username=...&playId=...`: exact run details. Benchmark scores omit `playId` and supply `weapon` and `score`; the server checks that the best run matches the displayed score.
 - `GET /api/profiles/:username/tasks/:taskId/runs?after=...`: 12 public solo plays per cursor page. Existing `?run=...` history links open the modal.
 

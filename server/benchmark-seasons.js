@@ -42,7 +42,10 @@ export function calculateVoltaicSeason(definition, rows) {
       const thresholds = scenario.tiers.find(item => item.tier_id === tier.id).thresholds;
       const calculation = { thresholds, score: stats.maxScore, subcategoryId: scenario.subcategory_id };
       const energy = Math.floor(uncappedScenarioEnergy(calculation, tiers, tierIndex));
-      return { id: scenario.task_id, weapon: scenario.weapon_id, name: scenario.name, workshopId: scenario.workshop_id, categoryID: scenario.subcategory_id, subCategory: subcategories.find(item => item.id === scenario.subcategory_id).name, ...stats, scores: thresholds, energy, rank: rankFor(energy, ranks), energyProgress: { value: energy >= ranks.at(-1).energy_threshold ? 100 : energy % 100, max: 100 }, calculation };
+      const energyProgress = energy < ranks[0].energy_threshold
+        ? { value: energy, max: ranks[0].energy_threshold }
+        : { value: energy >= ranks.at(-1).energy_threshold ? 100 : energy % 100, max: 100 };
+      return { id: scenario.task_id, weapon: scenario.weapon_id, name: scenario.name, workshopId: scenario.workshop_id, categoryID: scenario.subcategory_id, subCategory: subcategories.find(item => item.id === scenario.subcategory_id).name, ...stats, scores: thresholds, energy, rank: rankFor(energy, ranks), energyProgress, calculation };
     });
     const subcategoryEnergies = subcategories.map(category => subcategoryEnergy(tiers, tierIndex, benchmarks.filter(bench => bench.categoryID === category.id).map(bench => bench.calculation)));
     const categories = subcategories.map((category, index) => {

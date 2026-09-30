@@ -99,11 +99,12 @@ async function leaderboard(input) {
   return result;
 }
 
-export function getTaskLeaderboard(taskId, page = 0) {
-  return cached(`leaderboard:${taskId}:${page}`, async () => {
+export function getTaskLeaderboard(taskId, page = 0, weapon = null) {
+  return cached(JSON.stringify(["leaderboard", taskId, page, weapon]), async () => {
     const task = await getTask(taskId);
-    const result = await leaderboard({ taskId, weaponId: task.weapon_id, limit: 25, offset: page * 25 });
+    const result = await leaderboard({ taskId, weaponId: weapon ?? task.weapon_id, limit: 25, offset: page * 25 });
     return {
+      weaponId: weapon ?? task.weapon_id,
       pagination: { ...result.metadata, pageCount: Math.max(0, Math.ceil(result.metadata.totalRows / 25) - 1) },
       data: result.data.map((row) => ({ rank: row.rank, username: row.username, score: row.score,
         accuracy: Number.isFinite(row.accuracy) ? `${Math.round(row.accuracy * 100) / 100}%` : "—",
@@ -174,7 +175,9 @@ export async function handleAppDataRequest(request, response, pathname, params) 
     } else if (task[2] === "/leaderboard") {
       const page = Number(params.get("page") || 0);
       if (!Number.isInteger(page) || page < 0 || page > 1_000_000) throw new URIError("Invalid page");
-      body = await getTaskLeaderboard(id, page);
+      const weapon = params.get("weapon");
+      if (weapon !== null && invalid(weapon, 128)) throw new URIError("Invalid weapon");
+      body = await getTaskLeaderboard(id, page, weapon);
     } else if (task[2] === "/run") {
       const username = params.get("username");
       const playId = params.get("playId");

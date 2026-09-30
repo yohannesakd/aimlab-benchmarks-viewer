@@ -32,6 +32,22 @@ test('Season 3 retains all nine groups and ignores alternate modes, weapons, and
   assert.equal(result.overallRank, 'Unranked');
 });
 
+test('Voltaic scenario progress measures the full interval before the first rank', () => {
+  for (const definition of voltaicSeasons) {
+    for (const tier of definition.tiers) {
+      const scenario = definition.scenarios.find(item => item.tiers.some(level => level.tier_id === tier.id));
+      const firstScore = scenario.tiers.find(level => level.tier_id === tier.id).thresholds[0];
+      const firstEnergy = definition.ranks.find(rank => rank.tier_id === tier.id).energy_threshold;
+      const below = calculateVoltaicSeason(definition, [play(scenario, firstScore / 2)]).results[`VT${tier.name}`].benchmarks.find(bench => bench.id === scenario.task_id);
+      assert.equal(below.rank, 'Unranked');
+      assert.deepEqual(below.energyProgress, { value: below.energy, max: firstEnergy });
+      assert.ok(below.energy > 0 && below.energy < firstEnergy);
+      const ranked = calculateVoltaicSeason(definition, [play(scenario, firstScore)]).results[`VT${tier.name}`].benchmarks.find(bench => bench.id === scenario.task_id);
+      assert.deepEqual(ranked.energyProgress, { value: 0, max: 100 });
+    }
+  }
+});
+
 test('Voltaic caps category energy while preserving top-tier extrapolation', () => {
   const definition = voltaicSeasons[0];
   const rows = definition.scenarios.map(scenario => play(scenario, scenario.tiers[0].thresholds.at(-1) * 2));
