@@ -12,6 +12,13 @@
       "source": "/api/tasks/:path*",
       "destination": "https://aimlab-staging-api.saibot.site/api/tasks/:path*"
     },
-    { "source": "/:path*", "destination": "/index.html" }
+    {
+      "source": "/api/benchmarks/:path*",
+      "destination": "https://aimlab-staging-api.saibot.site/api/benchmarks/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
   ]
 }

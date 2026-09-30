@@ -19,7 +19,7 @@ From here you can navigate to the [Voltaic](https://voltaic.gg) and [Revosect](h
 
 Each task card has **View runs**. The list shows score, accuracy, shot count, and date. Run details open in a modal, with performance statistics, duration, pause time, versions, and a replay link where available. Leaderboard and benchmark scores open the same modal. Solo history can contain different scenario settings; its count is not a count of comparable benchmark attempts.
 
-Profile benchmark pages separate the benchmark set from difficulty. The existing sets are labelled **Legacy benchmark set**; the selected set and difficulty stay in the URL.
+Profile benchmark pages separate the benchmark set from difficulty. The selected set and difficulty stay in the URL. Voltaic Season 3 and the current Season 2 definitions use the official `energy-calculation` package on the VPS. Archived Season / Series 2 thresholds retain their original calculations and leaderboard identity. Revosect Series 4 shows exact playlist scores and runs; ranks await verified Aimlabs requirements. The home difficulty links open the benchmark catalog. **Save profile** stores one shortcut in this browser; it does not verify account ownership.
 
 ![Player Profile](./public/guide/player-profile.png)
 
@@ -41,16 +41,17 @@ The Task is Presented as such, the option to launch Aimlab and play as well as w
 
 ## Running on a VPS
 
-The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The production Vercel site uses the read-only API at `aimlab-api.saibot.site`. The staging Vercel preview uses `aimlab-staging-api.saibot.site` for benchmark leaderboards and all profile/task data. `vercel.json` proxies the `/api/leaderboards`, `/api/profiles`, and `/api/tasks` namespaces.
+The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The production Vercel site uses the read-only API at `aimlab-api.saibot.site`. The staging Vercel preview uses `aimlab-staging-api.saibot.site` for benchmark leaderboards and all profile/task data. `vercel.json` proxies the `/api/leaderboards`, `/api/profiles`, `/api/tasks`, and `/api/benchmarks` namespaces.
 
 The Node server serves the built site and paged Revosect and Voltaic leaderboards. The refresh command collects Aimlab scores into a resumable SQLite staging database, calculates ranks using the same benchmark functions as player profiles, then atomically publishes one database per benchmark level. It keeps the previous published database if Aimlab fails. Large levels take longer to backfill; until one completes, its API returns 503 and the site shows an error.
 
 The VPS owns Aimlabs requests, profile aggregation, weighted averages, totals, and all benchmark rank, energy, point, and progress calculations. The browser renders the processed results. Read-only routes are:
 
+- `GET /api/benchmarks/:community`: available sets and score requirements for `voltaic` or `revosect`.
 - `GET /api/profiles/:username/lookup`: username and Aimlabs ranking.
 - `GET /api/profiles/:username`: task summaries, totals, and results grouped by benchmark set.
 - `GET /api/tasks/search?name=...` and `GET /api/tasks/:taskId`: search and task metadata.
-- `GET /api/tasks/:taskId/leaderboard?page=...`: 25 normalized scores per page.
+- `GET /api/tasks/:taskId/leaderboard?page=...`: 25 normalized scores per page. Benchmark links supply `weapon` to preserve the benchmark score population when Aimlabs’ task default differs.
 - `GET /api/tasks/:taskId/run?username=...&playId=...`: exact run details. Benchmark scores omit `playId` and supply `weapon` and `score`; the server checks that the best run matches the displayed score.
 - `GET /api/profiles/:username/tasks/:taskId/runs?after=...`: 12 public solo plays per cursor page. Existing `?run=...` history links open the modal.
 
@@ -72,3 +73,13 @@ The private site listens on `127.0.0.1:5180` and is published through Tailscale 
 The private [analytics dashboard](https://vps.snapper-cod.ts.net:5181/websites/101682cb-3775-497a-b68a-b59a22ad10a5) runs Umami 3.4.0 and PostgreSQL from `deploy/analytics/compose.yaml`. It records page visits, navigation, referrers, devices, and search outcomes without search terms in custom events. Profile page URLs can contain player names. The public tracker host `aimlab-analytics.saibot.site` exposes only `/script.js` and `/api/send` through the Cloudflare Tunnel; the dashboard remains tailnet-only. Its database is stored at `/home/sai/.local/share/aimlab-analytics/postgres`; the deployed Compose file and private `.env` are in `/home/sai/apps/aimlab-analytics`. Run `docker compose up -d` there after updating the Compose file. The admin login is stored locally in `/home/sai/apps/aimlab-analytics/admin-credentials` with owner-only permissions. The backup timer in `deploy/analytics/` writes daily database dumps to `/home/sai/.local/share/aimlab-analytics/backups`. Vercel's available 30-day aggregate CSV exports are archived in `/home/sai/.local/share/aimlab-analytics/vercel-export-2026-09-28-30d/`; they cannot reconstruct historical Umami sessions.
 
 The Revosect calculations use the [Aim Lab progression sheet](https://docs.google.com/spreadsheets/d/1JUTGiKU6u0csCWcmaMTof6Y2LNiZqLyCStH0OzzXYwI/edit?usp=sharing) for the benchmark set included in this repository.
+
+## Benchmark definitions and account linking
+
+Run `npm run import:benchmarks` on the VPS to refresh definitions. Python 3 reads Voltaic’s public definition API and Revosect’s official playlist links, resolves the Revosect playlist packages through Aimlabs, then fetches every task’s identity, weapon, version, duration, and creator from `api.aimlabs.com/graphql`. It sends at most one GraphQL batch per second, bounds downloads, and stops on an upstream failure before replacing any definition. Signed package URLs are never saved. The committed snapshots record source and retrieval date; restart the server after a reviewed update.
+
+[Voltaic’s energy utility](https://github.com/VoltaicHQ/energy-calculation) supplies interpolation, category caps, and harmonic aggregation. Version 1.0.1 floors some exact harmonic results one point too low (500 → 499 and 1000 → 999 in our threshold fixtures). The adapter corrects only values within floating-point tolerance of an integer. Tests cover every rank threshold, missing groups, capped categories, and top-tier extrapolation. Revosect’s newer KovaaK’s score sheets are not Aimlabs S4 requirements.
+
+[Aimlabs’ OpenID configuration](https://auth.aimlab.gg/oauth/.well-known/openid-configuration) confirms authorization codes, S256 PKCE, and the `openid user.profile` scopes. On 2026-09-30, the signed-in account’s client-registry and client-registration requests returned `UNAUTHORIZED`; the account settings expose no developer-client registration. OAuth remains blocked on Aimlabs issuing a client under the owner’s existing API-access application. No other application’s client credentials are reused.
+
+Registration details: **Aimlab Tracker**, authorization-code grant, code response, `openid user.profile`, S256 PKCE, and exact staging callback `https://vps.snapper-cod.ts.net:5194/api/auth/callback`. The callback is a proposed registration URL, not an implemented endpoint. Once issued, store credentials only in the VPS environment and implement code exchange, state/nonce checks, verified identity, and private server sessions before enabling sign-in. Production and Vercel callbacks need their own exact approved URLs when supported.

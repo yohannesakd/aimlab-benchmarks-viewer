@@ -95,3 +95,27 @@ test("unpublished historical runs retain only available leaderboard statistics",
     assert.equal(JSON.stringify(run).includes("secret"), false);
   } finally { globalThis.fetch = originalFetch; }
 });
+
+test('benchmark leaderboards preserve the selected weapon and isolate cached score populations', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (_url, options) => {
+    const body = JSON.parse(options.body);
+    calls.push(body);
+    if (body.query.includes('GetTask(')) return response({ aimlab: { task: { id: 'fixture-weapon-identity', weapon_id: 'default-weapon' } } });
+    const weapon = body.variables.leaderboardInput.weaponId;
+    assert.equal(body.variables.leaderboardInput.taskMode, 0);
+    return response({ aimlab: { leaderboard: { metadata: { totalRows: 1, offset: 0, rows: 1 }, data: [{ username: weapon, score: weapon === 'benchmark-weapon' ? 200 : 100, play_id: weapon }] } } });
+  };
+  try {
+    const selected = await getTaskLeaderboard('fixture-weapon-identity', 0, 'benchmark-weapon');
+    const defaultBoard = await getTaskLeaderboard('fixture-weapon-identity');
+    const selectedAgain = await getTaskLeaderboard('fixture-weapon-identity', 0, 'benchmark-weapon');
+    assert.equal(selected.weaponId, 'benchmark-weapon');
+    assert.equal(selected.data[0].score, 200);
+    assert.equal(defaultBoard.weaponId, 'default-weapon');
+    assert.equal(defaultBoard.data[0].score, 100);
+    assert.equal(selectedAgain, selected);
+    assert.equal(calls.length, 3);
+  } finally { globalThis.fetch = originalFetch; }
+});

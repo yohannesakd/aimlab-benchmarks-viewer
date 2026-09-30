@@ -3,21 +3,15 @@
     <div class="panel filter-bar">
       <div>
         <label class="field-label">Level</label>
-        <dropdown :selectedTab="{ label: benchmarks[benchmark] }">
-          <li v-for="(name, index) in benchmarks" :key="name" @click="benchmark = index">{{ name }}</li>
-        </dropdown>
+        <dropdown label="Level" :options="benchmarks.map((label, value) => ({ label, value }))" :model-value="benchmark" @update:model-value="benchmark = $event" />
       </div>
       <div>
         <label class="field-label">Category</label>
-        <dropdown :selectedTab="{ label: categories[category] }">
-          <li v-for="(name, index) in categories" :key="name" @click="category = index">{{ name }}</li>
-        </dropdown>
+        <dropdown label="Category" :options="categories.map((label, value) => ({ label, value }))" :model-value="category" @update:model-value="category = $event" />
       </div>
       <div v-if="category !== 3">
         <label class="field-label">Subcategory</label>
-        <dropdown :selectedTab="{ label: subCategories[category][subCategory] }">
-          <li v-for="(name, index) in subCategories[category]" :key="name" @click="subCategory = index">{{ name }}</li>
-        </dropdown>
+        <dropdown label="Subcategory" :options="subCategories[category].map((label, value) => ({ label, value }))" :model-value="subCategory" @update:model-value="subCategory = $event" />
       </div>
       <span class="filter-status">Refreshed daily</span>
     </div>
@@ -25,7 +19,7 @@
     <div v-if="loading" class="panel status-panel" aria-live="polite"><loading-spinner></loading-spinner></div>
     <div v-else-if="error" class="panel status-panel" role="alert">{{ error }}</div>
     <div v-else class="panel leaderboard-panel">
-      <h2 class="leaderboard-heading">Voltaic · {{ benchmarks[benchmark] }}</h2>
+      <h2 class="leaderboard-heading">Voltaic · Archived Season 2 · {{ benchmarks[benchmark] }}</h2>
       <div class="leaderboard-row leaderboard-row--head" aria-hidden="true">
         <span>Rank</span><span>Player</span><span>Energy</span><span>Overall rank</span>
       </div>
@@ -33,7 +27,7 @@
         v-for="(player, index) in pageData.players"
         :key="index"
         class="leaderboard-row leaderboard-row--player"
-        :to="'/profile/' + player.username + '/voltaic'"
+        :to="{ path: '/profile/' + encodeURIComponent(player.username) + '/voltaic', query: { benchmark: 'legacy', level: benchmarks[benchmark].toLowerCase() } }"
       >
         <span>{{ (page - 1) * 25 + index + 1 }}</span>
         <span class="player-name">{{ player.username }}</span>
@@ -64,7 +58,7 @@ export default {
             benchmarks: ["Novice", "Intermediate", "Advanced"],
             categories: ["Clicking", "Tracking", "Switching", "Overall"],
             subCategories: [["Dynamic", "Static", "Overall"], ["Precise", "Reactive", "Overall"], ["Speed", "Evasive", "Overall"]],
-            benchmark: 0,
+            benchmark: Math.max(0, ["novice", "intermediate", "advanced"].indexOf(this.$route.query.level)),
             category: 3,
             subCategory: 2,
             page: 1,
@@ -83,7 +77,14 @@ export default {
         },
     },
     watch: {
-        benchmark() { this.resetAndLoad(); },
+        benchmark() {
+            this.$router.replace({ query: { ...this.$route.query, level: this.benchmarks[this.benchmark].toLowerCase() } });
+            this.resetAndLoad();
+        },
+        '$route.query.level'(level) {
+            const index = this.benchmarks.findIndex(name => name.toLowerCase() === level);
+            this.benchmark = Math.max(0, index);
+        },
         sort() { this.resetAndLoad(); },
         page() { this.loadLeaderboard(); },
     },

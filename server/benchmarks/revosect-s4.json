@@ -1,0 +1,899 @@
+{
+  "id": "revosect_s4",
+  "community": "revosect",
+  "label": "Series 4",
+  "source": "https://revosect.com/resources",
+  "retrievedAt": "2026-09-30",
+  "rankingAvailable": false,
+  "levels": {
+    "easy": {
+      "playlistWorkshopId": "3387042605",
+      "scenarios": [
+        {
+          "id": "CsLevel.RevosectTasks.S4 Fours.S8UK0R",
+          "name": "rA S4 Fourshot Easy",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "3160568145",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Fours.S8UK0R",
+            "name": "rA S4 Fourshot Easy",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "3160568145",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Micro.S8UK42",
+          "name": "rA S4 Microshot Easy",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "3160568498",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Micro.S8UK42",
+            "name": "rA S4 Microshot Easy",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "3160568498",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 XYcli.S8UK7N",
+          "name": "rA S4 XYclick Easy",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "3160569557",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 XYcli.S8UK7N",
+            "name": "rA S4 XYclick Easy",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "3160569557",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Bounc.S8UKA1",
+          "name": "rA S4 Bounceclick Easy",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "3160570032",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Bounc.S8UKA1",
+            "name": "rA S4 Bounceclick Easy",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "3160570032",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Glide.S8UKBY",
+          "name": "rA S4 Glidertrack Easy",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "3160570679",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Glide.S8UKBY",
+            "name": "rA S4 Glidertrack Easy",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "3160570679",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Capsu.S8UKDW",
+          "name": "rA S4 Capsuletrack Easy",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "3160571179",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Capsu.S8UKDW",
+            "name": "rA S4 Capsuletrack Easy",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "3160571179",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Airtr.S8UKGQ",
+          "name": "rA S4 Airtrack Easy",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "3160572005",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Airtr.S8UKGQ",
+            "name": "rA S4 Airtrack Easy",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "3160572005",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Straf.S8UKIK",
+          "name": "rA S4 Strafetrack Easy",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "3160572486",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Straf.S8UKIK",
+            "name": "rA S4 Strafetrack Easy",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "3160572486",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.rA S4 XY.SOQ1BN",
+          "name": "rA S4 XYswitch Easy",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "3387032735",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.rA S4 XY.SOQ1BN",
+            "name": "rA S4 XYswitch Easy",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "3387032735",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.rA S4 La.SOQ4FV",
+          "name": "rA S4 Layerswitch Easy",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "3387049622",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.rA S4 La.SOQ4FV",
+            "name": "rA S4 Layerswitch Easy",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "3387049622",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        }
+      ]
+    },
+    "medium": {
+      "playlistWorkshopId": "3026771775",
+      "scenarios": [
+        {
+          "id": "CsLevel.RevosectTasks.S4 Three.RWMF26",
+          "name": "rA S4 Threeshot Med",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2992717707",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Three.RWMF26",
+            "name": "rA S4 Threeshot Med",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2992717707",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Fivew.RWMF14",
+          "name": "rA S4 Sevenwide Med",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2992717400",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Fivew.RWMF14",
+            "name": "rA S4 Sevenwide Med",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2992717400",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Fourw.RWMEZV",
+          "name": "rA S4 Fourwide Small Med",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2992717033",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Fourw.RWMEZV",
+            "name": "rA S4 Fourwide Small Med",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2992717033",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Snapc.RWMEXO",
+          "name": "rA S4 Snapclick Med",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2992716445",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Snapc.RWMEXO",
+            "name": "rA S4 Snapclick Med",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2992716445",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 XYcli.RWMEW7",
+          "name": "rA S4 XYclick  Med",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2992716063",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 XYcli.RWMEW7",
+            "name": "rA S4 XYclick  Med",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2992716063",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Bounc.RWMETM",
+          "name": "rA S4 Bounceclick Med",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2992715319",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Bounc.RWMETM",
+            "name": "rA S4 Bounceclick Med",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2992715319",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Glide.RWMDPT",
+          "name": "rA S4 Glidertrack Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992704969",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Glide.RWMDPT",
+            "name": "rA S4 Glidertrack Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992704969",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Capsu.RWMDZ6",
+          "name": "rA S4 Capsuletrack Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992707636",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Capsu.RWMDZ6",
+            "name": "rA S4 Capsuletrack Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992707636",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Leapt.RWMEE0",
+          "name": "rA S4 Leaptrack Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992711313",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Leapt.RWMEE0",
+            "name": "rA S4 Leaptrack Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992711313",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.rAnak.S4 Airtr.RTVW5F",
+          "name": "S4 Airtrack Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2968858905",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.rAnak.S4 Airtr.RTVW5F",
+            "name": "S4 Airtrack Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2968858905",
+            "duration": null,
+            "version": 1,
+            "author": {
+              "username": "rAnak"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 React.RWMERJ",
+          "name": "rA S4 Reactivesphere Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992714777",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 React.RWMERJ",
+            "name": "rA S4 Reactivesphere Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992714777",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Straf.RWMEPR",
+          "name": "rA S4 Strafetrack Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992714316",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Straf.RWMEPR",
+            "name": "rA S4 Strafetrack Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992714316",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Wides.RWMECO",
+          "name": "rA S4 Wideswitch Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992710898",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Wides.RWMECO",
+            "name": "rA S4 Wideswitch Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992710898",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Orbsw.RWMEAQ",
+          "name": "rA S4 Orbswitch Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992710487",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Orbsw.RWMEAQ",
+            "name": "rA S4 Orbswitch Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992710487",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 XYswi.RWME9C",
+          "name": "rA S4 XYswitch Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992709897",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 XYswi.RWME9C",
+            "name": "rA S4 XYswitch Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992709897",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Layer.RWME7U",
+          "name": "rA S4 Layerswitch Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992709557",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Layer.RWME7U",
+            "name": "rA S4 Layerswitch Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992709557",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Space.RWME3O",
+          "name": "rA S4 Spaceswitch Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992708726",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Space.RWME3O",
+            "name": "rA S4 Spaceswitch Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992708726",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.RevosectTasks.S4 Evasw.RWME5Q",
+          "name": "rA S4 Evaswitch Med",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2992709112",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.RevosectTasks.S4 Evasw.RWME5Q",
+            "name": "rA S4 Evaswitch Med",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2992709112",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        }
+      ]
+    },
+    "hard": {
+      "playlistWorkshopId": "2950775188",
+      "scenarios": [
+        {
+          "id": "CsLevel.Revosect1.S4 Three.RRSEC9",
+          "name": "rA S4 Threeshot Hard",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2949438627",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Three.RRSEC9",
+            "name": "rA S4 Threeshot Hard",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2949438627",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Fivew.RRU42Q",
+          "name": "rA S4 Fivewide Hard",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2949845932",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Fivew.RRU42Q",
+            "name": "rA S4 Fivewide Hard",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2949845932",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Fours.RRU3OU",
+          "name": "rA S4 Fourwide Small Hard",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2949840310",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Fours.RRU3OU",
+            "name": "rA S4 Fourwide Small Hard",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2949840310",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Snapc.RRU2LN",
+          "name": "rA S4 Snapclick Hard",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2949832872",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Snapc.RRU2LN",
+            "name": "rA S4 Snapclick Hard",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2949832872",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 XYcli.RRU324",
+          "name": "rA S4 XYclick Hard",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2949836055",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 XYcli.RRU324",
+            "name": "rA S4 XYclick Hard",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2949836055",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Bounc.RRU3UC",
+          "name": "rA S4 Bounceclick Hard",
+          "weapon": "Custom_RevoClicker",
+          "workshopId": "2949842479",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Bounc.RRU3UC",
+            "name": "rA S4 Bounceclick Hard",
+            "weapon_id": "Custom_RevoClicker",
+            "mode": 0,
+            "workshop_id": "2949842479",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Glide.RRSE7O",
+          "name": "rA S4 Glidertrack Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949437274",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Glide.RRSE7O",
+            "name": "rA S4 Glidertrack Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949437274",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Capsu.RRSDND",
+          "name": "rA S4 Capsuletrack Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949431528",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Capsu.RRSDND",
+            "name": "rA S4 Capsuletrack Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949431528",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Leapt.RRSD8X",
+          "name": "rA S4 Leaptrack Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949427123",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Leapt.RRSD8X",
+            "name": "rA S4 Leaptrack Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949427123",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Airtr.RRSE27",
+          "name": "rA S4 Airtrack Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949435955",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Airtr.RRSE27",
+            "name": "rA S4 Airtrack Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949435955",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 React.RRSE5O",
+          "name": "rA S4 Reactivesphere Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949436827",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 React.RRSE5O",
+            "name": "rA S4 Reactivesphere Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949436827",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Straf.RRSE9Z",
+          "name": "rA S4 Strafetrack Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949437914",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Straf.RRSE9Z",
+            "name": "rA S4 Strafetrack Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949437914",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Wides.RRU4WZ",
+          "name": "rA S4 Wideswitch Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949851454",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Wides.RRU4WZ",
+            "name": "rA S4 Wideswitch Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949851454",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Orbsw.RRU4VG",
+          "name": "rA S4 Orbswitch Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949850781",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Orbsw.RRU4VG",
+            "name": "rA S4 Orbswitch Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949850781",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 XYswi.RRU4G1",
+          "name": "rA S4 XYswitch Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949847571",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 XYswi.RRU4G1",
+            "name": "rA S4 XYswitch Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949847571",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Layer.RRU3DN",
+          "name": "rA S4 Layerswitch Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949838164",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Layer.RRU3DN",
+            "name": "rA S4 Layerswitch Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949838164",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Evasw.RRU4LL",
+          "name": "rA S4 Evaswitch Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949849890",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Evasw.RRU4LL",
+            "name": "rA S4 Evaswitch Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949849890",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        },
+        {
+          "id": "CsLevel.Revosect1.S4 Space.RRSETJ",
+          "name": "rA S4 Spaceswitch Hard",
+          "weapon": "Custom_RevoTracker",
+          "workshopId": "2949443802",
+          "taskMode": 0,
+          "taskMetadata": {
+            "id": "CsLevel.Revosect1.S4 Space.RRSETJ",
+            "name": "rA S4 Spaceswitch Hard",
+            "weapon_id": "Custom_RevoTracker",
+            "mode": 0,
+            "workshop_id": "2949443802",
+            "duration": 60,
+            "version": 1,
+            "author": {
+              "username": "RevosectTasks"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

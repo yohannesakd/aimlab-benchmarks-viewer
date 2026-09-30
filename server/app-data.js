@@ -4,6 +4,8 @@ import { cleanUpUserTasks, cleanUpBenchmarkTasks, caclulateVT, calculateRevosect
 import { advancedBench, intermediateBench, noviceBench, advancedRanks, intermediateRanks, noviceRanks, categories, advancedEnergy, intermediateEnergy, noviceEnergy } from "../src/helpers/voltaicData.js";
 import { publicRun, runFields } from "./player-runs.js";
 
+import { voltaicSeasons, calculateVoltaicSeason, calculateRevosectSeason } from './benchmark-seasons.js';
+
 const cache = new Map();
 const pending = new Map();
 const cacheLifeMs = 60_000;
@@ -61,7 +63,7 @@ export function calculateProfile(playerInfo, rows) {
   for (const mode of ["hard", "medium", "easy"]) {
     benchmarks[`RA${mode[0].toUpperCase()}${mode.slice(1)}`] = calculateRevosectBenchmarks({ tasks: benchmarkTasks, id: playerInfo.id }, mode);
   }
-  return { playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", label: "Legacy benchmark set", results: benchmarks }] };
+  return { playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", label: "Season / Series 2 (archived thresholds)", results: benchmarks }, ...voltaicSeasons.map(definition => calculateVoltaicSeason(definition, rows)), calculateRevosectSeason(rows)] };
 }
 
 export function getProfile(username) {
@@ -97,11 +99,12 @@ async function leaderboard(input) {
   return result;
 }
 
-export function getTaskLeaderboard(taskId, page = 0) {
-  return cached(`leaderboard:${taskId}:${page}`, async () => {
+export function getTaskLeaderboard(taskId, page = 0, weapon = null) {
+  return cached(JSON.stringify(["leaderboard", taskId, page, weapon]), async () => {
     const task = await getTask(taskId);
-    const result = await leaderboard({ taskId, weaponId: task.weapon_id, limit: 25, offset: page * 25 });
+    const result = await leaderboard({ taskId, weaponId: weapon ?? task.weapon_id, limit: 25, offset: page * 25 });
     return {
+      weaponId: weapon ?? task.weapon_id,
       pagination: { ...result.metadata, pageCount: Math.max(0, Math.ceil(result.metadata.totalRows / 25) - 1) },
       data: result.data.map((row) => ({ rank: row.rank, username: row.username, score: row.score,
         accuracy: Number.isFinite(row.accuracy) ? `${Math.round(row.accuracy * 100) / 100}%` : "—",
@@ -148,18 +151,23 @@ export function getRunDetails(taskId, username, playId, weapon, score) {
 }
 
 export async function handleAppDataRequest(request, response, pathname, params) {
+  const catalog = pathname.match(/^\/api\/benchmarks\/(voltaic|revosect)$/);
   const profile = pathname.match(/^\/api\/profiles\/([^/]+)(\/lookup)?$/);
   const task = pathname.match(/^\/api\/tasks\/([^/]+)(\/leaderboard|\/run)?$/);
-  if (!profile && !task) return false;
+  if (!profile && !task && !catalog) return false;
   let status = 200;
   let body;
   let headers = {};
   try {
     if (request.method !== "GET") { const error = new Error("Method not allowed"); error.status = 405; throw error; }
-    const id = decodeURIComponent((profile || task)[1]);
+    const id = decodeURIComponent((profile || task || catalog)[1]);
     const invalid = (value, limit) => !value || value.length > limit || /[\x00-\x1f]/.test(value);
     if (invalid(id, profile ? 64 : 256)) throw new URIError("Invalid request");
-    if (profile) body = profile[2] ? await getProfileLookup(id) : await getProfile(id);
+    if (catalog) {
+      const prefix = id === 'voltaic' ? 'VT' : 'RA';
+      const sets = calculateProfile({ id: 'catalog' }, []).benchmarkSets.filter(set => !set.community || set.community === id);
+      body = { sets: sets.map(set => ({ ...set, label: set.id === 'legacy' ? `${id === 'voltaic' ? 'Season' : 'Series'} 2 (archived thresholds)` : set.label, results: Object.fromEntries(Object.entries(set.results).filter(([key]) => key.startsWith(prefix))) })) };
+    } else if (profile) body = profile[2] ? await getProfileLookup(id) : await getProfile(id);
     else if (id === "search" && !task[2]) {
       const name = params.get("name");
       if (invalid(name, 100)) throw new URIError("Invalid task search");
@@ -167,7 +175,9 @@ export async function handleAppDataRequest(request, response, pathname, params) 
     } else if (task[2] === "/leaderboard") {
       const page = Number(params.get("page") || 0);
       if (!Number.isInteger(page) || page < 0 || page > 1_000_000) throw new URIError("Invalid page");
-      body = await getTaskLeaderboard(id, page);
+      const weapon = params.get("weapon");
+      if (weapon !== null && invalid(weapon, 128)) throw new URIError("Invalid weapon");
+      body = await getTaskLeaderboard(id, page, weapon);
     } else if (task[2] === "/run") {
       const username = params.get("username");
       const playId = params.get("playId");

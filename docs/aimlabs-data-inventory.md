@@ -230,3 +230,12 @@ Remaining work:
 1. Normalize metric units by task/version before cross-run comparisons or trend charts. Keep canonical scores separate from derived charts, and verify scenario score rules against real runs.
 2. Add bounded replay decoding jobs only for on-demand detail. Signed replay URLs expire and must not be stored.
 3. Define retention and access before persisting replay traces, location, account settings, or social fields. Recheck available fields and terms if an Aimlabs API grant changes access.
+
+### Newer community benchmark integration (2026-09-30)
+
+- Voltaic’s public [Aimlabs catalog](https://app.voltaic.gg/api/v1/aimlabs/benchmarks) supplies S3 and current S2 task IDs, exact weapons, categories, thresholds, and playlist IDs. S3 has 18 tasks per difficulty across nine subcategories. The current S2 weapon/threshold definitions differ from this viewer’s archived tables; they remain separate sets.
+- Revosect’s [official resources](https://revosect.com/resources) supply Aimlabs S4 playlists. `Trainer.aimlabPlaylistsByWorkshop(workshopId)` resolves their signed playlist packages; parsing yields 10 Easy, 18 Medium, and 18 Hard task/weapon identities. The importer fetches metadata for all 142 tasks across Voltaic S3/current S2 and Revosect S4 directly from Aimlabs. Raw signed URLs and local paths are discarded.
+- The VPS processes normal-mode, exact-weapon score aggregates into each set. Voltaic uses its official energy package with a tested floating-point correction. S4 ranks are absent until Aimlabs-specific thresholds are verified; the KovaaK’s S4/S5 requirements cannot substitute.
+- Benchmark catalog, profile, and modal leaderboard links preserve the exact weapon in the URL and API cache identity. Aimlabs’ default weapon differs from the current Voltaic S2 requirement for Suavetrack Novice and Intermediate.
+- `/api/benchmarks/:community` powers the new catalog. Profile set selectors filter by community. Home difficulty links retain difficulty, and archived leaderboard rows retain the matching archived set when opening a profile.
+- OAuth discovery is available under `/oauth/.well-known/openid-configuration`. The owner signed in, but `Trainer.apiClients` and the authorized `createApiClient` attempt returned `UNAUTHORIZED`. Registration and verified account linking require credentials issued by Aimlabs. The current saved-profile shortcut is browser-local and unverified.

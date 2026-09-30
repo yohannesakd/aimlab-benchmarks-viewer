@@ -15,16 +15,16 @@
       <article class="panel benchmark-card">
         <div class="benchmark-card-top"><span class="eyebrow">01 / Benchmark set</span><span class="benchmark-mark">rA</span></div>
         <h2 class="section-title">Revosect</h2>
-        <p class="muted">Compare clicking, tracking, and switching across three existing benchmark levels.</p>
-        <div class="level-list"><span>Easy</span><span>Medium</span><span>Hard</span></div>
-        <router-link class="text-link" to="/leaderboards/ra">View leaderboards <span aria-hidden="true">→</span></router-link>
+        <p class="muted">Explore the Series 4 scenarios or revisit the archived benchmarks.</p>
+        <div class="level-list"><router-link v-for="level in ['Easy', 'Medium', 'Hard']" :key="level" :to="{ path: '/benchmarks/revosect', query: { level: level.toLowerCase() } }">{{ level }}</router-link></div>
+        <router-link class="text-link" to="/leaderboards/ra">Archived leaderboards <span aria-hidden="true">→</span></router-link>
       </article>
       <article class="panel benchmark-card">
         <div class="benchmark-card-top"><span class="eyebrow">02 / Benchmark set</span><span class="benchmark-mark">VT</span></div>
         <h2 class="section-title">Voltaic</h2>
-        <p class="muted">Browse player energy and ranks from Novice through Advanced.</p>
-        <div class="level-list"><span>Novice</span><span>Intermediate</span><span>Advanced</span></div>
-        <router-link class="text-link" to="/leaderboards/vt">View leaderboards <span aria-hidden="true">→</span></router-link>
+        <p class="muted">Track Season 3 energy and ranks from Novice through Advanced.</p>
+        <div class="level-list"><router-link v-for="level in ['Novice', 'Intermediate', 'Advanced']" :key="level" :to="{ path: '/benchmarks/voltaic', query: { level: level.toLowerCase() } }">{{ level }}</router-link></div>
+        <router-link class="text-link" to="/leaderboards/vt">Archived leaderboards <span aria-hidden="true">→</span></router-link>
       </article>
     </section>
 
@@ -37,17 +37,19 @@
       </div>
       <div class="panel home-action">
         <span class="eyebrow">Follow a player</span>
-        <h2 class="section-title">Profile overview</h2>
-        <p class="muted">See personal bests, play counts, and rank icons for both benchmark sets.</p>
-        <router-link class="btn-secondary" to="/profile">Search profiles <span aria-hidden="true">→</span></router-link>
+        <h2 class="section-title">{{ savedProfile ? savedProfile : 'Profile overview' }}</h2>
+        <p class="muted">Save a profile to open it quickly next time.</p>
+        <router-link class="btn-secondary" :to="savedProfile ? '/profile/' + encodeURIComponent(savedProfile) : '/profile'">{{ savedProfile ? 'Open saved profile' : 'Search profiles' }} <span aria-hidden="true">→</span></router-link>
       </div>
     </section>
   </main>
 </template>
 
 <script>
+import { savedProfile } from '../helpers/savedProfile.js';
 export default {
   data() { return { username: "" }; },
+  computed: { savedProfile() { return savedProfile.value; } },
   methods: {
     openProfile() {
       if (this.username) this.$router.push(`/profile/${encodeURIComponent(this.username)}`);
@@ -64,13 +66,14 @@ export default {
 .home-search { display: flex; gap: 10px; margin-top: 27px; max-width: 930px; }
 .home-search .text-field { flex: 1; min-width: 0; min-height: 54px; }
 .home-search .btn-primary { min-width: 160px; }
+.level-list a:hover, .level-list a:focus-visible { border-color: var(--accent); color: var(--accent); }
 .home-benchmarks, .home-bottom { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .benchmark-card { min-height: 270px; padding: 25px; }
 .benchmark-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
 .benchmark-mark { display: inline-flex; width: 34px; height: 34px; align-items: center; justify-content: center; border: 1px solid var(--line); color: var(--accent); font-size: .9rem; font-weight: 500; }
 .benchmark-card .muted { max-width: 440px; margin: 8px 0 20px; font-size: .85rem; line-height: 1.6; }
 .level-list { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 20px; }
-.level-list span { min-width: 78px; padding: 6px 11px; border: 1px solid var(--line); color: var(--muted); font-size: .8rem; text-align: center; }
+.level-list a { min-width: 78px; padding: 6px 11px; border: 1px solid var(--line); color: var(--muted); font-size: .8rem; text-align: center; }
 .home-bottom { margin-top: 14px; }
 .home-action { display: flex; flex-direction: column; align-items: flex-start; gap: 7px; padding: 25px; }
 .home-action .muted { min-height: 42px; font-size: .85rem; line-height: 1.6; }
