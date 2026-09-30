@@ -92,6 +92,7 @@ test("season standings use every group and include scores below the first rank",
       for (let index = 1; index <= count; index++) assert.equal(players[1][`c${index}`], 50);
       db.close();
 
+      await assert.rejects(refreshDatabase(mode, { dataDir, getPage: async () => ({ metadata: { totalRows: 2000 }, data: [] }) }), /Empty Aimlab page/);
       let calls = 0;
       await assert.rejects(refreshDatabase(mode, { dataDir, getPage: async () => {
         if (++calls > 1) throw new Error("Interrupted season refresh");
