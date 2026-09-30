@@ -68,7 +68,7 @@ def import_definitions():
         data = request_json(url)
         validate_voltaic(data)
         pending['voltaic-' + season + '.json'] = {
-            'id': data['alias'], 'community': 'voltaic', 'label': 'Season ' + data['season'] + ' (current definitions)',
+            'id': data['alias'], 'community': 'voltaic', 'label': 'Season ' + data['season'],
             'source': url, 'retrievedAt': today, 'tiers': data['tiers'], 'categories': data['categories'],
             'ranks': [{'name': r['name'].capitalize(), 'tier_id': r['tier_id'], 'energy_threshold': r['energy_threshold']} for r in data['ranks']],
             'scenarios': metadata(data['scenarios']),

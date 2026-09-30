@@ -19,8 +19,6 @@
         </div>
       </div>
     </div>
-
-    <p v-if="RABenchmarks.rankingAvailable === false" class="muted season-note">Series 4 scores and runs are available. Ranks will appear once the Aimlabs score requirements are verified.</p>
     <p v-if="actionError" class="panel status-panel mb-4" role="alert">{{ actionError }}</p>
     <section id="benchmark-table" class="panel bench-table">
       <h2 class="panel-header section-title">Scenario results</h2>
@@ -28,11 +26,11 @@
       <div v-for="(bench, index) in RABenchmarks.benchmarks" :key="index" class="bench-row">
         <div class="bench-main">
           <span class="bench-name">{{ bench.name }}</span>
-          <button v-if="bench.count" type="button" class="bench-score text-link" :aria-label="`View best run for ${bench.name}: ${bench.maxScore} points`" @click="showBestRun(bench)">{{ bench.maxScore }}</button><span v-else class="bench-score">—</span>
+          <button v-if="bench.count" type="button" class="bench-score text-link" :aria-label="`Open run for ${bench.name}: ${bench.maxScore} points`" @click="showBestRun(bench)">{{ bench.maxScore.toLocaleString() }}</button><span v-else class="bench-score">—</span>
           <span v-if="RABenchmarks.rankingAvailable === false">{{ bench.count }}</span>
           <span v-else class="bench-rank" :class="colorLookup[bench.rank]"><img :src="getImagePath(bench.rank)" alt="" />{{ bench.rank }}</span>
           <span v-if="RABenchmarks.rankingAvailable === false">{{ bench.count ? Math.round(bench.avgScore).toLocaleString() : '—' }}</span>
-          <span v-else class="bench-points">{{ bench.points }}<progress-bar class="progress-bar" :value="bench.progress" color="bg-mainCyan"></progress-bar></span>
+          <span v-else class="bench-points"><span class="bench-point-value">{{ bench.points }}</span><progress-bar class="progress-bar" :value="bench.progress" color="bg-mainCyan"></progress-bar></span>
           <button type="button" class="bench-expand" :aria-expanded="!!bench.detailsOpen" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
             <chevron-icon direction="down" class="h-4 w-4" :class="{ 'rotate-180': bench.detailsOpen }"></chevron-icon>
           </button>
@@ -54,7 +52,6 @@
             </div>
             <div class="bench-actions">
               <button type="button" @click="handlePlayScenario(bench)"><play-icon class="h-4 w-4"></play-icon>Play</button>
-              <button type="button" :disabled="!bench.count" @click="showBestRun(bench)">View best run</button>
               <router-link :to="historyLink(bench.id)">View runs</router-link>
               <router-link :to="{ path: '/tasks/' + encodeURIComponent(bench.id) + '/leaderboard', query: { weapon: bench.weapon } }">View leaderboard</router-link>
             </div>
@@ -94,7 +91,7 @@ export default {
         currentPlayerInfo() {
             return this.$store.getters.currentPlayerInfo;
         },
-        benchmarkSets() { return this.$store.getters.benchmarkSets.filter(set => !set.community || set.community === 'revosect').map(set => set.id === 'legacy' ? { ...set, label: 'Series 2 (archived thresholds)' } : set); },
+        benchmarkSets() { return this.$store.getters.benchmarkSets.filter(set => !set.community || set.community === 'revosect').map(set => set.id === 'legacy' ? { ...set, label: 'Series 2' } : set); },
         selectedSet() { return this.benchmarkSets.find(set => set.id === this.$route.query.benchmark) || this.benchmarkSets.find(set => set.id === "revosect_s4") || this.benchmarkSets[0]; },
         currentTab() {
             const label = this.dropdownElements.find(value => value.toLowerCase() === this.$route.query.level) || "Hard";

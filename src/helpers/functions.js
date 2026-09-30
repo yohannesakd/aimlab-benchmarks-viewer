@@ -78,6 +78,7 @@ function summarizeUserTasks(taskList, groupKey) {
             name: name || id,
             id,
             weapon: row.group_by.weapon_id,
+            mode: row.group_by.task_mode_mod,
             count: row.aggregate.count,
             avgScore: row.aggregate.avg.score,
             avgAcc: row.aggregate.avg.accuracy,
@@ -93,7 +94,11 @@ function summarizeUserTasks(taskList, groupKey) {
         const count = previous.count + task.count;
         previous.avgScore = (previous.avgScore * previous.count + task.avgScore * task.count) / count;
         previous.avgAcc = (previous.avgAcc * previous.count + task.avgAcc * task.count) / count;
-        previous.maxScore = Math.max(previous.maxScore, task.maxScore);
+        if (task.maxScore > previous.maxScore) {
+            previous.maxScore = task.maxScore;
+            previous.weapon = task.weapon;
+            previous.mode = task.mode;
+        }
         previous.maxAcc = Math.max(previous.maxAcc, task.maxAcc);
         previous.count = count;
     }

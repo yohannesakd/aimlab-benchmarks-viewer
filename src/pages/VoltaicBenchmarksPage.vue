@@ -30,9 +30,9 @@
       <div v-for="(bench, index) in VTBenchmarks.benchmarks" :key="index" class="bench-row">
         <div class="bench-main">
           <span class="bench-name">{{ bench.name }}</span>
-          <button v-if="bench.count" type="button" class="bench-score text-link" :aria-label="`View best run for ${bench.name}: ${bench.maxScore} points`" @click="showBestRun(bench)">{{ bench.maxScore }}</button><span v-else class="bench-score">—</span>
+          <button v-if="bench.count" type="button" class="bench-score text-link" :aria-label="`Open run for ${bench.name}: ${bench.maxScore} points`" @click="showBestRun(bench)">{{ bench.maxScore.toLocaleString() }}</button><span v-else class="bench-score">—</span>
           <span class="bench-rank" :class="colorLookup[bench.rank]"><img :src="getImagePath(bench.rank, 'badge')" alt="" />{{ bench.rank }}</span>
-          <span class="bench-points">{{ bench.energy }}<progress-bar class="progress-bar" :value="bench.energyProgress.value" :max="bench.energyProgress.max" color="bg-mainCyan"></progress-bar></span>
+          <span class="bench-points"><span class="bench-point-value">{{ bench.energy }}</span><progress-bar class="progress-bar" :value="bench.energyProgress.value" :max="bench.energyProgress.max" color="bg-mainCyan"></progress-bar></span>
           <button type="button" class="bench-expand" :aria-expanded="!!bench.detailsOpen" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
             <chevron-icon direction="down" class="h-4 w-4" :class="{ 'rotate-180': bench.detailsOpen }"></chevron-icon>
           </button>
@@ -54,7 +54,6 @@
             </div>
             <div class="bench-actions">
               <button type="button" @click="handlePlayScenario(bench)"><play-icon class="h-4 w-4"></play-icon>Play</button>
-              <button type="button" :disabled="!bench.count" @click="showBestRun(bench)">View best run</button>
               <router-link :to="historyLink(bench.id)">View runs</router-link>
               <router-link :to="{ path: '/tasks/' + encodeURIComponent(bench.id) + '/leaderboard', query: { weapon: bench.weapon } }">View leaderboard</router-link>
             </div>
@@ -84,7 +83,7 @@ export default {
         currentPlayerInfo() {
             return this.$store.getters.currentPlayerInfo;
         },
-        benchmarkSets() { return this.$store.getters.benchmarkSets.filter(set => !set.community || set.community === 'voltaic').map(set => set.id === 'legacy' ? { ...set, label: 'Season 2 (archived thresholds)' } : set); },
+        benchmarkSets() { return this.$store.getters.benchmarkSets.filter(set => !set.community || set.community === 'voltaic').map(set => set.id === 'legacy' ? { ...set, label: 'Archive' } : set); },
         selectedSet() { return this.benchmarkSets.find(set => set.id === this.$route.query.benchmark) || this.benchmarkSets.find(set => set.id === "aimlabs_s3") || this.benchmarkSets[0]; },
         currentTab() {
             const label = this.dropdownElements.find(value => value.toLowerCase() === this.$route.query.level) || "Advanced";

@@ -1,7 +1,7 @@
 {
   "id": "aimlabs_s3",
   "community": "voltaic",
-  "label": "Season 3 (current definitions)",
+  "label": "Season 3",
   "source": "https://app.voltaic.gg/api/v1/aimlabs/benchmarks/aimlabs_s3",
   "retrievedAt": "2026-09-30",
   "tiers": [

@@ -3,7 +3,6 @@
     <router-link :to="`/profile/${encodeURIComponent(username)}/overview`" class="text-link">← {{ username }}'s profile</router-link>
     <div class="page-intro run-heading">
       <div>
-        <p class="eyebrow">Run history</p>
         <h1 class="page-title">{{ history?.taskName || taskId }}</h1>
         <p v-if="history" class="page-subtitle">
           {{ history.totalCount.toLocaleString() }} solo runs
@@ -38,7 +37,6 @@
         <router-link v-if="afterCursor" :to="{ path: $route.path }" class="btn-secondary">First page</router-link>
         <router-link v-if="history.pageInfo.hasNextPage && history.pageInfo.endCursor" :to="{ path: $route.path, query: { after: history.pageInfo.endCursor } }" class="btn-secondary">Older runs →</router-link>
       </div>
-      <p class="result-meta run-note">Runs are shown in Aimlabs order. Scores may reflect different scenario settings.</p>
     </template>
   </main>
 </template>
@@ -53,7 +51,6 @@
 .run-date small { font-size: .72rem; }
 .run-action { text-align: right; }
 .run-pagination { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-.run-note { margin-top: 17px; line-height: 1.6; }
 @media (max-width: 800px) {
   .run-row { grid-template-columns: minmax(0, 1fr) 80px 50px auto; gap: 8px 12px; }
   .run-row-head { display: none; }

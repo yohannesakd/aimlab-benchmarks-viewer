@@ -51,8 +51,8 @@ The VPS owns Aimlabs requests, profile aggregation, weighted averages, totals, a
 - `GET /api/profiles/:username/lookup`: username and Aimlabs ranking.
 - `GET /api/profiles/:username`: task summaries, totals, and results grouped by benchmark set.
 - `GET /api/tasks/search?name=...` and `GET /api/tasks/:taskId`: search and task metadata.
-- `GET /api/tasks/:taskId/leaderboard?page=...`: 25 normalized scores per page. Benchmark links supply `weapon` to preserve the benchmark score population when Aimlabs’ task default differs.
-- `GET /api/tasks/:taskId/run?username=...&playId=...`: exact run details. Benchmark scores omit `playId` and supply `weapon` and `score`; the server checks that the best run matches the displayed score.
+- `GET /api/tasks/:taskId/leaderboard?page=...`: 25 scores per page, defaulting to normalized mode 0. Run links preserve `mode`; benchmark links supply `weapon` to preserve the benchmark score population when Aimlabs’ task default differs.
+- `GET /api/tasks/:taskId/run?username=...&playId=...`: exact run details. Benchmark scores omit `playId` and supply `weapon` and `score`; overview cards also supply the best score’s normalized `mode`. The server checks that the run matches the displayed score and identity.
 - `GET /api/profiles/:username/tasks/:taskId/runs?after=...`: 12 public solo plays per cursor page. Existing `?run=...` history links open the modal.
 
 The API uses `api.aimlabs.com/graphql`, caches successful responses briefly, shares identical in-flight app-data requests, caps upstream concurrency at four and responses at 1 MB, and pauses after provider rate limits. Only selected display fields leave the server; no signed replay files are downloaded. `publishedReplay` can expose a run anonymously by its ID, but many older runs are not published. Those modals use allowlisted leaderboard statistics and explain the missing detail. There is no full-leaderboard scan or unbounded history crawl.

@@ -2,15 +2,14 @@
   <section v-if="isLoading" class="status-panel"><loading-spinner></loading-spinner></section>
   <section v-else class="profile-tasks">
     <div class="panel-header profile-tasks-header">
-      <div><h2 class="section-title">Played tasks</h2><p class="result-meta">Search personal bests and play counts.</p></div>
+      <div><h2 class="section-title">Played tasks</h2></div>
       <label class="task-filter"><span class="sr-only">Search played tasks</span><input class="text-field" type="search" placeholder="Search played tasks" v-model.trim="searchQuery" /></label>
     </div>
     <div v-if="paginatedTaskList.data.length" class="task-grid profile-task-grid">
       <div v-for="task in paginatedTaskList.data" :key="task.id" class="task-card player-task-card">
-        <router-link class="player-task-leaderboard" :to="'/tasks/' + encodeURIComponent(task.id)" :aria-label="`View ${task.name} leaderboard`"></router-link>
-        <h3>{{ task.name }}</h3>
+        <button type="button" class="player-task-run" :aria-label="`Open ${task.name} run: ${task.maxScore} points`" @click="showRun(task)"></button>
+        <h3><router-link class="player-task-name" :to="'/tasks/' + encodeURIComponent(task.id) + '/leaderboard'">{{ task.name }}</router-link></h3>
         <div class="task-card-meta"><span>Best score: {{ task.maxScore }}</span><span>{{ task.count }} plays</span></div>
-        <router-link class="text-link player-task-runs" :to="`/profile/${encodeURIComponent($route.params.username)}/tasks/${encodeURIComponent(task.id)}/runs`">View runs →</router-link>
       </div>
     </div>
     <p v-else class="status-panel">No played tasks match this search.</p>
@@ -32,11 +31,13 @@
 .task-filter { width: min(100%, 290px); }
 .profile-task-grid { padding: 18px; }
 .player-task-card { position: relative; }
-.player-task-leaderboard { position: absolute; inset: 0; }
-.player-task-runs { position: relative; display: inline-block; margin-top: 14px; }
+.player-task-run { position: absolute; inset: 0; width: 100%; }
+.player-task-name { position: relative; }
+.player-task-name:hover { color: var(--accent); }
 </style>
 
 <script>
+import { openRunDetails } from '../helpers/runDetails.js';
 export default {
   props: ["isLoading"],
   data() {
@@ -47,6 +48,7 @@ export default {
     };
   },
   methods: {
+    showRun(task) { openRunDetails({ username: this.$store.getters.currentPlayerInfo.username, taskId: task.id, taskName: task.name, weapon: task.weapon, mode: task.mode, score: task.maxScore }); },
     handlePageSelect(event) {
       let value = parseInt(event.target.textContent);
       if (value) {

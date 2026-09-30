@@ -2,7 +2,6 @@
   <dialog ref="dialog" class="run-modal panel" aria-labelledby="run-modal-title" @cancel.prevent="close" @click="backdropClick">
     <div class="modal-heading">
       <div>
-        <p class="eyebrow">Run details · {{ selection?.username }}</p>
         <h2 id="run-modal-title" class="section-title">{{ selection?.taskName || 'Scenario run' }}</h2>
       </div>
       <button type="button" class="btn-secondary" autofocus @click="close">Close</button>
@@ -12,7 +11,7 @@
       <p>{{ error }}</p><button type="button" class="text-link" @click="load">Try again</button>
     </div>
     <div v-else-if="run" class="modal-content">
-      <div class="run-summary"><strong>{{ run.score.toLocaleString() }} points</strong><time>{{ dateLabel }}</time></div>
+      <div class="run-summary"><strong>{{ run.score.toLocaleString() }} points</strong><router-link class="text-link" :to="`/profile/${encodeURIComponent(selection.username)}`" @click="close">{{ selection.username }}</router-link><time>{{ dateLabel }}</time></div>
       <section v-if="performance.length">
         <h3>Performance</h3>
         <dl class="run-facts"><div v-for="item in performance" :key="item.label"><dt>{{ item.label }}</dt><dd>{{ item.value }}</dd></div></dl>
@@ -21,13 +20,11 @@
         <h3>Run</h3>
         <dl class="run-facts"><div v-for="item in metadata" :key="item.label"><dt>{{ item.label }}</dt><dd>{{ item.value }}</dd></div></dl>
       </section>
-      <p v-if="run.detailsSource === 'leaderboard'" class="result-meta">Aimlabs only provides leaderboard statistics for this older run.</p>
-      <p class="result-meta">Statistics come from Aimlabs. Their definitions can vary by scenario.</p>
       <a v-if="run.replayAvailable !== false" :href="replayLink" target="_blank" rel="noopener noreferrer" class="text-link">Open run in Aimlabs ↗</a>
     </div>
     <div v-if="selection" class="modal-footer">
       <router-link v-if="$route.path !== historyLink" class="text-link" :to="historyLink" @click="close">Player’s run history →</router-link>
-      <router-link v-if="!$route.path.startsWith('/tasks/')" class="text-link" :to="{ path: `/tasks/${encodeURIComponent(selection.taskId)}/leaderboard`, query: { weapon: selection.weapon } }" @click="close">Task leaderboard →</router-link>
+      <router-link v-if="!$route.path.startsWith('/tasks/')" class="text-link" :to="{ path: `/tasks/${encodeURIComponent(selection.taskId)}/leaderboard`, query: { weapon: selection.weapon, mode: selection.mode } }" @click="close">Task leaderboard →</router-link>
     </div>
   </dialog>
 </template>
@@ -109,6 +106,7 @@ export default {
           const params = new URLSearchParams({ username: selection.username });
           if (selection.playId) params.set("playId", selection.playId);
           if (selection.weapon) params.set("weapon", selection.weapon);
+          if (Number.isInteger(selection.mode)) params.set("mode", selection.mode);
           if (Number.isFinite(selection.score)) params.set("score", selection.score);
           const run = await fetchData(`/api/tasks/${encodeURIComponent(selection.taskId)}/run?${params}`, { signal: controller.signal });
           if (!controller.signal.aborted && selection === this.selection) this.run = run;
@@ -130,7 +128,6 @@ export default {
 .modal-heading { border-bottom: 1px solid var(--line); }
 .modal-heading > div { min-width: 0; overflow-wrap: anywhere; }
 .modal-heading .btn-secondary { flex-shrink: 0; }
-.modal-heading .section-title { margin-top: 4px; }
 .modal-content, .modal-status { padding: 20px; }
 .modal-content { display: grid; gap: 18px; }
 .modal-footer { border-top: 1px solid var(--line); flex-wrap: wrap; }

@@ -15,6 +15,8 @@ test("the backend returns weighted profile totals and isolated benchmark results
   assert.deepEqual(first.totals, { tasksPlayed: 1, totalPlays: 3 });
   assert.equal(first.tasks[0].avgScore, 200);
   assert.equal(first.tasks[0].avgAcc, 60);
+  assert.equal(first.tasks[0].weapon, "other");
+  assert.equal(first.tasks[0].mode, 1);
   assert.equal(first.benchmarkSets[0].results.VTAdvanced.overallRank, "Unranked");
   first.benchmarkSets[0].results.VTAdvanced.benchmarks[0].maxScore = 999;
   const second = calculateProfile({ id: "other-player" }, []);
@@ -47,7 +49,7 @@ test("exact run lookup validates the player and omits signed and private replay 
   globalThis.fetch = async (_url, options) => {
     const { variables } = JSON.parse(options.body);
     return response({ publishedReplay: { publisher: { username: "FixturePlayer" }, play: {
-      id: variables.playId, taskSlug: "fixture-scenario", score: 50, manifest: {
+      id: variables.playId, taskSlug: "fixture-scenario", score: 50, convertedMode: 0, manifest: {
         duration: 60, replayAvailable: true, replayUrl: "signed-secret", country: "private-country",
         performanceData: { shotsTotal: 100, accTotal: 80, privateField: 99 },
       },
@@ -116,6 +118,51 @@ test('benchmark leaderboards preserve the selected weapon and isolate cached sco
     assert.equal(defaultBoard.weaponId, 'default-weapon');
     assert.equal(defaultBoard.data[0].score, 100);
     assert.equal(selectedAgain, selected);
+    assert.equal(calls.length, 3);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+
+test('overview best runs preserve the winning mode and reject a different-mode replay', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_url, options) => {
+    const { query, variables } = JSON.parse(options.body);
+    if (!query.includes('publishedReplay')) {
+      assert.equal(variables.leaderboardInput.taskMode, 1);
+      assert.equal(variables.leaderboardInput.weaponId, 'alternate-weapon');
+      return response({ aimlab: { leaderboard: { metadata: {}, data: [{ username: 'FixturePlayer', score: 400, play_id: 'overview-alt-run' }] } } });
+    }
+    return response({ publishedReplay: { publisher: { username: 'FixturePlayer' }, play: {
+      id: variables.playId, taskSlug: 'overview-alt-task', score: 400, convertedMode: 1,
+      manifest: { weaponId: 'alternate-weapon', performanceData: { accTotal: 80 } },
+    } } });
+  };
+  try {
+    const run = await getRunDetails('overview-alt-task', 'FixturePlayer', null, 'alternate-weapon', 400, 1);
+    assert.equal(run.score, 400);
+    assert.equal(run.convertedMode, 1);
+    await assert.rejects(getRunDetails('overview-alt-task', 'FixturePlayer', 'overview-alt-run', 'alternate-weapon', 400, 0), error => error.status === 404);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+
+test('task leaderboards keep alternate-mode scores and caches separate', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (_url, options) => {
+    const body = JSON.parse(options.body); calls.push(body);
+    if (body.query.includes('GetTask(')) return response({ aimlab: { task: { id: 'fixture-mode-board', weapon_id: 'same-weapon' } } });
+    const mode = body.variables.leaderboardInput.taskMode;
+    return response({ aimlab: { leaderboard: { metadata: { totalRows: 1 }, data: [{ username: 'FixturePlayer', score: mode ? 400 : 100 }] } } });
+  };
+  try {
+    const alternate = await getTaskLeaderboard('fixture-mode-board', 0, 'same-weapon', 1);
+    const normal = await getTaskLeaderboard('fixture-mode-board', 0, 'same-weapon');
+    assert.equal(alternate.data[0].score, 400);
+    assert.equal(alternate.mode, 1);
+    assert.equal(normal.data[0].score, 100);
+    assert.equal(normal.mode, 0);
+    assert.equal(await getTaskLeaderboard('fixture-mode-board', 0, 'same-weapon', 1), alternate);
     assert.equal(calls.length, 3);
   } finally { globalThis.fetch = originalFetch; }
 });

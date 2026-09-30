@@ -2,9 +2,7 @@
   <main class="page-shell">
     <div class="search-layout">
       <div class="page-intro">
-        <p class="eyebrow">Player lookup</p>
         <h1 class="page-title">Find a profile</h1>
-        <p class="page-subtitle">Search by Aimlab username to see tasks played and benchmark ranks.</p>
       </div>
       <div class="panel panel-body">
         <label class="field-label" for="username">Aimlab username · case sensitive</label>
@@ -16,7 +14,6 @@
         <p v-else-if="!playerInfo.username" class="status-panel">User not found.</p>
         <div v-else class="result-row">
           <div>
-            <p class="eyebrow">Profile found</p>
             <h2 class="result-title">{{ playerInfo.username }}</h2>
             <p class="result-meta">Aimlab rank · {{ playerInfo.rank }}</p>
           </div>
