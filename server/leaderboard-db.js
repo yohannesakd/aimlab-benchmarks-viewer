@@ -61,7 +61,8 @@ export async function getLeaderboardPage(mode, page, sort) {
 export async function handleLeaderboardRequest(request, response, pathname, searchParams) {
   const match = pathname.match(/^\/api\/leaderboards\/(ra|vt)\/(?:(legacy|aimlabs_s2|aimlabs_s3)\/)?(easy|medium|hard|novice|intermediate|advanced)\/page$/);
   if (!match) return false;
-  const mode = `${match[1]}-${match[2] && match[2] !== 'legacy' ? match[2] + '-' : ''}${match[3]}`;
+  const set = match[1] === 'vt' && (!match[2] || match[2] === 'legacy') ? 'aimlabs_s2' : match[2];
+  const mode = `${match[1]}-${set && set !== 'legacy' ? set + '-' : ''}${match[3]}`;
   if (request.method !== "GET" || !benchmarkSets[mode]) {
     response.writeHead(404, { "Content-Type": "application/json" });
     response.end(JSON.stringify({ error: "Not found" }));

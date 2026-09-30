@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh Voltaic Aimlabs Season 3 and Season 2 standings
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/sai/aimlab-staging
+Environment=AIMLAB_DATA_DIR=/home/sai/.local/share/aimlab-viewer
+ExecStart=/usr/bin/flock -n /home/sai/.local/share/aimlab-viewer/refresh.lock /home/sai/.nvm/versions/node/v24.16.0/bin/node server/refresh-database.js vt-aimlabs_s3-advanced vt-aimlabs_s3-intermediate vt-aimlabs_s3-novice vt-aimlabs_s2-advanced vt-aimlabs_s2-intermediate vt-aimlabs_s2-novice
+TimeoutStartSec=12h
+Nice=10

@@ -17,10 +17,11 @@ test("the backend returns weighted profile totals and isolated benchmark results
   assert.equal(first.tasks[0].avgAcc, 60);
   assert.equal(first.tasks[0].weapon, "other");
   assert.equal(first.tasks[0].mode, 1);
-  assert.equal(first.benchmarkSets[0].results.VTAdvanced.overallRank, "Unranked");
-  first.benchmarkSets[0].results.VTAdvanced.benchmarks[0].maxScore = 999;
+  assert.deepEqual(first.benchmarkSets.filter(set => set.community === "voltaic").map(set => set.id), ["aimlabs_s3", "aimlabs_s2"]);
+  assert.equal(first.benchmarkSets.find(set => set.id === "aimlabs_s2").results.VTAdvanced.overallRank, "Unranked");
+  first.benchmarkSets.find(set => set.id === "aimlabs_s2").results.VTAdvanced.benchmarks[0].maxScore = 999;
   const second = calculateProfile({ id: "other-player" }, []);
-  assert.equal(second.benchmarkSets[0].results.VTAdvanced.benchmarks[0].maxScore, 0);
+  assert.equal(second.benchmarkSets.find(set => set.id === "aimlabs_s2").results.VTAdvanced.benchmarks[0].maxScore, 0);
   assert.equal(second.benchmarkSets[0].results.RAEasy.benchmarks.length > 0, true);
 });
 

@@ -42,7 +42,7 @@
           <div class="bench-threshold-wrap">
             <div class="bench-thresholds" :style="{ gridTemplateColumns: 'repeat(' + rankList.length + ', minmax(90px, 1fr))' }">
               <span v-for="rank in rankList" :key="rank" :class="colorLookup[rank]">{{ rank }}</span>
-              <span v-for="(score, scoreIndex) in selectedSet.id === 'legacy' ? bench.scores.slice(1) : bench.scores" :key="scoreIndex">{{ score }}</span>
+              <span v-for="(score, scoreIndex) in bench.scores" :key="scoreIndex">{{ score }}</span>
             </div>
           </div>
           <div class="bench-extra">
@@ -83,8 +83,8 @@ export default {
         currentPlayerInfo() {
             return this.$store.getters.currentPlayerInfo;
         },
-        benchmarkSets() { return this.$store.getters.benchmarkSets.filter(set => !set.community || set.community === 'voltaic').map(set => set.id === 'legacy' ? { ...set, label: 'Archive' } : set); },
-        selectedSet() { return this.benchmarkSets.find(set => set.id === this.$route.query.benchmark) || this.benchmarkSets.find(set => set.id === "aimlabs_s3") || this.benchmarkSets[0]; },
+        benchmarkSets() { return this.$store.getters.benchmarkSets.filter(set => set.community === 'voltaic'); },
+        selectedSet() { return this.benchmarkSets.find(set => set.id === (this.$route.query.benchmark === 'legacy' ? 'aimlabs_s2' : this.$route.query.benchmark)) || this.benchmarkSets.find(set => set.id === "aimlabs_s3") || this.benchmarkSets[0]; },
         currentTab() {
             const label = this.dropdownElements.find(value => value.toLowerCase() === this.$route.query.level) || "Advanced";
             return { value: label.toLowerCase(), label };

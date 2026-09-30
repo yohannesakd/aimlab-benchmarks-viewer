@@ -87,6 +87,7 @@ async function collectAll(db, benchmarks, getPage, onProgress) {
       if (!Array.isArray(page.data) || !Number.isInteger(page.metadata?.totalRows)) {
         throw new Error(`Invalid Aimlab page for ${bench.name}`);
       }
+      if (!page.data.length && offset < page.metadata.totalRows) throw new Error(`Empty Aimlab page for ${bench.name} at offset ${offset}`);
       let highestScore = -Infinity;
       db.exec("BEGIN");
       try {
@@ -209,7 +210,7 @@ export async function refreshDatabase(mode, options = {}) {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   const modes = process.argv.slice(2);
-  if (!modes.length) modes.push(...Object.keys(benchmarkSets));
+  if (!modes.length) modes.push(...Object.keys(benchmarkSets).filter(mode => mode.startsWith("ra-") || seasonModes[mode]));
   for (const mode of modes) {
     try {
       const result = await refreshDatabase(mode, {

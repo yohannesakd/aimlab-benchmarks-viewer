@@ -13,12 +13,12 @@
       <article class="panel benchmark-card">
         <div class="benchmark-card-top"><h2 class="section-title">Revosect</h2><span class="benchmark-mark">rA</span></div>
         <div class="level-list"><router-link v-for="level in ['Easy', 'Medium', 'Hard']" :key="level" :to="{ path: '/benchmarks/revosect', query: { level: level.toLowerCase() } }">{{ level }}</router-link></div>
-        <router-link class="text-link" to="/leaderboards/ra">Archived leaderboards <span aria-hidden="true">→</span></router-link>
+        <router-link class="text-link" to="/leaderboards/ra">Leaderboards <span aria-hidden="true">→</span></router-link>
       </article>
       <article class="panel benchmark-card">
         <div class="benchmark-card-top"><h2 class="section-title">Voltaic</h2><span class="benchmark-mark">VT</span></div>
         <div class="level-list"><router-link v-for="level in ['Novice', 'Intermediate', 'Advanced']" :key="level" :to="{ path: '/benchmarks/voltaic', query: { level: level.toLowerCase() } }">{{ level }}</router-link></div>
-        <router-link class="text-link" to="/leaderboards/vt">Archived leaderboards <span aria-hidden="true">→</span></router-link>
+        <router-link class="text-link" to="/leaderboards/vt">Leaderboards <span aria-hidden="true">→</span></router-link>
       </article>
     </section>
 
