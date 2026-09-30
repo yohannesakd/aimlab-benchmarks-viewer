@@ -1,5 +1,5 @@
 <template>
-  <dialog ref="dialog" class="run-modal panel" aria-labelledby="run-modal-title" @cancel.prevent="close" @close="close" @click="backdropClick">
+  <dialog ref="dialog" class="run-modal panel" aria-labelledby="run-modal-title" @cancel.prevent="close" @click="backdropClick">
     <div class="modal-heading">
       <div>
         <p class="eyebrow">Run details · {{ selection?.username }}</p>
