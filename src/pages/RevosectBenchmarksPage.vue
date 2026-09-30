@@ -1,10 +1,8 @@
 <template>
   <section class="benchmark-view">
+    <benchmark-controls :sets="benchmarkSets" :selected-set="selectedSet.id" :level="currentTab.value" :levels="dropdownElements" @set-change="selectSet" @level-change="selectLevel" />
     <div class="bench-overview">
       <div class="panel bench-overview-main">
-        <dropdown :selected-tab="currentTab">
-          <li v-for="(element, index) in dropdownElements" :key="element" @click="handleDropdownSelect(index)">{{ element }}</li>
-        </dropdown>
         <div class="bench-medal">
           <img :src="getImagePath(RABenchmarks.overallRank)" alt="" />
           <div>
@@ -29,7 +27,7 @@
       <div v-for="(bench, index) in RABenchmarks.benchmarks" :key="index" class="bench-row">
         <div class="bench-main">
           <span class="bench-name">{{ bench.name }}</span>
-          <span class="bench-score">{{ bench.maxScore }}</span>
+          <button v-if="bench.count" type="button" class="bench-score text-link" :aria-label="`View best run for ${bench.name}: ${bench.maxScore} points`" @click="showBestRun(bench)">{{ bench.maxScore }}</button><span v-else class="bench-score">—</span>
           <span class="bench-rank" :class="colorLookup[bench.rank]"><img :src="getImagePath(bench.rank)" alt="" />{{ bench.rank }}</span>
           <span class="bench-points">{{ bench.points }}<progress-bar class="progress-bar" :value="bench.progress" color="bg-mainCyan"></progress-bar></span>
           <button type="button" class="bench-expand" :aria-expanded="!!bench.detailsOpen" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
@@ -47,14 +45,15 @@
           <div class="bench-extra">
             <div class="bench-stats">
               <span>Total plays: {{ bench.count }}</span>
-              <span v-if="bench.count">PB accuracy: {{ Math.floor(bench.maxAcc) }}%</span>
+              <span v-if="bench.count">Best accuracy: {{ Math.floor(bench.maxAcc) }}%</span>
               <span v-if="bench.count">Average score: {{ Math.floor(bench.avgScore) }}</span>
               <span v-if="bench.count">Average accuracy: {{ Math.floor(bench.avgAcc) }}%</span>
             </div>
             <div class="bench-actions">
               <button type="button" @click="handlePlayScenario(bench.id)"><play-icon class="h-4 w-4"></play-icon>Play</button>
-              <button type="button" :disabled="!bench.count || replayLoading" @click="replayLink(bench.id, bench.weapon)">{{ replayLoading ? "Loading…" : "Watch replay" }}</button>
-              <router-link :to="'/tasks/' + bench.id">View leaderboard</router-link>
+              <button type="button" :disabled="!bench.count" @click="showBestRun(bench)">View best run</button>
+              <router-link :to="historyLink(bench.id)">View runs</router-link>
+              <router-link :to="'/tasks/' + encodeURIComponent(bench.id) + '/leaderboard'">View leaderboard</router-link>
             </div>
           </div>
         </div>
@@ -66,16 +65,16 @@
 <script>
 import * as ra from "../helpers/revosectData.js";
 import {
-    findReplay,
     findWorkshopId,
     taskDeepLink,
 } from "@/helpers/functions.js";
+import BenchmarkControls from "../components/BenchmarkControls.vue";
+import { openRunDetails } from "../helpers/runDetails.js";
 export default {
+    components: { BenchmarkControls },
     data() {
         return {
-            replayLoading: false,
             actionError: "",
-            currentTabIndex: 2,
             categories: ["Clicking", "Tracking", "Switching"],
             subCategories: [
                 "Static",
@@ -92,13 +91,11 @@ export default {
         currentPlayerInfo() {
             return this.$store.getters.currentPlayerInfo;
         },
+        benchmarkSets() { return this.$store.getters.benchmarkSets; },
+        selectedSet() { return this.benchmarkSets.find(set => set.id === this.$route.query.benchmark) || this.benchmarkSets[0]; },
         currentTab() {
-            return {
-                value: this.dropdownElements[
-                    this.currentTabIndex
-                ].toLowerCase(),
-                label: this.dropdownElements[this.currentTabIndex],
-            };
+            const label = this.dropdownElements.find(value => value.toLowerCase() === this.$route.query.level) || "Hard";
+            return { value: label.toLowerCase(), label };
         },
         rankList() {
             switch (this.currentTab.value) {
@@ -129,16 +126,7 @@ export default {
             }
         },
         RABenchmarks() {
-            switch (this.currentTab.value) {
-                case "hard":
-                    return this.$store.getters.RAHard;
-                case "medium":
-                    return this.$store.getters.RAMedium;
-                case "easy":
-                    return this.$store.getters.RAEasy;
-                default:
-                    return this.$store.getters.RAHard;
-            }
+            return this.selectedSet.results[`RA${this.currentTab.label}`];
         },
         colorLookup() {
             return {
@@ -167,9 +155,10 @@ export default {
         getImagePath(rank) {
             return `/rank-img/ra/${rank.toLowerCase()}.png`;
         },
-        handleDropdownSelect(index) {
-            this.currentTabIndex = index;
-        },
+        selectSet(id) { this.$router.push({ query: { benchmark: id, level: this.currentTab.value } }); },
+        selectLevel(level) { this.$router.push({ query: { benchmark: this.selectedSet.id, level } }); },
+        historyLink(taskId) { return `/profile/${encodeURIComponent(this.currentPlayerInfo.username)}/tasks/${encodeURIComponent(taskId)}/runs`; },
+        showBestRun(bench) { openRunDetails({ username: this.currentPlayerInfo.username, taskId: bench.id, taskName: bench.name, weapon: bench.weapon, score: bench.maxScore }); },
         toggleBenchDetails(bench) {
             bench.detailsOpen = !bench.detailsOpen;
         },
@@ -183,35 +172,6 @@ export default {
                 this.actionError = "Could not open this task. Try again.";
             }
         },
-        async replayLink(taskId, weapon) {
-            this.actionError = "";
-            this.replayLoading = true;
-            try {
-                const link = await findReplay(
-                    this.currentPlayerInfo.username,
-                    taskId,
-                    weapon
-                );
-                if (link) window.open(link, "_blank");
-                else this.actionError = "Replay not found.";
-            } catch (error) {
-                console.error(error);
-                this.actionError = "Could not find this replay. Try again.";
-            } finally {
-                this.replayLoading = false;
-            }
-        },
     },
 };
 </script>
-
-<style scoped>
-#category-bar {
-    min-width: 788px;
-    left: 64px;
-    top: 60px;
-}
-#category-bar span {
-    transform: scale(-1, -1);
-}
-</style>

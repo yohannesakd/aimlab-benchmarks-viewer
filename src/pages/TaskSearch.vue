@@ -37,7 +37,7 @@
 </style>
 
 <script>
-import { APIFetch, GET_TASKS_BY_NAME } from "../helpers/queries";
+import { fetchData } from "../helpers/api.js";
 export default {
   data() {
     return {
@@ -58,10 +58,10 @@ export default {
       this.taskList = [];
       this.searchStatus = "Searching...";
       try {
-        const data = await APIFetch(GET_TASKS_BY_NAME, { name });
+        const data = await fetchData(`/api/tasks/search?name=${encodeURIComponent(name)}`);
         if (version !== this.requestVersion) return;
-        if (!data.aimlab?.tasks) throw new Error("Missing task search results");
-        this.taskList = data.aimlab.tasks;
+        if (!Array.isArray(data)) throw new Error("Missing task search results");
+        this.taskList = data;
         this.searchStatus = this.taskList.length ? "" : "No tasks found";
         window.umami?.track("task-search", {
           result: this.taskList.length ? "found" : "missing",
@@ -75,7 +75,7 @@ export default {
       }
     },
     taskLeaderboardLink(id) {
-      return this.$route.path + "/" + id;
+      return "/tasks/" + encodeURIComponent(id) + "/leaderboard";
     },
   },
 };

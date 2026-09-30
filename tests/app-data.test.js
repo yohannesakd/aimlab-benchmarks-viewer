@@ -1,0 +1,97 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { calculateProfile, getTaskLeaderboard, getRunDetails } from "../server/app-data.js";
+
+function response(trainer) {
+  return new Response(JSON.stringify({ data: { Trainer: trainer } }));
+}
+
+test("the backend returns weighted profile totals and isolated benchmark results", () => {
+  const rows = [
+    { group_by: { task_id: "sixshot", task_name: "Sixshot", weapon_id: "9mm", task_mode_mod: 0 }, aggregate: { count: 2, avg: { score: 100, accuracy: 50 }, max: { score: 150, accuracy: 75 } } },
+    { group_by: { task_id: "sixshot", task_name: "Sixshot", weapon_id: "other", task_mode_mod: 1 }, aggregate: { count: 1, avg: { score: 400, accuracy: 80 }, max: { score: 400, accuracy: 80 } } },
+  ];
+  const first = calculateProfile({ id: "fixture" }, rows);
+  assert.deepEqual(first.totals, { tasksPlayed: 1, totalPlays: 3 });
+  assert.equal(first.tasks[0].avgScore, 200);
+  assert.equal(first.tasks[0].avgAcc, 60);
+  assert.equal(first.benchmarkSets[0].results.VTAdvanced.overallRank, "Unranked");
+  first.benchmarkSets[0].results.VTAdvanced.benchmarks[0].maxScore = 999;
+  const second = calculateProfile({ id: "other-player" }, []);
+  assert.equal(second.benchmarkSets[0].results.VTAdvanced.benchmarks[0].maxScore, 0);
+  assert.equal(second.benchmarkSets[0].results.RAEasy.benchmarks.length > 0, true);
+});
+
+test("a task with no default weapon still has a current-API leaderboard", async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, options) => {
+    assert.equal(url, "https://api.aimlabs.com/graphql");
+    const body = JSON.parse(options.body);
+    calls.push(body);
+    if (body.query.includes("GetTask(")) return response({ aimlab: { task: { id: "fixture-no-weapon", weapon_id: null } } });
+    assert.equal(body.variables.leaderboardInput.weaponId, null);
+    return response({ aimlab: { leaderboard: { metadata: { totalRows: 100, offset: 0, rows: 1 }, data: [{ username: "Player", score: 123, accuracy: 85.106, play_id: "run" }] } } });
+  };
+  try {
+    const [first, second] = await Promise.all([getTaskLeaderboard("fixture-no-weapon"), getTaskLeaderboard("fixture-no-weapon")]);
+    assert.equal(first.data[0].accuracy, "85.11%");
+    assert.equal(first.pagination.pageCount, 3);
+    assert.equal(first, second);
+    assert.equal(calls.length, 2);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test("exact run lookup validates the player and omits signed and private replay fields", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_url, options) => {
+    const { variables } = JSON.parse(options.body);
+    return response({ publishedReplay: { publisher: { username: "FixturePlayer" }, play: {
+      id: variables.playId, taskSlug: "fixture-scenario", score: 50, manifest: {
+        duration: 60, replayAvailable: true, replayUrl: "signed-secret", country: "private-country",
+        performanceData: { shotsTotal: 100, accTotal: 80, privateField: 99 },
+      },
+    } } });
+  };
+  try {
+    const run = await getRunDetails("fixture-scenario", "FixturePlayer", "fixture-public-run", null, 50);
+    assert.deepEqual(run.metrics, { shotsTotal: 100, accTotal: 80 });
+    assert.equal(run.detailsSource, "replay");
+    assert.equal(JSON.stringify(run).includes("secret"), false);
+    assert.equal(JSON.stringify(run).includes("private"), false);
+    await assert.rejects(getRunDetails("fixture-scenario", "WrongPlayer", "fixture-public-run", null, 50), error => error.status === 404);
+    await assert.rejects(getRunDetails("wrong-scenario", "FixturePlayer", "fixture-public-run", null, 50), error => error.status === 404);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test("benchmark score lookup cannot silently open a different personal best", async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async (_url, options) => {
+    calls++;
+    const input = JSON.parse(options.body).variables.leaderboardInput;
+    assert.equal(input.username, "FixturePlayer");
+    assert.equal(input.weaponId, "fixture-weapon");
+    return response({ aimlab: { leaderboard: { metadata: {}, data: [{ username: "FixturePlayer", score: 999, play_id: "different-run" }] } } });
+  };
+  try {
+    await assert.rejects(getRunDetails("fixture-score-task", "FixturePlayer", null, "fixture-weapon", 50), error => error.status === 404);
+    assert.equal(calls, 1);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test("unpublished historical runs retain only available leaderboard statistics", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_url, options) => {
+    const { query } = JSON.parse(options.body);
+    if (query.includes("publishedReplay")) return response({ publishedReplay: null });
+    return response({ aimlab: { leaderboard: { metadata: {}, data: [{ task_id: "fixture-old-task", username: "FixturePlayer", score: 50, play_id: "fixture-old-run", accuracy: 0, shots_hit: 0, custom: { avgDist: 12, signed: "secret" }, country: "private" }] } } });
+  };
+  try {
+    const run = await getRunDetails("fixture-old-task", "FixturePlayer", "fixture-old-run", null, 50);
+    assert.deepEqual(run.metrics, { hitsTotal: 0, accTotal: 0, avgDist: 12 });
+    assert.equal(run.detailsSource, "leaderboard");
+    assert.equal(run.replayAvailable, null);
+    assert.equal(JSON.stringify(run).includes("secret"), false);
+  } finally { globalThis.fetch = originalFetch; }
+});

@@ -23,15 +23,6 @@ const router = createRouter({
     {
       path: "/profile",
       component: ProfileSearch,
-      beforeEnter: (_, from) => {
-        if (from.name == "profile-overview") {
-          sessionStorage.removeItem("currentPlayer");
-          return;
-        }
-        if (sessionStorage.getItem("currentPlayer")) {
-          return "/profile/" + encodeURIComponent(sessionStorage.getItem("currentPlayer"));
-        }
-      },
     },
     {
       path: "/profile/:username/tasks/:taskId/runs",
@@ -73,15 +64,6 @@ const router = createRouter({
     {
       path: "/tasks",
       component: TaskSearch,
-      beforeEnter: (_, from) => {
-        if (from.name == "task-view") {
-          sessionStorage.removeItem("currentTask");
-          return;
-        }
-        if (sessionStorage.getItem("currentTask")) {
-          return "/tasks/" + encodeURIComponent(sessionStorage.getItem("currentTask"));
-        }
-      },
     },
     {
       path: "/tasks/:taskId",

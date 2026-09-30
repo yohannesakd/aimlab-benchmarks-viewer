@@ -1,11 +1,9 @@
-import { cleanUpBenchmarkTasks, cleanUpUserTasks } from "../../helpers/functions";
-
 export default {
   state() {
     return {
       currentPlayerInfo: {},
       currentPlayerTasks: [],
-      currentPlayerBenchmarkTasks: [],
+      totals: { tasksPlayed: 0, totalPlays: 0 },
     };
   },
   getters: {
@@ -13,18 +11,13 @@ export default {
       return state.currentPlayerInfo;
     },
     tasksPlayed(state) {
-      return state.currentPlayerTasks.length;
+      return state.totals.tasksPlayed;
     },
     totalPlays(state) {
-      return state.currentPlayerTasks.reduce((accumulator, current) => {
-        return accumulator + current.count;
-      }, 0);
+      return state.totals.totalPlays;
     },
     currentPlayerTasks(state) {
       return state.currentPlayerTasks;
-    },
-    currentPlayerBenchmarkTasks(state) {
-      return state.currentPlayerBenchmarkTasks;
     },
   },
   mutations: {
@@ -34,17 +27,15 @@ export default {
     updateCurrentPlayerTasks(state, payload) {
       state.currentPlayerTasks = payload;
     },
-    updateCurrentPlayerBenchmarkTasks(state, payload) {
-      state.currentPlayerBenchmarkTasks = payload;
-    },
+    updateTotals(state, payload) { state.totals = payload; },
   },
   actions: {
     updateCurrentPlayerInfo(context, payload) {
       context.commit("updateCurrentPlayerInfo", payload);
     },
     updateCurrentPlayerTasks(context, payload) {
-      context.commit("updateCurrentPlayerTasks", cleanUpUserTasks(payload));
-      context.commit("updateCurrentPlayerBenchmarkTasks", cleanUpBenchmarkTasks(payload));
+      context.commit("updateCurrentPlayerTasks", payload);
     },
+    updateTotals(context, payload) { context.commit("updateTotals", payload); },
   },
 };
