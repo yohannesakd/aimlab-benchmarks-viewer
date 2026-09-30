@@ -1,247 +1,81 @@
 <template>
-    <div class="min-h-max">
-
-        <div>
-            <div
-                class="mt-4 flex max-h-96 w-full justify-center gap-4 font-oswald"
-            >
-                <dropdown
-                    class="ml-4 mr-auto self-start"
-                    :selected-tab="currentTab"
-                >
-                    <li
-                        class="px-4 py-1 transition hover:bg-slate-600"
-                        v-for="(element, index) in dropdownElements"
-                        :key="index"
-                        @click="handleDropdownSelect(index)"
-                    >
-                        {{ element }}
-                    </li>
-                </dropdown>
-                <div class="my-2 mr-auto flex gap-20">
-
-                    <div class="mr-auto flex gap-20">
-                        <div
-                            class="flex flex-col items-center justify-center text-center"
-                        >
-                            <img
-                                class="h-36 self-center"
-                                :src="
-                                    getImagePath(
-                                        RABenchmarks.overallRank,
-                                        'medal'
-                                    )
-                                "
-                                alt=""
-                            />
-                            <p
-                                class="font-bold uppercase tracking-widest"
-                                :class="colorLookup[RABenchmarks.overallRank]"
-                            >
-                                {{ RABenchmarks.overallRank }}
-                            </p>
-                            <div class="flex items-center gap-1">
-                                <span class="-mt-1">Overall Points :</span>
-                                <span
-                                    class="font-bold tracking-wider"
-                                    :class="
-                                        colorLookup[RABenchmarks.overallRank]
-                                    "
-                                    >{{ RABenchmarks.overallPoints }}</span
-                                >
-                            </div>
-                        </div>
-                        <div
-                            class="flex flex-col items-center justify-center tracking-wide text-slate-200"
-                        >
-                            <p class="text-lg font-bold">SubCategories</p>
-                            <ul class="mt-4 grid grid-cols-2 gap-1">
-                                <li
-                                    v-for="(item, index) in subCategoryPoints"
-                                    :key="index"
-                                    class="flex items-center gap-2 pr-4"
-                                >
-                                    {{ displaySubCategories[index] }} :
-                                    <span class="font-bold">{{ item }}</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <p v-if="actionError" class="px-4 text-center" role="alert">{{ actionError }}</p>
-            <section class="relative p-4" id="benchmark-table">
-                <header class="grid grid-cols-12 bg-slate-700 py-2 pr-4 pl-16">
-                    <p class="col-span-4 ml-2">Scenario</p>
-                    <p>Score</p>
-                    <p class="col-span-3">Rank</p>
-                    <p class="col-span-2">Points</p>
-                </header>
-                <div
-                    v-for="(bench, index) in RABenchmarks.benchmarks"
-                    :key="index"
-                    class="mt-1 ml-14 grid grid-cols-12 bg-slate-800 px-4 py-2 text-slate-200"
-                >
-                    <p class="col-span-4">{{ bench.name }}</p>
-                    <p class="font-semibold tracking-wide">
-                        {{ bench.maxScore }}
-                    </p>
-                    <p
-                        class="col-span-3 flex gap-2"
-                        :class="colorLookup[bench.rank]"
-                    >
-                        <img
-                            class="h-5 self-center"
-                            :src="getImagePath(bench.rank)"
-                            alt=""
-                        />
-                        {{ bench.rank }}
-                    </p>
-                    <div
-                        class="relative col-span-3 flex items-center justify-between"
-                    >
-                        <span
-                            class="absolute left-1/2 z-10 -translate-x-1/2 transform text-right"
-                            v-if="bench.points"
-                            >{{ bench.points }}</span
-                        >
-                        <progress-bar
-                            class="h-5 w-full rounded-sm bg-slate-600"
-                            :value="bench.progress"
-                            color="bg-sky-700"
-                        ></progress-bar>
-                        <!-- colors: bg-grandmaster bg-nova bg-celestial bg-astra bg-iron bg-bronze bg-silver bg-gold bg-platinum bg-diamond bg-jade bg-master -->
-                    </div>
-                    <p
-                        class="relative col-start-12 ml-4 flex items-center justify-center"
-                    >
-                        <chevron-icon
-                            direction="down"
-                            class="absolute h-full w-12 transition hover:translate-y-0.5 hover:text-slate-400"
-                            :class="bench.detailsOpen ? 'rotate-180' : ''"
-                            @click="toggleBenchDetails(bench)"
-                        ></chevron-icon>
-                    </p>
-                    <div
-                        class="col-span-12 mt-2 border-t-2 border-t-slate-600 py-2 text-slate-200 transition"
-                        v-if="bench.detailsOpen"
-                    >
-                        <div class="pb-4">
-                            <div class="flex flex-col gap-0.5">
-                                <div
-                                    class="min-w-3/4 grid gap-0.5 text-center"
-                                    :class="scoreReqGrid"
-                                >
-                                    <span
-                                        v-for="(rank, index) in rankList"
-                                        :key="index"
-                                        class="bg-slate-700 px-8 py-2 text-center"
-                                        :class="colorLookup[rank]"
-                                        >{{ rank }}</span
-                                    >
-                                </div>
-                                <div
-                                    class="grid gap-0.5 text-center"
-                                    :class="scoreReqGrid"
-                                >
-                                    <span
-                                        v-for="(score, index) in bench.scores"
-                                        :key="index"
-                                        class="bg-slate-700 px-8 py-2"
-                                        >{{ score }}</span
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex gap-10 pl-4">
-                            <div class="flex flex-col gap-2">
-                                <div class="grid grid-cols-2">
-                                    <p v-if="bench.count">
-                                        PB Accuracy :
-                                        {{ Math.floor(bench.maxAcc) }}%
-                                    </p>
-                                    <p>Total Plays : {{ bench.count }}</p>
-                                </div>
-                                <div class="grid grid-cols-2">
-                                    <p v-if="bench.count">
-                                        Avg. Score :
-                                        {{ Math.floor(bench.avgScore) }}
-                                    </p>
-                                    <p v-if="bench.count">
-                                        Avg. Accuracy :
-                                        {{ Math.floor(bench.avgAcc) }}%
-                                    </p>
-                                </div>
-                            </div>
-                            <div
-                                class="ml-auto mr-10 flex items-center gap-10 text-white"
-                            >
-                                <button
-                                    class="flex cursor-pointer items-center gap-1 transition hover:text-slate-300"
-                                    @click="handlePlayScenario(bench.id)"
-                                >
-                                    <play-icon
-                                        class="h-5 w-5 transition"
-                                    ></play-icon
-                                    >Play
-                                </button>
-                                <button
-                                    class="flex items-center"
-                                    :class="
-                                        bench.count == 0
-                                            ? 'disabled pointer-events-none text-slate-500'
-                                            : ''
-                                    "
-                                    @click="replayLink(bench.id, bench.weapon)"
-                                >
-                                    <span v-if="replayLoading">Loading...</span>
-                                    <span
-                                        v-else
-                                        class="cursor-pointer transition hover:text-slate-300"
-                                        >Watch Replay</span
-                                    >
-                                </button>
-
-                                <router-link
-                                    class="cursor-pointer transition hover:text-slate-300"
-                                    :to="'/tasks/' + bench.id"
-                                    >View Leaderboard</router-link
-                                >
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-            </section>
+  <section class="benchmark-view">
+    <benchmark-controls :sets="benchmarkSets" :selected-set="selectedSet.id" :level="currentTab.value" :levels="dropdownElements" @set-change="selectSet" @level-change="selectLevel" />
+    <div v-if="RABenchmarks.rankingAvailable !== false" class="bench-overview">
+      <div class="panel bench-overview-main">
+        <div class="bench-medal">
+          <img :src="getImagePath(RABenchmarks.overallRank)" alt="" />
+          <div>
+            <small>Overall rank</small>
+            <strong :class="colorLookup[RABenchmarks.overallRank]">{{ RABenchmarks.overallRank }}</strong>
+            <small>{{ RABenchmarks.overallPoints }} points</small>
+          </div>
         </div>
+      </div>
+      <div class="panel bench-categories">
+        <h2>Category points</h2>
+        <div class="bench-categories-grid">
+          <div v-for="(item, index) in subCategoryPoints" :key="index"><span>{{ displaySubCategories[index] }}</span><strong>{{ item }}</strong></div>
+        </div>
+      </div>
     </div>
-    <!-- text-mythic bg-mythic grid-cols-5 grid-cols-4 -->
+    <p v-if="actionError" class="panel status-panel mb-4" role="alert">{{ actionError }}</p>
+    <section id="benchmark-table" class="panel bench-table">
+      <h2 class="panel-header section-title">Scenario results</h2>
+      <div class="bench-table-head"><span>Scenario</span><span>Score</span><span>{{ RABenchmarks.rankingAvailable === false ? 'Plays' : 'Rank' }}</span><span>{{ RABenchmarks.rankingAvailable === false ? 'Average score' : 'Points' }}</span><span></span></div>
+      <div v-for="(bench, index) in RABenchmarks.benchmarks" :key="index" class="bench-row">
+        <div class="bench-main">
+          <span class="bench-name">{{ bench.name }}</span>
+          <button v-if="bench.count" type="button" class="bench-score text-link" :aria-label="`Open run for ${bench.name}: ${bench.maxScore} points`" @click="showBestRun(bench)">{{ bench.maxScore.toLocaleString() }}</button><span v-else class="bench-score">—</span>
+          <span v-if="RABenchmarks.rankingAvailable === false">{{ bench.count }}</span>
+          <span v-else class="bench-rank" :class="colorLookup[bench.rank]"><img :src="getImagePath(bench.rank)" alt="" />{{ bench.rank }}</span>
+          <span v-if="RABenchmarks.rankingAvailable === false">{{ bench.count ? Math.round(bench.avgScore).toLocaleString() : '—' }}</span>
+          <span v-else class="bench-points"><span class="bench-point-value">{{ bench.points }}</span><progress-bar class="progress-bar" :value="bench.progress" color="bg-mainCyan"></progress-bar></span>
+          <button type="button" class="bench-expand" :aria-expanded="!!expandedTasks[bench.id]" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
+            <chevron-icon direction="down" class="h-4 w-4" :class="{ 'rotate-180': expandedTasks[bench.id] }"></chevron-icon>
+          </button>
+        </div>
+        <div v-if="expandedTasks[bench.id]" class="bench-details">
+          <p v-if="RABenchmarks.rankingAvailable !== false" class="field-label">Rank score requirements</p>
+          <div v-if="RABenchmarks.rankingAvailable !== false" class="bench-threshold-wrap">
+            <div class="bench-thresholds" :style="{ gridTemplateColumns: 'repeat(' + rankList.length + ', minmax(90px, 1fr))' }">
+              <span v-for="rank in rankList" :key="rank" :class="colorLookup[rank]">{{ rank }}</span>
+              <span v-for="(score, scoreIndex) in bench.scores" :key="scoreIndex">{{ score }}</span>
+            </div>
+          </div>
+          <div class="bench-extra">
+            <div class="bench-stats">
+              <span>Total plays: {{ bench.count }}</span>
+              <span v-if="bench.count">Best accuracy: {{ Math.floor(bench.maxAcc) }}%</span>
+              <span v-if="bench.count">Average score: {{ Math.floor(bench.avgScore) }}</span>
+              <span v-if="bench.count">Average accuracy: {{ Math.floor(bench.avgAcc) }}%</span>
+            </div>
+            <div class="bench-actions">
+              <button type="button" @click="handlePlayScenario(bench)"><play-icon class="h-4 w-4"></play-icon>Play</button>
+              <router-link :to="historyLink(bench.id)">View runs</router-link>
+              <router-link :to="{ path: '/tasks/' + encodeURIComponent(bench.id) + '/leaderboard', query: { weapon: bench.weapon } }">View leaderboard</router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
 </template>
+
 <script>
-import * as ra from "../helpers/revosectData.js";
 import {
-    findReplay,
     findWorkshopId,
     taskDeepLink,
-} from "@/helpers/functions.js";
+} from "@/helpers/taskLinks.js";
+import { rankImage } from "../helpers/rankAssets.js";
+import BenchmarkControls from "../components/BenchmarkControls.vue";
+import { openRunDetails } from "../helpers/runDetails.js";
 export default {
+    components: { BenchmarkControls },
     data() {
         return {
-            replayLoading: false,
             actionError: "",
-            currentTabIndex: 2,
-            categories: ["Clicking", "Tracking", "Switching"],
-            subCategories: [
-                "Static",
-                "Dynamic",
-                "Precise",
-                "Reactive",
-                "Flick",
-                "Track",
-            ],
+            expandedTasks: {},
             dropdownElements: ["Easy", "Medium", "Hard"],
         };
     },
@@ -249,56 +83,15 @@ export default {
         currentPlayerInfo() {
             return this.$store.getters.currentPlayerInfo;
         },
+        benchmarkSets() { return this.$store.getters.benchmarkSets.filter(set => !set.community || set.community === 'revosect').map(set => set.id === 'legacy' ? { ...set, label: 'Series 2' } : set); },
+        selectedSet() { return this.benchmarkSets.find(set => set.id === this.$route.query.benchmark) || this.benchmarkSets.find(set => set.id === "revosect_s4") || this.benchmarkSets[0]; },
         currentTab() {
-            return {
-                value: this.dropdownElements[
-                    this.currentTabIndex
-                ].toLowerCase(),
-                label: this.dropdownElements[this.currentTabIndex],
-            };
+            const label = this.dropdownElements.find(value => value.toLowerCase() === this.$route.query.level) || "Hard";
+            return { value: label.toLowerCase(), label };
         },
-        rankList() {
-            switch (this.currentTab.value) {
-                case "hard":
-                    return [
-                        "Mythic",
-                        "Immortal",
-                        "Archon",
-                        "Ethereal",
-                        "Divine",
-                    ];
-
-                case "medium":
-                    return ["Ace", "Legend", "Sentinel", "Valour"];
-
-                case "easy":
-                    return ["Bronze", "Silver", "Gold", "Platinum"];
-            }
-        },
-        pointList() {
-            switch (this.currentTab.value) {
-                case "hard":
-                    return ra.hardSubPoints;
-                case "medium":
-                    return ra.mediumPoints;
-                case "easy":
-                    return ra.easySubPoints;
-            }
-        },
+        rankList() { return this.RABenchmarks.rankList || []; },
         RABenchmarks() {
-            switch (this.currentTab.value) {
-                case "hard":
-                    return this.$store.getters.RAHard;
-                case "medium":
-                    return this.$store.getters.RAMedium;
-                case "easy":
-                    return this.$store.getters.RAEasy;
-                default:
-                    return this.$store.getters.RAHard;
-            }
-        },
-        scoreReqGrid() {
-            return `grid-cols-${this.rankList.length}`;
+            return this.selectedSet.results[`RA${this.currentTab.label}`];
         },
         colorLookup() {
             return {
@@ -317,66 +110,31 @@ export default {
         subCategoryPoints() {
             return this.RABenchmarks.subCategoryPoints;
         },
-        displaySubCategories() {
-            return this.currentTab.value === "easy"
-                ? ["Static", "Dynamic", "Precise", "Flick"]
-                : this.subCategories;
-        },
+        displaySubCategories() { return this.RABenchmarks.subCategoryNames || []; },
+    },
+    watch: {
+        selectedSet() { this.expandedTasks = {}; },
+        currentTab() { this.expandedTasks = {}; },
     },
     methods: {
-        getImagePath(rank) {
-            return `../../rank-img/ra/${rank.toLowerCase()}.png`;
-        },
-        handleDropdownSelect(index) {
-            this.currentTabIndex = index;
-        },
+        getImagePath(rank) { return rankImage('revosect', rank); },
+        selectSet(id) { this.$router.push({ query: { benchmark: id, level: this.currentTab.value } }); },
+        selectLevel(level) { this.$router.push({ query: { benchmark: this.selectedSet.id, level } }); },
+        historyLink(taskId) { return `/profile/${encodeURIComponent(this.currentPlayerInfo.username)}/tasks/${encodeURIComponent(taskId)}/runs`; },
+        showBestRun(bench) { openRunDetails({ username: this.currentPlayerInfo.username, taskId: bench.id, taskName: bench.name, weapon: bench.weapon, score: bench.maxScore }); },
         toggleBenchDetails(bench) {
-            bench.detailsOpen = !bench.detailsOpen;
+            this.expandedTasks[bench.id] = !this.expandedTasks[bench.id];
         },
-        collapseBenchDetails() {
-            this.VTBenchmarks.forEach((element) => {
-                element.detailsOpen = false;
-            });
-        },
-        async handlePlayScenario(taskId) {
+        async handlePlayScenario(bench) {
             this.actionError = "";
             try {
-                const workshopId = await findWorkshopId(taskId);
+                const workshopId = bench.workshopId || await findWorkshopId(bench.id);
                 window.open(taskDeepLink(workshopId), "_blank");
             } catch (error) {
                 console.error(error);
                 this.actionError = "Could not open this task. Try again.";
             }
         },
-        async replayLink(taskId, weapon) {
-            this.actionError = "";
-            this.replayLoading = true;
-            try {
-                const link = await findReplay(
-                    this.currentPlayerInfo.username,
-                    taskId,
-                    weapon
-                );
-                if (link) window.open(link, "_blank");
-                else this.actionError = "Replay not found.";
-            } catch (error) {
-                console.error(error);
-                this.actionError = "Could not find this replay. Try again.";
-            } finally {
-                this.replayLoading = false;
-            }
-        },
     },
 };
 </script>
-
-<style scoped>
-#category-bar {
-    min-width: 788px;
-    left: 64px;
-    top: 60px;
-}
-#category-bar span {
-    transform: scale(-1, -1);
-}
-</style>

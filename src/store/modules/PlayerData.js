@@ -1,43 +1,17 @@
-import { cleanUpUserTasks } from "../../helpers/functions";
-
 export default {
-  state() {
-    return {
-      currentPlayerInfo: {},
-      currentPlayerTasks: [],
-    };
-  },
+  state: () => ({ snapshot: null }),
   getters: {
-    currentPlayerInfo(state) {
-      return state.currentPlayerInfo;
-    },
-    tasksPlayed(state) {
-      return state.currentPlayerTasks.length;
-    },
-    totalPlays(state) {
-      return state.currentPlayerTasks.reduce((accumulator, current) => {
-        return accumulator + current.count;
-      }, 0);
-    },
-    currentPlayerTasks(state) {
-      return state.currentPlayerTasks;
-    },
+    currentPlayerInfo: state => state.snapshot?.playerInfo || {},
+    currentPlayerTasks: state => state.snapshot?.tasks || [],
+    tasksPlayed: state => state.snapshot?.totals.tasksPlayed || 0,
+    totalPlays: state => state.snapshot?.totals.totalPlays || 0,
+    benchmarkSets: state => state.snapshot?.benchmarkSets || [],
+    profileFetchedAt: state => state.snapshot?.fetchedAt || null,
   },
   mutations: {
-    updateCurrentPlayerInfo(state, payload) {
-      state.currentPlayerInfo = payload;
-    },
-    updateCurrentPlayerTasks(state, payload) {
-      state.currentPlayerTasks = payload;
-    },
+    setProfileSnapshot(state, snapshot) { state.snapshot = snapshot; },
   },
   actions: {
-    updateCurrentPlayerInfo(context, payload) {
-      context.commit("updateCurrentPlayerInfo", payload);
-    },
-    updateCurrentPlayerTasks(context, payload) {
-      let plays = cleanUpUserTasks(payload);
-      context.commit("updateCurrentPlayerTasks", plays);
-    },
+    setProfileSnapshot({ commit }, snapshot) { commit('setProfileSnapshot', snapshot); },
   },
 };

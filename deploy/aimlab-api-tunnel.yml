@@ -3,6 +3,8 @@ credentials-file: /home/sai/.cloudflared/8657036f-19bd-4e43-b286-536f448c6987.js
 ingress:
   - hostname: aimlab-api.saibot.site
     service: http://127.0.0.1:5182
+  - hostname: aimlab-staging-api.saibot.site
+    service: http://127.0.0.1:5282
   - hostname: aimlab-analytics.saibot.site
     path: ^/(script\.js|api/send)$
     service: http://127.0.0.1:5181

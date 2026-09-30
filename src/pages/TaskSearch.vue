@@ -1,81 +1,40 @@
 <template>
-  <section class="mb-20">
-    <base-card class="mt-10 mx-auto max-w-2xl">
-      <form @submit.prevent="searchTask" class="flex flex-col items-center">
-        <div class="flex w-full gap-3 justify-center py-2">
-          <input
-            class="
-              border-2
-              block
-              rounded
-              py-1
-              px-2
-              w-3/5
-              text-black
-              focus:ring-2 focus:ring-blue-500
-            "
-            type="text"
-            id="taskname"
-            autocomplete="off"
-            v-model.trim="taskNameInput"
-          />
-          <button
-            type="submit"
-            class="
-              border border-slate-300
-              px-4
-              py-1
-              rounded
-              transition
-              hover:bg-slate-500
-            "
-          >
-            Search
-          </button>
-        </div>
-        <label class="block" for="taskname"
-          >Search for a Task/Scenario (<span class="italic">Be Specific</span
-          >)</label
-        >
-      </form>
-    </base-card>
-    <base-card class="mx-auto mt-4 max-w-2xl" v-if="searchStatus">
-      <p>{{ searchStatus }}</p>
-    </base-card>
-    <base-card class="mx-auto mt-4 max-w-2xl" v-if="taskList.length">
-      <router-link
-        class="
-          flex
-          items-center
-          justify-between
-          py-1
-          px-4
-          my-2
-          bg-slate-600
-          rounded
-          transition
-          hover:bg-slate-500
-        "
-        v-for="(task, index) in taskList"
-        :key="index"
-        :to="taskLeaderboardLink(task.id)"
-      >
-        <p>{{ task.name }}</p>
-        <div class="flex items-center gap-4">
-          <p>{{ task.author?.username || "?" }}</p>
-          <img
-            class="w-10 h-10 text-[8px] text-center bg-slate-700 p-1"
-            :src="task.image_url"
-            alt="Missing"
-          />
-        </div>
-      </router-link>
-    </base-card>
-  </section>
+  <main class="page-shell">
+    <div class="search-layout">
+      <div class="page-intro">
+        <h1 class="page-title">Find a task</h1>
+      </div>
+      <div class="panel panel-body">
+        <form class="search-form" @submit.prevent="searchTask">
+          <label class="sr-only" for="taskname">Task or scenario name</label>
+          <input id="taskname" class="text-field" type="text" autocomplete="off" placeholder="Enter a task or scenario name" v-model.trim="taskNameInput" />
+          <button class="btn-primary" type="submit">Search</button>
+        </form>
+      </div>
+      <div v-if="searchStatus" class="panel search-result status-panel" role="status">{{ searchStatus }}</div>
+      <div v-if="taskList.length" class="panel search-result">
+        <div class="panel-header"><h2 class="section-title">Matching tasks</h2><span class="result-meta">{{ taskList.length }} results</span></div>
+        <router-link v-for="task in taskList" :key="task.id" class="result-row" :to="taskLeaderboardLink(task.id)">
+          <div>
+            <h3 class="result-title">{{ task.name }}</h3>
+            <p v-if="task.author?.username" class="result-meta">{{ task.author.username }}</p>
+          </div>
+          <div class="result-action">
+            <img v-if="task.image_url" :src="task.image_url" alt="" class="task-thumbnail" />
+            <span aria-hidden="true">→</span>
+          </div>
+        </router-link>
+      </div>
+    </div>
+  </main>
 </template>
+<style scoped>
+.result-action { display: flex; align-items: center; gap: 14px; color: var(--accent); }
+.task-thumbnail { width: 44px; height: 44px; object-fit: cover; border: 1px solid var(--line); }
+</style>
 
 <script>
-import { APIFetch, GET_TASKS_BY_NAME } from "../helpers/queries";
+import { fetchData } from "../helpers/api.js";
 export default {
   data() {
     return {
@@ -96,10 +55,10 @@ export default {
       this.taskList = [];
       this.searchStatus = "Searching...";
       try {
-        const data = await APIFetch(GET_TASKS_BY_NAME, { name });
+        const data = await fetchData(`/api/tasks/search?name=${encodeURIComponent(name)}`);
         if (version !== this.requestVersion) return;
-        if (!data.aimlab?.tasks) throw new Error("Missing task search results");
-        this.taskList = data.aimlab.tasks;
+        if (!Array.isArray(data)) throw new Error("Missing task search results");
+        this.taskList = data;
         this.searchStatus = this.taskList.length ? "" : "No tasks found";
         window.umami?.track("task-search", {
           result: this.taskList.length ? "found" : "missing",
@@ -113,7 +72,7 @@ export default {
       }
     },
     taskLeaderboardLink(id) {
-      return this.$route.path + "/" + id;
+      return "/tasks/" + encodeURIComponent(id) + "/leaderboard";
     },
   },
 };

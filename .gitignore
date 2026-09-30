@@ -24,3 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 BenchmarkViewerData
+playwright-report/
+test-results/
+__pycache__/

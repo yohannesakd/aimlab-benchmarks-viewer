@@ -1,0 +1,745 @@
+change	definition	member	archived_signature	current_signature	current_source_line
+added_member	AIMLProvenance	deactivationTimestamp		DateTime	7708
+added_member	AIMLProvenance	ingestionTimestamp		DateTime	7710
+added_member	AIMLProvenance	publishTimestamp		DateTime	7714
+added_type	AcademyArticle			ObjectTypeDefinitionNode	5598
+added_type	AcademyArticleDocument			ObjectTypeDefinitionNode	5604
+added_type	AcademyArticleImage			ObjectTypeDefinitionNode	5608
+added_type	AcademyArticleNode			ObjectTypeDefinitionNode	5615
+added_type	AcademyArticleNodeType			EnumTypeDefinitionNode	5622
+added_type	AcademyArticleText			ObjectTypeDefinitionNode	5628
+added_type	AcademyImage			ObjectTypeDefinitionNode	5632
+added_type	AcademyTask			ObjectTypeDefinitionNode	5636
+added_type	AcademyUserInput			InputObjectTypeDefinitionNode	5640
+added_type	AcademyVideo			ObjectTypeDefinitionNode	5644
+added_type	AchievementMetric			ObjectTypeDefinitionNode	5648
+added_type	AdaptiveDifficultyDimension			ObjectTypeDefinitionNode	5660
+added_type	AdaptiveDifficultyDimensionInput			InputObjectTypeDefinitionNode	5665
+added_type	AdaptiveDifficultyPoint			ObjectTypeDefinitionNode	5670
+added_type	AdaptiveDifficultyPointInput			InputObjectTypeDefinitionNode	5675
+added_type	AddDiscoveryMessagesInput			InputObjectTypeDefinitionNode	5685
+added_type	AdminSteamSubscriptionItem			ObjectTypeDefinitionNode	5690
+added_type	AdminSteamSubscriptionItemBillingPeriod			ObjectTypeDefinitionNode	5699
+added_type	AdminSteamSubscriptionItemDescription			ObjectTypeDefinitionNode	5706
+added_type	AdminSteamSubscriptionItemPrice			ObjectTypeDefinitionNode	5711
+removed_member	Agreement	userAgreements	[UserAgreement!]!	-	-
+added_member	AimlabActivity	overrides		[AimlabActivityOverride!]!	5789
+added_type	AimlabActivityOverride			ObjectTypeDefinitionNode	5801
+removed_member	AimlabAsset	anthic_id	String	-	-
+removed_member	AimlabAsset	s3_bucket	String!	-	-
+removed_member	AimlabAsset	s3_key	String!	-	-
+added_member	AimlabAssetType	texture		enum value	5888
+added_type	AimlabControllerAimingSettingsInput			InputObjectTypeDefinitionNode	5893
+added_type	AimlabControllerAxisAccelerationSettingsInput			InputObjectTypeDefinitionNode	5899
+added_type	AimlabControllerAxisSettingsInput			InputObjectTypeDefinitionNode	5908
+added_type	AimlabControllerRadialSettingsInput			InputObjectTypeDefinitionNode	5916
+added_type	AimlabGrayboxSceneSetting			ObjectTypeDefinitionNode	5943
+added_type	AimlabGrayboxSceneSettingInput			InputObjectTypeDefinitionNode	5948
+added_member	AimlabLeaderboardEntry	playerEntries		[AimlabLeaderboardEntry!]!	5970
+added_member	AimlabLeaderboardEntry	type		LeaderboardEntryType!	5974
+added_member	AimlabLeaderboardInput	multiplayer		Boolean	5995
+added_member	AimlabLeaderboardInput	userIds		[String!]	6004
+added_member	AimlabLeaderboardProjection	metadata		AimlabLeaderboardProjectionMetadata!	6023
+added_member	AimlabLeaderboardProjection	projectedPercentile		Float!	6025
+added_member	AimlabLeaderboardProjection	projectedScore		Float!	6039
+added_type	AimlabLeaderboardProjectionMetadata			ObjectTypeDefinitionNode	6047
+added_member	AimlabMountSinaiPlayResult	academyStepId		String	6070
+added_member	AimlabMountSinaiPlayResult	benchmarkSeasonId		String	6075
+added_member	AimlabMountSinaiPlayResult	multiplayerSessionId		String	6087
+added_member	AimlabMountSinaiPlayResult	playDuration		Float	6090
+added_member	AimlabPlayResult	academyStepId		String	6385
+added_member	AimlabPlayResult	benchmarkSeasonId		String	6390
+added_member	AimlabPlayResult	multiplayerSessionId		String	6404
+added_member	AimlabPlayResult	playDuration		Float	6408
+added_type	AimlabPlaylist			ObjectTypeDefinitionNode	6362
+added_member	AimlabProfile	achievementMetrics		[AchievementMetric!]! (slugs:[String!])	6692
+added_member	AimlabProfile	athenaMetricInsight		AthenaUserMetricInsight! (fresh:Boolean, range:AthenaMetricTimeframeRange!)	6702
+added_member	AimlabProfile	athenaMetricTimeseries		AthenaMetricTimeseries (metricId:String!, range:AthenaMetricTimeframeRange!)	6703
+added_member	AimlabProfile	bannerId		String	6704
+added_member	AimlabProfile	benchmarkPerformance		BenchmarkUserPerformance! (input:BenchmarkPerformanceInput!)	6707
+added_member	AimlabProfile	eventpass		EventpassProgress! (eventpassId:ID!)	6714
+added_member	AimlabProfile	eventpasses		[EventpassProgress!]!	6715
+added_member	AimlabProfile	hasActivatedTrial		Boolean!	6717
+added_member	AimlabProfile	imageId		String	6719
+added_member	AimlabProfile	latestPlays		[Play!]! (app:App!)	6739
+added_member	AimlabProfile	learningStats		UserLearningStats!	6740
+changed_member	AimlabProfile	missionStates	[MissionState!]!	[MissionState!]! (eventId:String, missionGroup:String)	6744
+added_member	AimlabProfile	plans		[Plan!]! (input:UserPlansInput!)	6746
+added_member	AimlabProfile	profileCosmetics		AimlabProfileCosmetics!	6764
+added_member	AimlabProfile	psProfile		PSProfile	6766
+added_member	AimlabProfile	recommendedTasks		[RecommendedTask!]! (app:App, engine:OracleEngine!, max:Int!)	6769
+added_member	AimlabProfile	subscriptions		[AimlabsPlusSubscriptionStatus!]!	6773
+added_member	AimlabProfile	targetTextures		[AimlabTargetTexture!]! (appId:App)	6775
+added_member	AimlabProfile	taskAdaptiveDifficulties		[TaskAdaptiveDifficulty!] (appId:App)	6777
+added_member	AimlabProfile	taskAdaptiveDifficulty		TaskAdaptiveDifficulty (appId:App!, taskId:ID!)	6778
+changed_member	AimlabProfile	taskStats	[AimlabTaskStats!]! (limit:Int)	[AimlabTaskStats!]! (app:App, limit:Int)	6779
+changed_member	AimlabProfile	username	String!	String! (app:App)	6783
+added_member	AimlabProfile	xboxProfile		XboxProfile	6784
+added_type	AimlabProfileCosmetic			ObjectTypeDefinitionNode	6787
+added_type	AimlabProfileCosmetics			ObjectTypeDefinitionNode	6799
+added_type	AimlabReplay			ObjectTypeDefinitionNode	6876
+added_type	AimlabReplayComment			ObjectTypeDefinitionNode	6915
+added_type	AimlabReplayCommentConnection			ObjectTypeDefinitionNode	6932
+added_type	AimlabReplayCommentEdge			ObjectTypeDefinitionNode	6943
+added_type	AimlabReplayFeed			ObjectTypeDefinitionNode	6951
+added_type	AimlabReplayPublishingOpts			InputObjectTypeDefinitionNode	6958
+added_type	AimlabReplayStats			ObjectTypeDefinitionNode	6962
+added_member	AimlabSeason	leaderboardPaused		Boolean!	6975
+added_member	AimlabSeason	visible		Boolean!	6980
+added_type	AimlabTargetTexture			ObjectTypeDefinitionNode	7026
+added_member	AimlabTask	duration		Float	7053
+added_member	AimlabTask	style		TaskStyle!	7066
+added_member	AimlabTaskInput	style		TaskStyle	7096
+added_member	AimlabTaskStats	play		Play	7104
+added_member	AimlabTaskStats	playId		String!	7106
+added_type	AimlabThumbnail			ObjectTypeDefinitionNode	7111
+added_member	AimlabUserControlSettingsInput	controllerSettings		AimlabUserControllerSettingsInput	7169
+added_type	AimlabUserControllerSettingsInput			InputObjectTypeDefinitionNode	7154
+added_type	AimlabUserCosmeticsSettingsInput			InputObjectTypeDefinitionNode	7217
+added_type	AimlabUserCrosshairSettings			ObjectTypeDefinitionNode	7221
+added_member	AimlabUserCrosshairSettingsInput	circleEnabled		Boolean	7255
+added_member	AimlabUserCrosshairSettingsInput	crosshairType		AimlabUserSettingsCrosshairType	7258
+removed_member	AimlabUserCrosshairSettingsInput	currentCrosshair	Float!	-	-
+added_member	AimlabUserCrosshairSettingsInput	customReticle		String	7259
+added_member	AimlabUserCrosshairSettingsInput	dotEnabled		Boolean	7261
+added_member	AimlabUserCrosshairSettingsInput	hitmarkerColor		AimlabUserSettingsColorInput	7263
+added_member	AimlabUserCrosshairSettingsInput	hitmarkerDuration		Float	7264
+added_member	AimlabUserCrosshairSettingsInput	hitmarkerEnabled		Boolean	7265
+added_member	AimlabUserCrosshairSettingsInput	hitmarkerGap		Float	7266
+added_member	AimlabUserCrosshairSettingsInput	hitmarkerLength		Float	7267
+added_member	AimlabUserCrosshairSettingsInput	hitmarkerOpacity		Float	7268
+added_member	AimlabUserCrosshairSettingsInput	hitmarkerThickness		Float	7269
+added_member	AimlabUserCrosshairSettingsInput	outlineColor		AimlabUserSettingsColorInput	7272
+added_member	AimlabUserCrosshairSettingsInput	outlineEnabled		Boolean	7273
+added_member	AimlabUserCrosshairSettingsInput	outlineThickness		Float	7275
+added_member	AimlabUserCrosshairSettingsInput	perfectPixel		Boolean	7276
+removed_member	AimlabUserGameSettingsInput	hitTarget	AimlabUserSettingsTargetDisplayDataInput!	-	-
+removed_member	AimlabUserGameSettingsInput	missTarget	AimlabUserSettingsTargetDisplayDataInput!	-	-
+removed_member	AimlabUserGameSettingsInput	target	AimlabUserSettingsTargetDisplayDataInput!	-	-
+added_type	AimlabUserGrayboxDisplaySettings			ObjectTypeDefinitionNode	7321
+added_type	AimlabUserGrayboxDisplaySettingsInput			InputObjectTypeDefinitionNode	7335
+removed_type	AimlabUserGrayboxSettingsInput	-	InputObjectTypeDefinitionNode	-	-
+added_type	AimlabUserSettingsColor			ObjectTypeDefinitionNode	7411
+added_type	AimlabUserSettingsCrosshairDimensionData			ObjectTypeDefinitionNode	7425
+added_type	AimlabUserSettingsCrosshairType			EnumTypeDefinitionNode	7435
+added_type	AimlabUserSettingsGrayboxVariantDisplay			ObjectTypeDefinitionNode	7440
+added_type	AimlabUserSettingsGrayboxVariantDisplayInput			InputObjectTypeDefinitionNode	7448
+added_member	AimlabUserSettingsInput	cosmeticsSettings		AimlabUserCosmeticsSettingsInput	7459
+added_member	AimlabUserSettingsInput	grayboxDisplaySettings		AimlabUserGrayboxDisplaySettingsInput	7463
+removed_member	AimlabUserSettingsInput	grayboxSettings	AimlabUserGrayboxSettingsInput!	-	-
+added_member	AimlabUserSettingsInput	targetDisplaySettings		AimlabUserTargetDisplaySettingsInput	7466
+added_type	AimlabUserSettingsTargetCosmeticInput			InputObjectTypeDefinitionNode	7469
+removed_type	AimlabUserSettingsTargetDisplayDataInput	-	InputObjectTypeDefinitionNode	-	-
+added_type	AimlabUserSettingsTargetVariantDisplay			ObjectTypeDefinitionNode	7474
+added_type	AimlabUserSettingsTargetVariantDisplayInput			InputObjectTypeDefinitionNode	7480
+added_type	AimlabUserTargetDisplaySettings			ObjectTypeDefinitionNode	7486
+added_type	AimlabUserTargetDisplaySettingsInput			InputObjectTypeDefinitionNode	7506
+added_type	AimlabVisualUserSettingsInput			InputObjectTypeDefinitionNode	7526
+added_member	AimlabsPlusSubscriptionStatus	autoRenew		Boolean!	7011
+added_member	AimlabsPlusSubscriptionStatus	canceledAt		DateTime	7012
+added_member	AimlabsPlusSubscriptionStatus	id		ID!	7014
+added_member	AimlabsPlusSubscriptionStatus	terminatedAt		DateTime	7017
+added_member	App	AIMLAB_BETA		enum value	7786
+added_type	AthenaFieldSource			EnumTypeDefinitionNode	7813
+added_type	AthenaFieldType			EnumTypeDefinitionNode	7822
+added_type	AthenaMetric			ObjectTypeDefinitionNode	7834
+added_type	AthenaMetricBase			EnumTypeDefinitionNode	7843
+added_type	AthenaMetricExtraFieldInput			InputObjectTypeDefinitionNode	7851
+added_type	AthenaMetricField			ObjectTypeDefinitionNode	7861
+added_type	AthenaMetricFlickingTimeseriesPoint			ObjectTypeDefinitionNode	7873
+added_type	AthenaMetricPlayInsight			ObjectTypeDefinitionNode	7889
+added_type	AthenaMetricSample			ObjectTypeDefinitionNode	7899
+added_type	AthenaMetricSampleInput			InputObjectTypeDefinitionNode	7911
+added_type	AthenaMetricTimeframeRange			EnumTypeDefinitionNode	7921
+added_type	AthenaMetricTimeseries			ObjectTypeDefinitionNode	7928
+added_type	AthenaMetricTimeseriesMetric			ObjectTypeDefinitionNode	7940
+added_type	AthenaMetricTimeseriesPoint			ObjectTypeDefinitionNode	7946
+added_type	AthenaMetricValueRange			ObjectTypeDefinitionNode	7976
+added_type	AthenaPlayInsightType			EnumTypeDefinitionNode	7981
+added_type	AthenaTimeRange			ObjectTypeDefinitionNode	7986
+added_type	AthenaUserMetricInsight			ObjectTypeDefinitionNode	7991
+added_type	AthenaUserMetricInsightItem			ObjectTypeDefinitionNode	8006
+added_type	BackendExperiment			ObjectTypeDefinitionNode	8075
+added_type	BackendExperimentMutationPayload			ObjectTypeDefinitionNode	8086
+added_type	BackendExperimentOverrideType			EnumTypeDefinitionNode	8093
+added_type	BackendExperimentUserOverride			ObjectTypeDefinitionNode	8098
+added_type	BanChatUserResultPayload			ObjectTypeDefinitionNode	8107
+added_type	BenchmarkConfiguration			ObjectTypeDefinitionNode	8251
+added_type	BenchmarkPerformanceInput			InputObjectTypeDefinitionNode	8285
+added_type	BenchmarkRankDistribution			ObjectTypeDefinitionNode	8307
+added_type	BenchmarkRankDistributionEntry			ObjectTypeDefinitionNode	8312
+added_type	BenchmarkTaskConfiguration			ObjectTypeDefinitionNode	8395
+added_type	BenchmarkUserPerformance			ObjectTypeDefinitionNode	8436
+added_type	BenchmarkUserProgressionPoint			ObjectTypeDefinitionNode	8460
+added_type	BenchmarkUserSubcategoryPerformance			ObjectTypeDefinitionNode	8486
+added_type	BenchmarkUserTaskPerformance			ObjectTypeDefinitionNode	8491
+added_type	BindDiscoveryConversationSchemaInput			InputObjectTypeDefinitionNode	8497
+removed_type	BrainlabPlayGridShotPerformanceData	-	InputObjectTypeDefinitionNode	-	-
+added_member	BrainlabPlayResult	academyStepId		String	8520
+added_member	BrainlabPlayResult	benchmarkSeasonId		String	8525
+added_member	BrainlabPlayResult	multiplayerSessionId		String	8537
+added_member	BrainlabPlayResult	playDuration		Float	8540
+added_type	Chat			ObjectTypeDefinitionNode	8602
+added_type	ChatBans			ObjectTypeDefinitionNode	8608
+added_type	ChatFilterInput			InputObjectTypeDefinitionNode	8612
+added_type	ChatMessage			ObjectTypeDefinitionNode	8616
+added_type	ChatScope			EnumTypeDefinitionNode	8625
+added_member	ClaimNextLoginStreakResult	message		String	8633
+added_type	ClearUniversalSensFinderDataInput			InputObjectTypeDefinitionNode	8637
+added_type	CoherenceRegion			EnumTypeDefinitionNode	8650
+added_member	ConsolePlayResult	academyStepId		String	8784
+added_member	ConsolePlayResult	benchmarkSeasonId		String	8791
+added_member	ConsolePlayResult	multiplayerSessionId		String	8805
+added_member	ConsolePlayResult	playDuration		Float	8809
+added_type	ConversationMessageInput			InputObjectTypeDefinitionNode	8828
+added_type	CreateAimlabActivityOverrideInput			InputObjectTypeDefinitionNode	8836
+added_type	CreateAimlabReplayCommentInput			InputObjectTypeDefinitionNode	8857
+added_type	CreateAthenaCoachConversationInput			InputObjectTypeDefinitionNode	8862
+added_type	CreateAthenaPlaysConversationInput			InputObjectTypeDefinitionNode	8868
+added_type	CreateAthenaReplayConversationInput			InputObjectTypeDefinitionNode	8877
+added_member	CreateBattlePassResult	message		String	8899
+added_member	CreateBattlePassRewardResult	message		String	8906
+added_member	CreateBattlePassTierResult	message		String	8915
+added_member	CreateBrainlabStudyResult	message		String	8923
+added_type	CreateDiscoveryConversationSchemaInput			InputObjectTypeDefinitionNode	8929
+added_type	CreateDiscoveryEvaluationInput			InputObjectTypeDefinitionNode	8935
+added_member	CreateLoginStreakResult	message		String	8943
+added_type	CreateMouselabsConversationInput			InputObjectTypeDefinitionNode	8948
+added_type	CreateTextureConversationInput			InputObjectTypeDefinitionNode	8957
+added_member	CustomUsersSourceMutationPayload	message		String	8981
+added_type	DeleteReplayFeedStaticEntry			InputObjectTypeDefinitionNode	9000
+added_type	DisconnectFromMultiplayerSessionPayload			ObjectTypeDefinitionNode	9011
+added_type	DiscoveryAthenaPlayComment			ObjectTypeDefinitionNode	9018
+added_type	DiscoveryAthenaPlayMetricComment			ObjectTypeDefinitionNode	9025
+added_type	DiscoveryAttachment			ObjectTypeDefinitionNode	9040
+added_type	DiscoveryAttachmentType			EnumTypeDefinitionNode	9076
+added_type	DiscoveryAuthoringVocabulary			ObjectTypeDefinitionNode	9088
+added_type	DiscoveryContentRecommendation			ObjectTypeDefinitionNode	9096
+added_type	DiscoveryContentRecommendationType			EnumTypeDefinitionNode	9119
+added_type	DiscoveryConversation			ObjectTypeDefinitionNode	9124
+added_type	DiscoveryConversationMessage			ObjectTypeDefinitionNode	9133
+added_type	DiscoveryConversationMessageReview			ObjectTypeDefinitionNode	9176
+added_type	DiscoveryConversationMessageReviewLabel			EnumTypeDefinitionNode	9187
+added_type	DiscoveryConversationMessageSource			EnumTypeDefinitionNode	9197
+added_type	DiscoveryConversationMessageState			EnumTypeDefinitionNode	9202
+added_type	DiscoveryConversationQuota			ObjectTypeDefinitionNode	9211
+added_type	DiscoveryConversationQuotaUsage			ObjectTypeDefinitionNode	9217
+added_type	DiscoveryConversationSchema			ObjectTypeDefinitionNode	9226
+added_type	DiscoveryEvaluation			ObjectTypeDefinitionNode	9248
+added_type	DiscoveryEvaluationGrader			ObjectTypeDefinitionNode	9265
+added_type	DiscoveryEvaluationGraderInput			InputObjectTypeDefinitionNode	9275
+added_type	DiscoveryEvaluationResult			ObjectTypeDefinitionNode	9284
+added_type	DiscoveryEvaluationRun			ObjectTypeDefinitionNode	9299
+added_type	DiscoveryInferenceOpts			ObjectTypeDefinitionNode	9316
+added_type	DiscoveryInterface			ObjectTypeDefinitionNode	9337
+added_type	DiscoveryInterfaceContextInput			InputObjectTypeDefinitionNode	9349
+added_type	DiscoveryInterfaceNavigation			ObjectTypeDefinitionNode	9365
+added_type	DiscoveryInterfacePage			ObjectTypeDefinitionNode	9385
+added_type	DiscoveryInterfacePageInput			InputObjectTypeDefinitionNode	9400
+added_type	DiscoveryKnowledgeBase			ObjectTypeDefinitionNode	9414
+added_type	DiscoveryKnowledgeEntry			ObjectTypeDefinitionNode	9421
+added_type	DiscoveryKnowledgeEntryInput			InputObjectTypeDefinitionNode	9431
+added_type	DiscoveryKnowledgeSearchResult			ObjectTypeDefinitionNode	9438
+added_type	DiscoveryMessageReviewCorrectionInput			InputObjectTypeDefinitionNode	9450
+added_type	DiscoveryMessageReviewInput			InputObjectTypeDefinitionNode	9455
+added_type	DiscoveryQuota			ObjectTypeDefinitionNode	9461
+added_type	DiscoveryQuotaUsage			ObjectTypeDefinitionNode	9478
+added_type	DiscoverySchemaBinding			ObjectTypeDefinitionNode	9492
+added_type	DiscoverySchemaInferenceOpts			ObjectTypeDefinitionNode	9505
+added_type	DiscoverySchemaInferenceOptsInput			InputObjectTypeDefinitionNode	9515
+added_type	DiscoverySchemaKeyword			ObjectTypeDefinitionNode	9524
+added_type	DiscoverySchemaKeywordInput			InputObjectTypeDefinitionNode	9533
+added_type	DiscoveryTool			ObjectTypeDefinitionNode	9540
+added_type	DiscoveryUserReplyInput			InputObjectTypeDefinitionNode	9548
+added_type	EditDiscoveryQuotaInput			InputObjectTypeDefinitionNode	9602
+added_type	EnsureDiscoveryInferenceOptsInput			InputObjectTypeDefinitionNode	9614
+added_type	Eventpass			ObjectTypeDefinitionNode	9627
+added_type	EventpassCurrencyGrant			ObjectTypeDefinitionNode	9635
+added_type	EventpassCurrencyGrantInput			InputObjectTypeDefinitionNode	9640
+added_type	EventpassExperienceGain			ObjectTypeDefinitionNode	9645
+added_type	EventpassInput			InputObjectTypeDefinitionNode	9653
+added_type	EventpassLevel			ObjectTypeDefinitionNode	9660
+added_type	EventpassLevelInput			InputObjectTypeDefinitionNode	9667
+added_type	EventpassLevelProgress			ObjectTypeDefinitionNode	9672
+added_type	EventpassPlayfabItemGrant			ObjectTypeDefinitionNode	9678
+added_type	EventpassPlayfabItemGrantInput			InputObjectTypeDefinitionNode	9682
+added_type	EventpassProgress			ObjectTypeDefinitionNode	9686
+added_type	EventpassReward			ObjectTypeDefinitionNode	9700
+added_type	EventpassRewardGrant			ObjectTypeDefinitionNode	9706
+added_type	EventpassRewardGrantInput			InputObjectTypeDefinitionNode	9712
+added_type	EventpassRewardGrantType			EnumTypeDefinitionNode	9718
+added_type	EventpassRewardInput			InputObjectTypeDefinitionNode	9723
+added_type	EventpassRewardProgress			ObjectTypeDefinitionNode	9729
+added_type	EventpassRewardTier			EnumTypeDefinitionNode	9734
+added_type	EventpassUpdateInput			InputObjectTypeDefinitionNode	9739
+added_type	ExperimentSubscriptionRolloutMode			EnumTypeDefinitionNode	9745
+changed_member	FriendsListResult	friends	[AimlabProfile!]!	[AimlabProfile]!	9777
+added_type	GenerateRedeemableCodeGrantCodesInput			InputObjectTypeDefinitionNode	9791
+added_type	GenerateRedeemableCodeGrantCodesPayload			ObjectTypeDefinitionNode	9804
+added_type	JSON			ScalarTypeDefinitionNode	9993
+added_type	JoinMatchmakingQueueInput			InputObjectTypeDefinitionNode	9986
+added_type	LatestUniversalSensFinderDataByTaskQueryInput			InputObjectTypeDefinitionNode	10003
+added_type	LeaderboardEntryType			EnumTypeDefinitionNode	10013
+added_member	LeaderboardInput	academyPlanId		String	10030
+added_member	LeaderboardInput	benchmarkSeasonId		String	10031
+added_member	LeaderboardInput	inputDevice		InputDevice	10039
+added_member	LeaderboardInput	multiplayer		Boolean	10042
+added_member	LeaderboardInput	projectionStatistic		LeaderboardProjectionStatistic	10046
+added_member	LeaderboardInput	projectionStatisticValue		Float	10047
+removed_member	LeaderboardInput	scoreToProjectRank	Float	-	-
+added_member	LeaderboardInput	stars		Boolean	10051
+added_member	LeaderboardInput	userIds		[String!]	10056
+added_type	LeaderboardProjectionStatistic			EnumTypeDefinitionNode	10077
+added_type	Matchmaking			ObjectTypeDefinitionNode	10217
+added_type	MatchmakingPing			InputObjectTypeDefinitionNode	10223
+added_type	MatchmakingState			ObjectTypeDefinitionNode	10228
+added_type	MatchmakingStateStatus			EnumTypeDefinitionNode	10236
+added_type	Mission			ObjectTypeDefinitionNode	10307
+added_type	MissionAccumulativeTargetBounds			InputObjectTypeDefinitionNode	10340
+added_type	MissionAction			ObjectTypeDefinitionNode	10352
+added_type	MissionActionInput			InputObjectTypeDefinitionNode	10357
+added_type	MissionActionUpdateInput			InputObjectTypeDefinitionNode	10362
+added_type	MissionActionUpdateOrDeleteResult			ObjectTypeDefinitionNode	10367
+added_type	MissionCondition			ObjectTypeDefinitionNode	10377
+added_type	MissionConditionGroup			ObjectTypeDefinitionNode	10382
+added_type	MissionConditionGroupInput			InputObjectTypeDefinitionNode	10389
+added_type	MissionConditionInput			InputObjectTypeDefinitionNode	10396
+added_type	MissionDatetime			ObjectTypeDefinitionNode	10401
+added_type	MissionDatetimeInput			InputObjectTypeDefinitionNode	10407
+added_type	MissionDatetimeType			EnumTypeDefinitionNode	10413
+added_type	MissionGroup			ObjectTypeDefinitionNode	10418
+added_type	MissionGroupActivationPrerequisites			ObjectTypeDefinitionNode	10425
+added_type	MissionGroupActivationPrerequisitesInput			InputObjectTypeDefinitionNode	10430
+added_type	MissionGroupCreateInput			InputObjectTypeDefinitionNode	10435
+added_type	MissionGroupCreateResult			ObjectTypeDefinitionNode	10441
+added_type	MissionGroupUpdateInput			InputObjectTypeDefinitionNode	10448
+added_type	MissionGroupUpdateOrDeleteResult			ObjectTypeDefinitionNode	10454
+added_type	MissionInput			InputObjectTypeDefinitionNode	10461
+added_type	MissionIteration			ObjectTypeDefinitionNode	10491
+added_type	MissionIterationExpiryPolicy			ObjectTypeDefinitionNode	10501
+added_type	MissionIterationExpiryPolicyInput			InputObjectTypeDefinitionNode	10507
+added_type	MissionObjective			ObjectTypeDefinitionNode	10513
+added_type	MissionObjectiveInput			InputObjectTypeDefinitionNode	10554
+added_type	MissionObjectiveMutationPayload			ObjectTypeDefinitionNode	10594
+added_type	MissionObjectiveType			EnumTypeDefinitionNode	10602
+added_type	MissionObjectiveUpdateInput			InputObjectTypeDefinitionNode	10609
+added_type	MissionObjectiveUpdateOrDeletePayload			ObjectTypeDefinitionNode	10642
+added_type	MissionParameter			ObjectTypeDefinitionNode	10650
+added_type	MissionParameterInput			InputObjectTypeDefinitionNode	10655
+added_type	MissionParameterType			EnumTypeDefinitionNode	10660
+added_member	MissionState	iteration		MissionIteration!	10672
+added_member	MissionState	mission		Mission!	10674
+added_member	MissionState	missionIteration		Int!	10676
+added_member	MissionState	timeUntilNextIteration		Int	10678
+added_type	MissionText			ObjectTypeDefinitionNode	10686
+added_type	MissionTextInput			InputObjectTypeDefinitionNode	10691
+added_type	MissionUpdateInput			InputObjectTypeDefinitionNode	10696
+added_type	MissionUpsertResult			ObjectTypeDefinitionNode	10715
+added_member	MobilePlayResult	academyStepId		String	10735
+added_member	MobilePlayResult	benchmarkSeasonId		String	10739
+added_member	MobilePlayResult	multiplayerSessionId		String	10750
+added_member	MobilePlayResult	playDuration		Float	10753
+added_type	MultiplayerDisconnectConsensus			ObjectTypeDefinitionNode	10782
+added_type	MultiplayerDisconnectConsensusStatus			EnumTypeDefinitionNode	10789
+added_type	MultiplayerModeConfig			ObjectTypeDefinitionNode	10795
+added_type	MultiplayerModeStyle			EnumTypeDefinitionNode	10814
+added_type	MultiplayerModeTaskConfig			ObjectTypeDefinitionNode	10819
+added_type	MultiplayerModeTaskConfigMode			EnumTypeDefinitionNode	10826
+added_type	MultiplayerParty			ObjectTypeDefinitionNode	10832
+added_type	MultiplayerPartyInvite			ObjectTypeDefinitionNode	10869
+added_type	MultiplayerPartyLog			ObjectTypeDefinitionNode	10886
+added_type	MultiplayerPartyLogType			EnumTypeDefinitionNode	10897
+added_type	MultiplayerPartyMember			ObjectTypeDefinitionNode	10914
+added_type	MultiplayerPartyMemberState			EnumTypeDefinitionNode	10924
+added_type	MultiplayerPartyState			EnumTypeDefinitionNode	10929
+added_type	MultiplayerSelectedEntity			ObjectTypeDefinitionNode	10937
+added_type	MultiplayerSelectedEntityInput			InputObjectTypeDefinitionNode	10942
+added_type	MultiplayerSelectedEntityType			EnumTypeDefinitionNode	10946
+added_type	MultiplayerSession			ObjectTypeDefinitionNode	10950
+added_type	MultiplayerSessionEvent			ObjectTypeDefinitionNode	10977
+added_type	MultiplayerSessionEventType			EnumTypeDefinitionNode	10987
+added_type	MultiplayerSessionMember			ObjectTypeDefinitionNode	11000
+added_type	MultiplayerSessionMemberState			EnumTypeDefinitionNode	11031
+added_type	MultiplayerSessionState			EnumTypeDefinitionNode	11038
+added_type	MultiplayerSessionType			EnumTypeDefinitionNode	11046
+added_type	MultiplayerTaskSelectedEntity			ObjectTypeDefinitionNode	11051
+added_type	MultiplayerTaskSelectedEntityInput			InputObjectTypeDefinitionNode	11060
+added_member	Mutation	abortSteamSubscriptionOrder		Boolean! (orderId:String!)	14419
+added_member	Mutation	activateMissionGroup		String! (missionGroup:String!)	14423
+added_member	Mutation	activatePremiumEventpass		MutationPayload! (id:ID!, userId:String)	14424
+added_member	Mutation	activateTrial		MutationPayload!	14425
+added_member	Mutation	addBackendExperimentOverride		BackendExperimentMutationPayload! (enabled:Boolean, experimentId:ID!, type:BackendExperimentOverrideType!, value:String!)	14427
+added_member	Mutation	addBannedWord		MutationPayload! (escapeRegularExpressionCharacters:Boolean!, word:String!)	14434
+added_member	Mutation	addCodesToRedeemableCodeGrant		MutationPayload! (codes:[String!]!, redeemableCodeGrantId:ID!)	14435
+added_member	Mutation	addDiscoveryMessages		[DiscoveryConversationMessage!]! (input:AddDiscoveryMessagesInput!)	14437
+added_member	Mutation	addUserReply		DiscoveryConversationMessage! (input:DiscoveryUserReplyInput!)	14439
+added_member	Mutation	banChatUser		BanChatUserResultPayload! (userId:String!)	14448
+added_member	Mutation	banUserFromReplays		MutationPayload! (userId:ID!)	14449
+added_member	Mutation	bindDiscoveryConversationSchema		DiscoverySchemaBinding! (input:BindDiscoveryConversationSchemaInput!)	14451
+added_member	Mutation	cancelXboxSubscription		MutationPayload! (id:ID!, userId:ID)	14457
+added_member	Mutation	changeReplayLike		AimlabReplay! (liked:Boolean!, replayId:ID!)	14458
+added_member	Mutation	checkForNewPsSubscriptions		MutationPayload! (userId:ID)	14459
+added_member	Mutation	checkForNewXboxSubscription		MutationPayload! (userId:ID)	14460
+added_member	Mutation	clearUniversalSensFinderData		MutationPayload! (input:ClearUniversalSensFinderDataInput!)	14462
+added_member	Mutation	configureEventpassLevel		MutationPayload! (eventpassId:ID!, level:EventpassLevelInput!)	14463
+added_member	Mutation	configureEventpassReward		MutationPayload! (eventpassId:ID!, levelId:ID!, reward:EventpassRewardInput!)	14464
+added_member	Mutation	correctDiscoveryMessageReview		DiscoveryConversationMessageReview! (input:DiscoveryMessageReviewCorrectionInput!, messageId:ID!)	14465
+added_member	Mutation	createAimlabActivityOverride		AimlabActivityOverride! (input:CreateAimlabActivityOverrideInput!)	14469
+added_member	Mutation	createAthenaCoachDiscoveryConversation		DiscoveryConversation! (input:CreateAthenaCoachConversationInput)	14472
+added_member	Mutation	createAthenaPlaysDiscoveryConversation		DiscoveryConversation! (input:CreateAthenaPlaysConversationInput!)	14474
+added_member	Mutation	createAthenaReplayDiscoveryConversation		DiscoveryConversation! (input:CreateAthenaReplayConversationInput!)	14481
+added_member	Mutation	createBackendExperiment		BackendExperimentMutationPayload! (input:UpsertBackendExperimentInput!)	14489
+added_member	Mutation	createDiscoveryConversationSchema		DiscoveryConversationSchema! (input:CreateDiscoveryConversationSchemaInput!)	14495
+added_member	Mutation	createDiscoveryEvaluation		DiscoveryEvaluation! (input:CreateDiscoveryEvaluationInput!)	14497
+added_member	Mutation	createDiscoveryKnowledgeBase		DiscoveryKnowledgeBase! (id:ID!, name:String!)	14499
+added_member	Mutation	createDiscoveryKnowledgeEntry		DiscoveryKnowledgeEntry! (embeddingModel:String, input:DiscoveryKnowledgeEntryInput!, knowledgeBaseId:ID!)	14503
+added_member	Mutation	createEventpass		MutationPayload! (eventpass:EventpassInput!)	14504
+added_member	Mutation	createMission		MissionUpsertResult! (input:MissionInput!)	14507
+added_member	Mutation	createMissionAction		MissionUpsertResult! (action:MissionActionInput!, missionId:ID!)	14508
+added_member	Mutation	createMissionGroup		MissionGroupCreateResult! (input:MissionGroupCreateInput!)	14509
+added_member	Mutation	createMissionObjective		MissionObjectiveMutationPayload! (missionId:ID!, objective:MissionObjectiveInput!)	14510
+added_member	Mutation	createMouselabsDiscoveryConversation		DiscoveryConversation! (input:CreateMouselabsConversationInput!)	14511
+added_member	Mutation	createMultiplayerSession		MultiplayerSession! (maxPlayers:Int, preferredRegion:CoherenceRegion, selectedEntity:MultiplayerSelectedEntityInput)	14512
+added_member	Mutation	createMultiplayerSessionFromExisting		MultiplayerSession! (previousSessionId:String!)	14521
+added_member	Mutation	createMultiplayerSessionFromParty		MultiplayerSession! (partyId:String!, preferredRegion:CoherenceRegion!)	14523
+added_member	Mutation	createParty		MultiplayerParty! (displayName:String)	14528
+added_member	Mutation	createPlayInsightsDiscoveryConversation		DiscoveryConversation! (input:[PlayInsightsReferenceInput!]!)	14529
+removed_member	Mutation	createPlayUploadUrl	PlayResultURL! (isComplete:Boolean!, playId:ID!)	-	-
+added_member	Mutation	createRedeemableCodeGrant		RedeemableCodeGrantMutationPayload! (input:RedeemableCodeGrantInput!)	14531
+added_member	Mutation	createReplayComment		AimlabReplayComment! (input:CreateAimlabReplayCommentInput!, replayId:ID!)	14533
+added_member	Mutation	createReplayFeedConfiguration		MutationPayload! (feedData:ReplayFeedInput!)	14534
+added_member	Mutation	createReplayFeedVersion		MutationPayload! (feedId:ID!, feedVersion:Int!)	14535
+added_member	Mutation	createSteamSubscriptionItem		MutationPayload!	14538
+added_member	Mutation	createSteamSubscriptionItemBillingPeriod		MutationPayload! (steamSubscriptionItemId:ID!)	14539
+added_member	Mutation	createTextureDiscoveryConversation		DiscoveryConversation! (input:CreateTextureConversationInput!)	14541
+added_member	Mutation	createVisualTheme		VisualTheme! (name:String!, visualSettings:AimlabVisualUserSettingsInput!)	14542
+added_member	Mutation	deactivatePremiumEventpass		MutationPayload! (id:ID!, userId:String)	14543
+added_member	Mutation	deleteAimlabActivityOverride		Boolean! (id:ID!)	14547
+added_member	Mutation	deleteBackendExperiment		BackendExperimentMutationPayload! (id:ID!)	14549
+added_member	Mutation	deleteMissionAction		MissionActionUpdateOrDeleteResult! (actionIndex:Int!, missionId:ID!)	14552
+added_member	Mutation	deleteMissionGroup		MissionGroupUpdateOrDeleteResult! (id:ID!)	14557
+added_member	Mutation	deleteMissionObjective		MissionObjectiveUpdateOrDeletePayload! (missionId:ID!, objectiveId:ID!)	14558
+added_member	Mutation	deleteRedeemableCodeGrant		RedeemableCodeGrantMutationPayload! (id:ID!)	14560
+added_member	Mutation	deleteReplayComment		AimlabReplayComment! (replayCommentId:ID!)	14561
+added_member	Mutation	deleteReplayFeedConfiguration		MutationPayload! (feedId:ID!)	14562
+added_member	Mutation	deleteReplayFeedVersion		MutationPayload! (feedId:ID!, feedVersion:Int!)	14563
+added_member	Mutation	deleteReplayFromFeedVersion		MutationPayload! (feedEntry:DeleteReplayFeedStaticEntry!)	14564
+added_member	Mutation	deleteSteamSubscriptionItem		MutationPayload! (steamSubscriptionItemId:ID!)	14565
+added_member	Mutation	deleteSteamSubscriptionItemBillingPeriod		MutationPayload! (steamSubscriptionItemId:ID!)	14566
+added_member	Mutation	deleteSteamSubscriptionItemBillingPeriodPrice		MutationPayload! (currency:String!, orderIndex:Int!, steamSubscriptionItemId:ID!)	14567
+added_member	Mutation	deleteSteamSubscriptionItemDescription		MutationPayload! (languageCode:String!, steamSubscriptionItemId:ID!)	14568
+added_member	Mutation	denyPartyInvite		MutationPayload! (partyId:String!)	14571
+added_member	Mutation	disableAutoRenewForXboxSubscription		MutationPayload! (id:ID!, userId:ID)	14575
+added_member	Mutation	disconnectFromMultiplayer		MutationPayload!	14576
+added_member	Mutation	disconnectFromMultiplayerSession		DisconnectFromMultiplayerSessionPayload! (disconnectedUserId:String, requireConsensus:Boolean!, sessionId:String!)	14577
+added_member	Mutation	dispatchMissionClientEvent		MutationPayload! (dispatchType:String!, payload:JSONObject!)	14579
+added_member	Mutation	editDiscoveryQuota		DiscoveryQuota! (input:EditDiscoveryQuotaInput!)	14585
+added_member	Mutation	editReplay		AimlabReplay! (opts:AimlabReplayPublishingOpts!, replayId:ID!)	14589
+added_member	Mutation	embedDiscoveryKnowledgeEntry		DiscoveryKnowledgeEntry! (embeddingModel:String!, id:ID!)	14591
+added_member	Mutation	enqueueThumbnailForGeneration		PlayThumbnailQueueEntry! (playId:String!)	14593
+added_member	Mutation	ensureDiscoveryInferenceOpts		DiscoveryInferenceOpts! (input:EnsureDiscoveryInferenceOptsInput!)	14595
+added_member	Mutation	extendXboxSubscription		MutationPayload! (extensionTimeInDays:Int!, id:ID!, userId:ID!)	14599
+added_member	Mutation	finalizeSteamSubscriptionOrder		SteamSubscriptionItemOrder! (orderId:String!)	14600
+added_member	Mutation	generateRedeemableCodeGrantCodes		GenerateRedeemableCodeGrantCodesPayload! (input:GenerateRedeemableCodeGrantCodesInput!, redeemableCodeGrantId:ID!)	14601
+added_member	Mutation	inviteUserToParty		MultiplayerPartyInvite! (invitedUserId:String!, partyId:String!)	14604
+added_member	Mutation	issueClientNotification		Notification! (input:NotificationInput!)	14610
+added_member	Mutation	joinMatchmaking		MatchmakingState! (input:JoinMatchmakingQueueInput!)	14614
+added_member	Mutation	joinMultiplayerSession		MultiplayerSession! (entryCode:String!)	14615
+added_member	Mutation	joinParty		MultiplayerParty! (entryCode:String!)	14616
+added_member	Mutation	kickPartyMember		MutationPayload! (kickedUserId:String!, partyId:String!)	14618
+added_member	Mutation	leaveMatchmaking		MutationPayload!	14622
+added_member	Mutation	leaveMultiplayerSessionAsParty		MultiplayerSession! (sessionId:String!)	14623
+added_member	Mutation	leaveParty		MutationPayload! (partyId:String!)	14625
+added_member	Mutation	markMultiplayerSessionAsPlaying		MutationPayload! (id:String!)	14629
+added_member	Mutation	markSelfAsReadyInMultiplayerSession		MutationPayload! (isReady:Boolean!, sessionId:String!)	14630
+added_member	Mutation	markSelfAsReadyInParty		MutationPayload! (isReady:Boolean!, partyId:String!)	14635
+added_member	Mutation	placeSteamSubscriptionOrder		SteamSubscriptionItemOrder! (locale:String, steamSubscriptionItemId:String!, steamUserTicket:String!)	14641
+added_member	Mutation	progressStep		MutationPayload! (input:ProgressStepInput!)	14643
+added_member	Mutation	putDiscoveryInterface		DiscoveryInterface! (input:PutDiscoveryInterfaceInput!)	14646
+added_member	Mutation	reassociateSteamSubscriptions		Boolean! (steamUserTicket:String!)	14650
+changed_member	Mutation	recordUniversalSensFinderData	Boolean! (input:UniversalSensFinderDataInput!)	MutationPayload! (input:UniversalSensFinderDataInput!)	14651
+added_member	Mutation	redeemRedeemableCode		RedeemInternalResult! (code:String!)	14652
+added_member	Mutation	redeemRedeemableCodeInternal		RedeemInternalResult! (code:String!, userId:String!)	14653
+added_member	Mutation	reingestPlay		SubmitPlayResultPayload! (playId:String!)	14654
+added_member	Mutation	removeBackendExperimentOverride		BackendExperimentMutationPayload! (experimentId:ID!, type:BackendExperimentOverrideType!, value:String!)	14656
+added_member	Mutation	removeBannedWord		MutationPayload! (word:String!)	14657
+added_member	Mutation	removeChatMessage		RemoveChatMessageResultPayload! (messageId:String!)	14658
+added_member	Mutation	removeEventpassLevel		MutationPayload! (eventpassId:ID!, levelId:ID!)	14660
+added_member	Mutation	removeEventpassReward		MutationPayload! (eventpassId:ID!, levelId:ID!, rewardId:ID!)	14661
+added_member	Mutation	reportReplay		MutationPayload! (replayId:ID!)	14663
+added_member	Mutation	reportReplayComment		MutationPayload! (replayCommentId:ID!)	14664
+added_member	Mutation	resetAcademyUser		MutationPayload! (input:AcademyUserInput!)	14667
+added_member	Mutation	resetMissionStateForUser		[MissionState!]! (missionId:ID!, userId:ID!)	14669
+added_member	Mutation	resolveRedeemableCodeGrant		RedeemableCodeGrantClaimResponse! (codeGrantId:ID!, userId:String)	14671
+added_member	Mutation	reviewDiscoveryMessage		DiscoveryConversationMessageReview! (input:DiscoveryMessageReviewInput!, messageId:ID!)	14672
+added_member	Mutation	runDiscoveryEvaluation		Boolean! (controllerType:String!, evaluationId:ID!, schemaId:ID!)	14675
+added_member	Mutation	scheduleDiscoveryAssistantMessage		DiscoveryConversationMessage! (input:ScheduleDiscoveryAssistantMessageInput!)	14677
+added_member	Mutation	selectMultiplayerSessionEntity		MultiplayerSession! (entity:MultiplayerSelectedEntityInput!, sessionId:String!)	14679
+added_member	Mutation	selectPartyMode		MultiplayerParty! (modeId:String!, partyId:String!)	14682
+added_member	Mutation	sendChatMessage		SubmitChatMessageResultPayload! (channelId:String, message:String!, scope:ChatScope, userIdOverride:String)	14686
+added_member	Mutation	setReplayTags		MutationPayload! (replayId:ID!, tags:[String!]!)	14687
+added_member	Mutation	setSelectedVersionForReplayFeed		MutationPayload! (feedId:ID!, feedVersion:Int!)	14688
+added_member	Mutation	setThumbnailForPlay		PlayThumbnail! (playId:String!)	14689
+added_member	Mutation	submitAimlabPlayAdaptiveDifficulty		Play! (adaptiveDifficulty:PlayAdaptiveDifficultyInput!, playId:String!)	14699
+changed_member	Mutation	submitAimlabPlayResults	SubmitPlayResultPayload! (result:AimlabPlayResult!)	SubmitPlayResultPayload! (replayPublishingOpts:AimlabReplayPublishingOpts, result:AimlabPlayResult!, targetUserId:String)	14701
+added_member	Mutation	submitAthenaMetrics		SubmitAthenaMetricsMutationPayload! (input:SubmitAthenaMetricsInput!)	14710
+added_member	Mutation	submitPlayInsightsData		SubmitPlayInsightsDataMutationPayload! (input:PlayInsightsInput!)	14717
+added_member	Mutation	transferPartyHost		MultiplayerParty! (newHostUserId:String!, partyId:String!)	14724
+added_member	Mutation	unbanUserFromReplays		MutationPayload! (userId:ID!)	14732
+changed_member	Mutation	updateAimlabCosmeticsForCurrentUser	AimlabCosmetics! (input:UpdateCurrentUserAimlabCosmeticsInput!)	AimlabCosmetics! (affectsMissions:Boolean!, input:UpdateCurrentUserAimlabCosmeticsInput!)	14735
+added_member	Mutation	updateAimlabProfileCosmetics		AimlabProfileCosmetics! (affectsMissions:Boolean!, input:UpdateAimlabProfileCosmeticsInput!, userId:ID)	14741
+added_member	Mutation	updateDiscoveryConversationSchema		DiscoveryConversationSchema! (input:UpdateDiscoveryConversationSchemaInput!)	14754
+added_member	Mutation	updateDiscoveryEvaluation		DiscoveryEvaluation! (input:UpdateDiscoveryEvaluationInput!)	14758
+added_member	Mutation	updateDiscoveryEvaluationSourceMessages		DiscoveryEvaluation! (action:String!, evaluationId:ID!, messageIds:[ID!]!)	14760
+added_member	Mutation	updateDiscoveryKnowledgeEntry		DiscoveryKnowledgeEntry! (embeddingModel:String, id:ID!, input:DiscoveryKnowledgeEntryInput!)	14771
+added_member	Mutation	updateEventpass		MutationPayload! (eventpass:EventpassUpdateInput!, eventpassId:ID!)	14772
+added_member	Mutation	updateMission		MutationPayload! (data:MissionUpdateInput!, id:ID!)	14773
+added_member	Mutation	updateMissionAction		MissionActionUpdateOrDeleteResult! (actionIndex:Int!, missionId:ID!, newAction:MissionActionUpdateInput!)	14774
+added_member	Mutation	updateMissionGroup		MissionGroupUpdateOrDeleteResult! (id:ID!, input:MissionGroupUpdateInput!)	14780
+added_member	Mutation	updateMissionObjective		MissionObjectiveUpdateOrDeletePayload! (missionId:ID!, objective:MissionObjectiveUpdateInput!, objectiveId:ID!)	14781
+added_member	Mutation	updateRedeemableCodeGrant		RedeemableCodeGrantMutationPayload! (id:ID!, input:RedeemableCodeGrantUpdateInput!)	14783
+added_member	Mutation	updateSteamSubscriptionItem		MutationPayload! (steamSubscriptionItemId:ID!)	14785
+added_member	Mutation	updateSteamSubscriptionItemBillingPeriod		MutationPayload! (steamSubscriptionItemId:ID!)	14786
+added_member	Mutation	upsertAthenaMetricDefinition		UpsertAthenaMetricMutationPayload! (input:UpsertAthenaMetricInput!)	14788
+added_member	Mutation	upsertBackendExperiment		BackendExperimentMutationPayload! (input:UpsertBackendExperimentInput!)	14789
+added_member	Mutation	upsertReplayFeedVersionEntries		MutationPayload! (feedEntries:[ReplayFeedStaticEntryInput!]!, feedId:ID!, feedVersion:Int!)	14790
+added_member	Mutation	upsertSteamSubscriptionItemBillingPeriodPrice		MutationPayload! (currency:String!, orderIndex:Int!, price:Int!, steamReportingId:Int, steamSubscriptionItemId:ID!)	14791
+added_member	Mutation	upsertSteamSubscriptionItemDescription		MutationPayload! (description:String!, languageCode:String!, steamSubscriptionItemId:ID!)	14792
+added_member	Mutation	upsertUserProfileImages		Boolean! (affectsMissions:Boolean!, bannerId:String, imageId:String)	14793
+added_member	Mutation	validatePlayfabPurchase		Boolean! (orderId:String!)	14799
+added_member	Mutation	viewStep		MutationPayload! (id:ID!)	14801
+added_member	Mutation	viewer		User	14802
+added_member	MutationPayload	message		String	11073
+added_type	NotificationInput			InputObjectTypeDefinitionNode	11087
+added_member	ObjectiveProgress	checked		[String!]	11094
+added_type	OracleEngine			EnumTypeDefinitionNode	11100
+added_type	PSProfile			ObjectTypeDefinitionNode	11831
+added_type	PerformanceMetrics			ObjectTypeDefinitionNode	11163
+added_type	Plan			ObjectTypeDefinitionNode	11176
+added_type	PlanContent			ObjectTypeDefinitionNode	11186
+added_type	PlanMetadata			ObjectTypeDefinitionNode	11194
+added_type	PlanMetadataFilterInput			InputObjectTypeDefinitionNode	11204
+added_type	PlanOverview			ObjectTypeDefinitionNode	11212
+added_type	PlanOwnershipType			EnumTypeDefinitionNode	11218
+added_type	PlanProgressStateFilter			EnumTypeDefinitionNode	11226
+added_type	PlanType			EnumTypeDefinitionNode	11233
+added_type	PlanUserOwnership			ObjectTypeDefinitionNode	11238
+added_type	PlanUserProgress			ObjectTypeDefinitionNode	11243
+added_member	Play	adaptiveDifficulty		PlayAdaptiveDifficulty	11253
+added_member	Play	appId		App!	11254
+added_member	Play	athenaCoachingConversation		DiscoveryConversation	11255
+added_member	Play	athenaMetricPlayInsights		[AthenaMetricPlayInsight!]	11256
+added_member	Play	athenaMetrics		[AthenaMetricSample!] (metricId:String)	11257
+added_member	Play	playInsights		PlayInsights	11267
+added_member	Play	replay		AimlabReplay!	11268
+changed_member	Play	taskSlug	ID	ID!	11274
+added_type	PlayAdaptiveDifficulty			ObjectTypeDefinitionNode	11283
+added_type	PlayAdaptiveDifficultyInput			InputObjectTypeDefinitionNode	11291
+added_type	PlayAdaptiveDifficultyPoint			ObjectTypeDefinitionNode	11296
+added_type	PlayAdaptiveDifficultyPointInput			InputObjectTypeDefinitionNode	11305
+added_member	PlayFilterInput	isMultiplayer		Boolean	11529
+changed_member	PlayFilterInput	mode	Float	Int	11533
+added_member	PlayFilterInput	taskIds		[String!]	11535
+added_type	PlayInsights			ObjectTypeDefinitionNode	11538
+added_type	PlayInsightsEvent			ObjectTypeDefinitionNode	11546
+added_type	PlayInsightsEventInput			InputObjectTypeDefinitionNode	11553
+added_type	PlayInsightsEventsMetadata			ObjectTypeDefinitionNode	11560
+added_type	PlayInsightsEventsMetadataInput			InputObjectTypeDefinitionNode	11567
+added_type	PlayInsightsInput			InputObjectTypeDefinitionNode	11574
+added_type	PlayInsightsMetadata			ObjectTypeDefinitionNode	11582
+added_type	PlayInsightsMetadataInput			InputObjectTypeDefinitionNode	11587
+added_type	PlayInsightsMetric			ObjectTypeDefinitionNode	11592
+added_type	PlayInsightsMetricInput			InputObjectTypeDefinitionNode	11597
+added_type	PlayInsightsMetricMetadata			ObjectTypeDefinitionNode	11602
+added_type	PlayInsightsMetricsMetadata			ObjectTypeDefinitionNode	11609
+added_type	PlayInsightsMetricsMetadataInput			InputObjectTypeDefinitionNode	11616
+added_type	PlayInsightsReferenceInput			InputObjectTypeDefinitionNode	11623
+added_member	PlayManifest	academyStepId		String	11629
+added_member	PlayManifest	missionsResolvedAt		DateTime	11647
+added_member	PlayManifest	multiplayerSession		MultiplayerSession	11650
+added_member	PlayManifest	multiplayerSessionId		String	11655
+added_member	PlayManifest	playDuration		Float	11659
+removed_type	PlayResultURL	-	ObjectTypeDefinitionNode	-	-
+added_type	PlayThumbnail			ObjectTypeDefinitionNode	11773
+added_type	PlayThumbnailQueueEntry			ObjectTypeDefinitionNode	11780
+added_type	PlayThumbnailUploadUrl			ObjectTypeDefinitionNode	11785
+added_member	PlaystationPlayResult	academyStepId		String	11709
+added_member	PlaystationPlayResult	benchmarkSeasonId		String	11716
+added_member	PlaystationPlayResult	multiplayerSessionId		String	11730
+added_member	PlaystationPlayResult	playDuration		Float	11734
+added_type	PricingInfo			ObjectTypeDefinitionNode	11796
+added_type	PricingType			EnumTypeDefinitionNode	11801
+added_type	ProgressStepInput			InputObjectTypeDefinitionNode	11827
+added_type	PutDiscoveryInterfaceInput			InputObjectTypeDefinitionNode	11835
+added_member	Query	aimlabPlaylistsByWorkshop		[AimlabPlaylist!] (workshopId:String!)	14817
+added_member	Query	aimlabTasksByWorkshop		[AimlabTask!] (workshopId:String!)	14837
+added_member	Query	assetUploadUrl		String!	14841
+added_member	Query	athenaMetricDefinition		AthenaMetric (metricId:String!)	14843
+added_member	Query	athenaMetricDefinitions		[AthenaMetric!]!	14846
+added_member	Query	availableMissionActionTypeIds		[String!]!	14849
+added_member	Query	availableMissionConditionTypeIds		[String!]!	14850
+added_member	Query	availableMissionEventIds		[String!]!	14851
+added_member	Query	availableMissionIterationContextResolverIds		[String!]!	14852
+added_member	Query	availableMissionParameterTypes		[String!]!	14853
+added_member	Query	backendExperiment		BackendExperiment (id:ID!)	14856
+added_member	Query	backendExperiments		[BackendExperiment!]!	14857
+added_member	Query	benchmarkConfiguration		BenchmarkConfiguration! (id:String!)	14859
+added_member	Query	benchmarkPerformance		BenchmarkUserPerformance! (input:BenchmarkPerformanceInput!)	14861
+added_member	Query	benchmarkRankDistribution		BenchmarkRankDistribution! (seasonId:ID!)	14865
+added_member	Query	benchmarkSeasons		[BenchmarkConfiguration!]!	14867
+added_member	Query	deleteSeason		AimlabSeason! (id:String!)	14873
+added_member	Query	discoveryAuthoringVocabulary		DiscoveryAuthoringVocabulary!	14875
+added_member	Query	discoveryConversationSchema		DiscoveryConversationSchema (id:ID!, version:Int)	14880
+added_member	Query	discoveryConversationSchemaVersions		[DiscoveryConversationSchema!]! (id:ID!)	14883
+added_member	Query	discoveryConversationSchemas		[DiscoveryConversationSchema!]!	14888
+added_member	Query	discoveryEvaluation		DiscoveryEvaluation (id:ID!)	14890
+added_member	Query	discoveryEvaluationRun		DiscoveryEvaluationRun (evaluationId:ID!, runId:ID!)	14891
+added_member	Query	discoveryEvaluationRuns		[DiscoveryEvaluationRun!]! (evaluationId:ID!)	14892
+added_member	Query	discoveryEvaluations		[DiscoveryEvaluation!]!	14894
+added_member	Query	discoveryInferenceOpts		[DiscoveryInferenceOpts!]!	14897
+added_member	Query	discoveryInterface		DiscoveryInterface (id:ID!, version:Int)	14900
+added_member	Query	discoveryInterfaces		[DiscoveryInterface!]!	14903
+added_member	Query	discoveryKnowledgeBase		DiscoveryKnowledgeBase (id:ID!)	14906
+added_member	Query	discoveryKnowledgeBases		[DiscoveryKnowledgeBase!]!	14909
+added_member	Query	discoveryKnowledgeEntry		DiscoveryKnowledgeEntry (id:ID!)	14913
+added_member	Query	discoveryMessageReviews		[DiscoveryConversationMessageReview!]! (schemaId:ID!, schemaVersion:Int!)	14915
+added_member	Query	discoveryQuota		DiscoveryQuota (id:ID!, userId:ID)	14918
+added_member	Query	discoveryQuotas		[DiscoveryQuota!]!	14923
+added_member	Query	discoverySchemaBinding		DiscoverySchemaBinding (controllerType:String!)	14926
+added_member	Query	discoverySchemaBindings		[DiscoverySchemaBinding!]!	14929
+added_member	Query	eventpass		Eventpass (id:ID!)	14931
+added_member	Query	eventpasses		[Eventpass!]!	14932
+added_member	Query	fetchConversation		DiscoveryConversation! (conversationId:ID!, tags:[String!])	14933
+added_member	Query	fetchConversationMessage		DiscoveryConversationMessage! (messageId:ID!)	14941
+added_member	Query	getBannedWords		[String!]!	14943
+added_member	Query	getChat		Chat! (channelId:String, scope:ChatScope)	14944
+added_member	Query	getNextThumbnailToGenerate		PlayThumbnailQueueEntry	14946
+added_member	Query	getThumbnailUploadSignedUrlForPlay		PlayThumbnailUploadUrl! (playId:String!)	14949
+added_member	Query	hasActivatedTrial		Boolean!	14952
+added_member	Query	latestUniversalSensFinderDataByTask		UniversalSensFinderDataConnection! (input:LatestUniversalSensFinderDataByTaskQueryInput!)	14953
+added_member	Query	mission		Mission (id:ID!)	14968
+added_member	Query	missionGroup		MissionGroup (id:ID!)	14969
+added_member	Query	missionGroups		[MissionGroup!]!	14970
+added_member	Query	missions		[Mission!]! (activeMissions:Boolean, event:String, missionGroup:String, missionIds:[String!])	14971
+added_member	Query	multiplayerMode		MultiplayerModeConfig! (modeId:String!)	14985
+added_member	Query	multiplayerModes		[MultiplayerModeConfig!]! (appId:App!)	14988
+added_member	Query	multiplayerSession		MultiplayerSession! (id:String!)	14993
+added_member	Query	plan		Plan (id:ID!)	14995
+added_member	Query	plans		[Plan!]! (includeStartedPlans:Boolean, input:PlanMetadataFilterInput!)	14996
+added_member	Query	publishedReplay		AimlabReplay (replayId:ID!)	15001
+added_member	Query	redeemableCodeGrant		RedeemableCodeGrant (id:ID!)	15002
+added_member	Query	redeemableCodeGrantCodes		RedeemableCodeGrantCodeConnection! (after:String, before:String, filter:RedeemableCodeGrantCodesFilterInput, first:Int, last:Int, redeemableCodeGrantId:ID!)	15003
+added_member	Query	redeemableCodeGrants		[RedeemableCodeGrant!]!	15020
+added_member	Query	redeemableCodeInfo		RedeemableCodeInfo (code:String!)	15021
+added_member	Query	replayFeed		AimlabReplayFeed (feedId:ID!)	15023
+added_member	Query	replayFeedConfigurations		[ReplayFeedConfiguration!]!	15024
+changed_member	Query	resolveAIMLConversationResponse	AIMLConversationMessage! (contextPrompt:String, conversationId:String!, provenanceAmount:Int, userPrompt:String)	AIMLConversationMessage! (contextPrompt:String, conversationId:String!, game:String, provenanceAmount:Int, userPrompt:String)	15025
+added_member	Query	searchDiscoveryKnowledgeBase		[DiscoveryKnowledgeSearchResult!]! (embeddingModel:String!, knowledgeBaseId:ID!, max:Int, query:String!)	15027
+added_member	Query	steamSubscriptionItem		SteamSubscriptionItem (id:ID!)	15032
+added_member	Query	steamSubscriptionItemConfiguration		AdminSteamSubscriptionItem (steamSubscriptionItemId:ID!)	15033
+added_member	Query	steamSubscriptionItemConfigurations		[AdminSteamSubscriptionItem!]!	15034
+added_member	Query	step		Step (id:ID!)	15035
+changed_member	Query	universalSensFinderData	UniversalSensFinder!	UniversalSensFinderDataConnection! (input:UniversalSensFinderDataQueryInput!)	15040
+added_member	Query	visualTheme		VisualTheme (shareCode:String!)	15045
+added_member	Query	yearReview		YearReview! (userId:String)	15046
+added_type	RecommendedTask			ObjectTypeDefinitionNode	11842
+added_type	RedeemInternalResult			ObjectTypeDefinitionNode	11984
+added_type	RedeemableCodeClaimStatus			EnumTypeDefinitionNode	11851
+added_type	RedeemableCodeGrant			ObjectTypeDefinitionNode	11856
+added_type	RedeemableCodeGrantClaimResponse			ObjectTypeDefinitionNode	11865
+added_type	RedeemableCodeGrantClaimStatus			EnumTypeDefinitionNode	11870
+added_type	RedeemableCodeGrantCode			ObjectTypeDefinitionNode	11878
+added_type	RedeemableCodeGrantCodeConnection			ObjectTypeDefinitionNode	11889
+added_type	RedeemableCodeGrantCodeCounts			ObjectTypeDefinitionNode	11900
+added_type	RedeemableCodeGrantCodeEdge			ObjectTypeDefinitionNode	11908
+added_type	RedeemableCodeGrantCodesFilterInput			InputObjectTypeDefinitionNode	11916
+added_type	RedeemableCodeGrantInput			InputObjectTypeDefinitionNode	11921
+added_type	RedeemableCodeGrantMutationPayload			ObjectTypeDefinitionNode	11945
+added_type	RedeemableCodeGrantRedemptionType			EnumTypeDefinitionNode	11951
+added_type	RedeemableCodeGrantUpdateInput			InputObjectTypeDefinitionNode	11956
+added_type	RedeemableCodeInfo			ObjectTypeDefinitionNode	11972
+added_type	RedeemableCodeRedemptionStatus			EnumTypeDefinitionNode	11979
+added_type	RedemptionInfo			ObjectTypeDefinitionNode	11993
+added_type	RemoveChatMessageResultPayload			ObjectTypeDefinitionNode	12005
+added_type	ReplayFeedConfiguration			ObjectTypeDefinitionNode	12012
+added_type	ReplayFeedInput			InputObjectTypeDefinitionNode	12020
+added_type	ReplayFeedStaticEntryInput			InputObjectTypeDefinitionNode	12025
+added_type	ReplayFeedType			EnumTypeDefinitionNode	12032
+added_type	ReplayFeedVersion			ObjectTypeDefinitionNode	12037
+added_type	ScheduleDiscoveryAssistantMessageInput			InputObjectTypeDefinitionNode	12062
+added_member	Scopes	AdminContent		enum value	12083
+added_member	Scopes	AdminDiscoveryReview		enum value	12088
+added_member	Scopes	AdminMissions		enum value	12091
+added_member	Scopes	Introspect		enum value	12108
+added_type	ScoringMetrics			ObjectTypeDefinitionNode	12139
+added_member	SeasonInput	visible		Boolean	12167
+added_type	SteamAppUser			ObjectTypeDefinitionNode	12202
+added_type	SteamSubscriptionAgreement			ObjectTypeDefinitionNode	12212
+added_type	SteamSubscriptionAgreementStatus			EnumTypeDefinitionNode	12224
+added_type	SteamSubscriptionItem			ObjectTypeDefinitionNode	12235
+added_type	SteamSubscriptionItemDescription			ObjectTypeDefinitionNode	12245
+added_type	SteamSubscriptionItemOrder			ObjectTypeDefinitionNode	12250
+added_type	SteamSubscriptionItemOrderStatus			EnumTypeDefinitionNode	12263
+added_type	SteamSubscriptionItemPeriod			EnumTypeDefinitionNode	12272
+added_type	SteamSubscriptionItemPrice			ObjectTypeDefinitionNode	12279
+added_type	SteamSubscriptionItemRawTier			EnumTypeDefinitionNode	12284
+added_type	SteamTransactionInfo			ObjectTypeDefinitionNode	12289
+added_type	Step			ObjectTypeDefinitionNode	12303
+added_type	StepContent			ObjectTypeDefinitionNode	12312
+added_type	StepMetadata			ObjectTypeDefinitionNode	12321
+added_type	StepType			EnumTypeDefinitionNode	12327
+added_type	StepUserProgress			ObjectTypeDefinitionNode	12334
+added_type	SubmitAthenaMetricsInput			InputObjectTypeDefinitionNode	12354
+added_type	SubmitAthenaMetricsMutationPayload			ObjectTypeDefinitionNode	12362
+added_type	SubmitChatMessageResultPayload			ObjectTypeDefinitionNode	12370
+added_member	SubmitPlayAnalyticsPayload	message		String	12379
+added_type	SubmitPlayInsightsDataMutationPayload			ObjectTypeDefinitionNode	12384
+added_member	SubmitPlayResultPayload	message		String	12394
+added_type	SubscriptionInfo			ObjectTypeDefinitionNode	12405
+added_type	TaskAdaptiveDifficulty			ObjectTypeDefinitionNode	12510
+added_member	TaskAssetSource	discovery		enum value	12545
+added_member	TaskAssetSource	s3		enum value	12546
+added_type	TaskStepMetadata			ObjectTypeDefinitionNode	12550
+added_type	TaskStyle			EnumTypeDefinitionNode	12555
+removed_type	UniversalSensFinder	-	ObjectTypeDefinitionNode	-	-
+added_member	UniversalSensFinderData	dpi		Int	12615
+added_member	UniversalSensFinderData	inputDevice		InputDevice!	12617
+added_member	UniversalSensFinderData	stats		UniversalSensFinderDataStats!	12619
+added_member	UniversalSensFinderDataFilterInput	afterDate		DateTime	12645
+added_member	UniversalSensFinderDataFilterInput	beforeDate		DateTime	12646
+changed_member	UniversalSensFinderDataFilterInput	taskMode	Int!	Int	12647
+changed_member	UniversalSensFinderDataFilterInput	taskName	String!	String	12648
+changed_member	UniversalSensFinderDataInput	date	DateTime!	DateTime	12654
+added_member	UniversalSensFinderDataInput	dpi		Int	12655
+added_member	UniversalSensFinderDataInput	inputDevice		InputDevice	12656
+added_type	UniversalSensFinderDataStats			ObjectTypeDefinitionNode	12667
+added_type	UpdateAimlabProfileCosmeticsInput			InputObjectTypeDefinitionNode	12678
+added_type	UpdateDiscoveryConversationSchemaInput			InputObjectTypeDefinitionNode	12705
+added_type	UpdateDiscoveryEvaluationInput			InputObjectTypeDefinitionNode	12721
+added_type	UpsertAthenaMetricInput			InputObjectTypeDefinitionNode	12730
+added_type	UpsertAthenaMetricMutationPayload			ObjectTypeDefinitionNode	12739
+added_type	UpsertBackendExperimentInput			InputObjectTypeDefinitionNode	12746
+added_member	User	chatBans		ChatBans!	12761
+added_member	User	currentParty		MultiplayerParty	12766
+added_member	User	discoveryConversations		[DiscoveryConversation!]! (limit:Float!, skip:Float!)	12768
+added_member	User	discoveryTextureQuota		DiscoveryConversationQuotaUsage!	12769
+added_member	User	emailIsInternal		Boolean!	12772
+added_member	User	matchmaking		Matchmaking!	12787
+added_member	User	partyInvites		[MultiplayerPartyInvite!]!	12789
+added_member	User	steamAppUser		SteamAppUser	12809
+added_member	User	steamSubscriptionAgreements		[SteamSubscriptionAgreement!]!	12810
+added_member	UserIdentity	rawMetadata		JSONObject!	12838
+added_type	UserLearningStats			ObjectTypeDefinitionNode	12864
+added_type	UserPlansInput			InputObjectTypeDefinitionNode	12885
+added_type	UserSettingsVector			ObjectTypeDefinitionNode	12903
+added_type	VisualTheme			ObjectTypeDefinitionNode	14325
+added_type	VisualUserSettings			ObjectTypeDefinitionNode	14334
+added_member	XboxPlayResult	academyStepId		String	14349
+added_member	XboxPlayResult	benchmarkSeasonId		String	14356
+added_member	XboxPlayResult	multiplayerSessionId		String	14370
+added_member	XboxPlayResult	playDuration		Float	14374
+added_type	XboxProfile			ObjectTypeDefinitionNode	14393
+added_type	YearReview			ObjectTypeDefinitionNode	14397
+added_type	YearUserOverallReview			ObjectTypeDefinitionNode	14402
+added_type	YearUserTaskReview			ObjectTypeDefinitionNode	14410
+removed_type	specifiedBy	-	DirectiveDefinitionNode	-	-

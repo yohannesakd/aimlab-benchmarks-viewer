@@ -1,5 +1,5 @@
 <template>
-  <div class="lds-ring">
+  <div class="lds-ring" role="status" aria-label="Loading">
     <div></div>
     <div></div>
     <div></div>
@@ -42,5 +42,8 @@
   100% {
     transform: rotate(360deg);
   }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lds-ring div { animation: none; }
 }
 </style>

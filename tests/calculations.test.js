@@ -3,13 +3,15 @@ import assert from "node:assert/strict";
 import {
   calculateRevosectBenchmarks,
   caclulateVT,
-} from "../src/helpers/functions.js";
-import { easyBench, hardBench, mediumBench } from "../src/helpers/revosectData.js";
+  cleanUpBenchmarkTasks,
+  cleanUpUserTasks,
+} from "../server/benchmark-calculations.js";
+import { easyBench, hardBench, mediumBench } from "../server/revosectData.js";
 import {
   advancedBench,
   intermediateBench,
   noviceBench,
-} from "../src/helpers/voltaicData.js";
+} from "../server/voltaicData.js";
 
 const playsAt = (benchmarks, scoreIndex) =>
   benchmarks.map((bench) => ({
@@ -17,6 +19,48 @@ const playsAt = (benchmarks, scoreIndex) =>
     maxScore: bench.scores[scoreIndex],
     count: 1,
   }));
+
+const playGroup = (bench, mode, weapon, score, count = 1) => ({
+  group_by: {
+    task_id: bench.id,
+    task_name: bench.name,
+    task_mode_mod: mode,
+    weapon_id: weapon,
+  },
+  aggregate: {
+    count,
+    avg: { score, accuracy: 50 },
+    max: { score, accuracy: 50 },
+  },
+});
+
+test("benchmark math ignores alternate modes and weapons without hiding task history", () => {
+  const bench = noviceBench[0];
+  const rows = [
+    playGroup(bench, 0, bench.weapon, bench.scores[1], 2),
+    playGroup(bench, 201, bench.weapon, bench.scores[4] * 10),
+    playGroup(bench, 0, "OtherWeapon", bench.scores[4] * 10),
+  ];
+  const overview = cleanUpUserTasks(rows);
+  assert.equal(overview.length, 1);
+  assert.equal(overview[0].count, 4);
+  assert.equal(overview[0].maxScore, bench.scores[4] * 10);
+  assert.equal(overview[0].avgScore, (2 * bench.scores[1] + 2 * bench.scores[4] * 10) / 4);
+
+  const benchmarkTasks = cleanUpBenchmarkTasks(rows);
+  const result = caclulateVT(benchmarkTasks, noviceBench.map((item) => ({ ...item })), "novice");
+  assert.equal(result.benchmarks[0].maxScore, bench.scores[1]);
+  assert.equal(result.benchmarks[0].count, 2);
+  assert.equal(result.benchmarks[0].energy, 100);
+
+  const easy = easyBench[0];
+  const raTasks = cleanUpBenchmarkTasks([
+    playGroup(easy, 0, easy.weapon, easy.scores[1]),
+    playGroup(easy, 201, easy.weapon, easy.scores[3] * 10),
+  ]);
+  const raResult = calculateRevosectBenchmarks({ tasks: raTasks }, "easy");
+  assert.equal(raResult.benchmarks[0].maxScore, easy.scores[1]);
+});
 
 test("Revosect awards ranks at exact overall thresholds", () => {
   const easy = calculateRevosectBenchmarks(

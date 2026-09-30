@@ -1,152 +1,43 @@
 <template>
-  <section v-if="isLoading" class="grid items-center py-4">
-    <loading-spinner class="mx-auto"></loading-spinner>
-  </section>
-  <section v-else>
-    <div class="grid grid-cols-4 gap-3 p-3 relative">
-      <input
-        type="text"
-        name=""
-        id=""
-        class="
-          w-72
-          px-4
-          py-1.5
-          bg-slate-600
-          rounded-t-md
-          absolute
-          top-0
-          -right-[1px]
-          -translate-y-full
-          z-10
-          outline-none
-          border-2 border-slate-600
-          placeholder-slate-200
-        "
-        placeholder="Search..."
-        v-model.trim="searchQuery"
-        @change="handleQuery"
-      />
-      <router-link
-        v-for="(task, index) in paginatedTaskList.data"
-        :key="index"
-        class="
-          bg-slate-800
-          border border-slate-800
-          min-h-[128px]
-          px-4
-          py-2
-          flex flex-col
-          justify-center
-          rounded-lg
-          shadow-md
-          font-semibold
-          tracking-wide
-          transition
-          hover:scale-[101%] hover:shadow-xl hover:border hover:border-slate-500
-        "
-        :to="'/tasks/' + task.id"
-      >
-        <h3 class="text-lg uppercase text-slate-100">
-          {{ task.name }}
-        </h3>
-        <p>
-          <span class="text-sm text-blue-100">High Score :</span>
-          {{ task.maxScore }}
-        </p>
-        <p>
-          <span class="text-sm text-blue-100">Plays : </span>{{ task.count }}
-        </p>
-      </router-link>
+  <section v-if="isLoading" class="status-panel"><loading-spinner></loading-spinner></section>
+  <section v-else class="profile-tasks">
+    <div class="panel-header profile-tasks-header">
+      <div><h2 class="section-title">Played tasks</h2></div>
+      <label class="task-filter"><span class="sr-only">Search played tasks</span><input class="text-field" type="search" placeholder="Search played tasks" v-model.trim="searchQuery" /></label>
     </div>
-    <!-- Paginator -->
-    <div class="max-w-max mx-auto flex gap-1 items-center mb-4">
-      <button
-        type="button"
-        class="px-3 py-2.5 h-full inline-block bg-slate-700"
-        @click="currentPage--"
-        :class="
-          currentPage > 0 ? '' : 'disabled text-slate-500 pointer-events-none'
-        "
-      >
-        <chevron-icon
-          direction="left"
-          class="h-5 w-5 text-center"
-        ></chevron-icon>
-      </button>
-
-      <!-- Center Buttons -->
-      <div class="flex gap-1">
-        <p
-          class="py-2 px-4 bg-slate-700 hover:cursor-pointer"
-          v-for="page in pageNumbers"
-          :key="page"
-          :class="{
-            'bg-slate-600 pointer-events-none': this.currentPage == page - 1,
-            ' hover:bg-slate-600': !!parseInt(page),
-          }"
-          @click="handlePageSelect($event)"
-        >
-          {{ page }}
-        </p>
+    <div v-if="paginatedTaskList.data.length" class="task-grid profile-task-grid">
+      <div v-for="task in paginatedTaskList.data" :key="task.id" class="task-card player-task-card">
+        <button type="button" class="player-task-run" :aria-label="`Open ${task.name} run: ${task.maxScore} points`" @click="showRun(task)"></button>
+        <h3><router-link class="player-task-name" :to="'/tasks/' + encodeURIComponent(task.id) + '/leaderboard'">{{ task.name }}</router-link></h3>
+        <div class="task-card-meta"><span>Best score: {{ task.maxScore }}</span><span>{{ task.count }} plays</span></div>
       </div>
-      <!-- Center Buttons -->
-
-      <button
-        type="button"
-        class="
-          px-3
-          py-2.5
-          inline-block
-          bg-slate-700
-          transition
-          hover:bg-slate-600
-        "
-        @click="currentPage++"
-        :class="
-          currentPage < paginatedTaskList.pageCount
-            ? ''
-            : 'disabled text-slate-500 pointer-events-none'
-        "
-      >
-        <chevron-icon class="h-5 w-5" direction="right"></chevron-icon>
-      </button>
-      <input
-        type="text"
-        v-model.number="goToPageInput"
-        @keydown.enter="goToPage"
-        @blur="goToPage"
-        class="
-          bg-slate-600
-          text-center
-          w-10
-          py-2
-          outline-none
-          ml-2
-          transition
-          focus:ring-2
-          ring-inset ring-slate-300
-        "
-      />
-      <button
-        class="
-          text-center
-          bg-slate-600
-          w-10
-          py-2
-          outline-none
-          transition
-          hover:bg-slate-500
-        "
-        @click="goToPage"
-      >
-        Go
-      </button>
+    </div>
+    <p v-else class="status-panel">No played tasks match this search.</p>
+    <div v-if="paginatedTaskList.data.length" class="pagination">
+      <span>{{ currentPlayerTasks.length.toLocaleString() }} played tasks</span>
+      <div class="pagination-controls">
+        <button type="button" class="page-button" :disabled="currentPage <= 0" aria-label="Previous page" @click="currentPage--"><chevron-icon direction="left" class="h-4 w-4"></chevron-icon></button>
+        <button v-for="(page, index) in pageNumbers" :key="index" type="button" class="page-button page-number" :class="{ active: page === currentPage + 1 }" :disabled="page === '...'" @click="handlePageSelect($event)">{{ page }}</button>
+        <button type="button" class="page-button" :disabled="currentPage >= paginatedTaskList.pageCount" aria-label="Next page" @click="currentPage++"><chevron-icon direction="right" class="h-4 w-4"></chevron-icon></button>
+        <span class="page-status">Page {{ currentPage + 1 }} / {{ paginatedTaskList.pageCount + 1 }}</span>
+        <input class="page-input" type="number" min="1" :max="paginatedTaskList.pageCount + 1" aria-label="Go to page" v-model.number="goToPageInput" @keydown.enter="goToPage" />
+        <button type="button" class="page-button" @click="goToPage">Go</button>
+      </div>
     </div>
   </section>
 </template>
+<style scoped>
+.profile-tasks-header { flex-wrap: wrap; }
+.task-filter { width: min(100%, 290px); }
+.profile-task-grid { padding: 18px; }
+.player-task-card { position: relative; }
+.player-task-run { position: absolute; inset: 0; width: 100%; }
+.player-task-name { position: relative; }
+.player-task-name:hover { color: var(--accent); }
+</style>
 
 <script>
+import { openRunDetails } from '../helpers/runDetails.js';
 export default {
   props: ["isLoading"],
   data() {
@@ -157,6 +48,7 @@ export default {
     };
   },
   methods: {
+    showRun(task) { openRunDetails({ username: this.$store.getters.currentPlayerInfo.username, taskId: task.id, taskName: task.name, weapon: task.weapon, mode: task.mode, score: task.maxScore }); },
     handlePageSelect(event) {
       let value = parseInt(event.target.textContent);
       if (value) {
@@ -180,7 +72,6 @@ export default {
     currentPlayerTasks() {
       let taskList = [...this.$store.getters.currentPlayerTasks];
       if (this.searchQuery) {
-        this.currentPage = 0;
         return taskList.filter((task) =>
           task.name.toLowerCase().includes(this.searchQuery.toLowerCase())
         );
@@ -219,6 +110,10 @@ export default {
         pages.push(this.paginatedTaskList.pageCount + 1);
       return pages;
     },
+  },
+  watch: {
+    searchQuery() { this.currentPage = 0; },
+    '$store.getters.currentPlayerTasks'() { this.currentPage = 0; },
   },
 };
 </script>

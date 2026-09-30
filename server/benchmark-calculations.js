@@ -1,9 +1,12 @@
 "use strict";
 import {
+    advancedBench,
     advancedRanks,
     advancedEnergy,
+    intermediateBench,
     intermediateEnergy,
     intermediateRanks,
+    noviceBench,
     noviceEnergy,
     noviceRanks,
 } from "./voltaicData.js";
@@ -25,85 +28,73 @@ import {
     mediumBench,
     easyBench,
 } from "./revosectData.js";
-import {
-    APIFetch,
-    GET_TASK_LEADERBOARD,
-    GET_TASK_BY_ID,
-} from "./queries.js";
-import _ from "lodash";
+function groupBy(items, key) {
+    const groups = {};
+    for (const item of items) (groups[item[key]] ||= []).push(item);
+    return groups;
+}
 
 
-export async function findWorkshopId(taskId) {
-    const task = await APIFetch(GET_TASK_BY_ID, { slug: taskId });
-    if (!task.aimlab?.task?.workshop_id) throw new Error("Task has no workshop ID");
-    return task.aimlab.task.workshop_id;
-}
-export function taskDeepLink(workshopId) {
-    return `https://go.aimlab.gg/v1/redirects?link=aimlab://workshop?id=${workshopId}&source=EEDCC708991834C0&link=steam://rungameid/714010`;
-}
-export function replayDeepLink(playId) {
-    return `https://go.aimlab.gg/v1/redirects?link=aimlab%3a%2f%2fcompare%3fid%3d${playId}%26source%3d84966503A24BD515&link=steam%3a%2f%2frungameid%2f714010`;
-}
-export async function findReplay(playerName, taskId, weapon) {
-    let limit = 100;
-    let offset = 0;
-    let playerFound = false;
-    while (!playerFound) {
-        let ldb = await APIFetch(GET_TASK_LEADERBOARD, {
-            leaderboardInput: {
-                clientId: "aimlab",
-                limit: limit,
-                offset: offset,
-                taskId: taskId,
-                taskMode: 0,
-                weaponId: weapon,
-            },
-        });
-
-        if (ldb.aimlab?.leaderboard) {
-            let located = ldb.aimlab.leaderboard.data.filter(
-                (entry) => entry.username == playerName
-            );
-            if (_.isEmpty(located)) {
-                offset += limit;
-                if (offset >= ldb.aimlab.leaderboard.metadata.totalRows) {
-                    return;
-                }
-                continue;
-            } else {
-                playerFound = true;
-                return replayDeepLink(located[0].play_id);
-            }
-        } else {
-            throw new Error("Missing Aimlab leaderboard");
-        }
-    }
-}
+const benchmarkTaskWeapons = new Set(
+    [
+        ...advancedBench,
+        ...intermediateBench,
+        ...noviceBench,
+        ...hardBench,
+        ...mediumBench,
+        ...easyBench,
+    ].map((bench) => `${bench.id}\0${bench.weapon}`)
+);
 
 export function cleanUpUserTasks(taskList) {
-    let data = taskList.map((task) => {
-        return {
-            name: task.group_by.task_name,
-            id: task.group_by.task_id,
-            count: task.aggregate.count,
-            avgScore: task.aggregate.avg.score,
-            avgAcc: task.aggregate.avg.accuracy,
-            maxScore: task.aggregate.max.score,
-            maxAcc: task.aggregate.max.accuracy,
+    return summarizeUserTasks(taskList, (task) => `${task.id}\0${task.name}`);
+}
+
+export function cleanUpBenchmarkTasks(taskList) {
+    return summarizeUserTasks(
+        taskList.filter((task) =>
+            task.group_by.task_mode_mod === 0 &&
+            benchmarkTaskWeapons.has(`${task.group_by.task_id}\0${task.group_by.weapon_id}`)
+        ),
+        (task) => `${task.id}\0${task.weapon}`
+    );
+}
+
+function summarizeUserTasks(taskList, groupKey) {
+    const groups = new Map();
+    for (const row of taskList) {
+        const name = row.group_by.task_name;
+        const id = row.group_by.task_id;
+        if (!name && id.includes(".")) continue;
+        const task = {
+            name: name || id,
+            id,
+            weapon: row.group_by.weapon_id,
+            mode: row.group_by.task_mode_mod,
+            count: row.aggregate.count,
+            avgScore: row.aggregate.avg.score,
+            avgAcc: row.aggregate.avg.accuracy,
+            maxScore: row.aggregate.max.score,
+            maxAcc: row.aggregate.max.accuracy,
         };
-    });
-    data = data
-        .filter((task) => {
-            if (task.name) return true;
-            if (!task.id.includes(".")) return true;
-        })
-        .map((task) => {
-            if (!task.name) {
-                task.name = task.id;
-            }
-            return task;
-        });
-    data = data.sort((a, b) =>
+        const key = groupKey(task);
+        const previous = groups.get(key);
+        if (!previous) {
+            groups.set(key, task);
+            continue;
+        }
+        const count = previous.count + task.count;
+        previous.avgScore = (previous.avgScore * previous.count + task.avgScore * task.count) / count;
+        previous.avgAcc = (previous.avgAcc * previous.count + task.avgAcc * task.count) / count;
+        if (task.maxScore > previous.maxScore) {
+            previous.maxScore = task.maxScore;
+            previous.weapon = task.weapon;
+            previous.mode = task.mode;
+        }
+        previous.maxAcc = Math.max(previous.maxAcc, task.maxAcc);
+        previous.count = count;
+    }
+    const data = [...groups.values()].sort((a, b) =>
         a.count > b.count ? -1 : b.count > a.count ? 1 : 0
     );
     return data;
@@ -159,7 +150,7 @@ export function caclulateVT(playerTasks, playerBench, mode) {
         }
     }
     playerBench.sort((a, b) => a.scenarioID - b.scenarioID);
-    const grouped = _.groupBy(playerBench, "categoryID");
+    const grouped = groupBy(playerBench, "categoryID");
     const allEnergyList = playerBench.map((bench) => bench.energy);
     const categoryEnergyList = Object.entries(grouped).map(([_, group]) => {
         return Math.max(...group.map(({ energy }) => energy));
@@ -328,7 +319,7 @@ export function calculateRevosectBenchmarks(playerData, mode) {
 
     playerBenchmarks.sort((a, b) => a.scenarioID - b.scenarioID);
     const allPointsList = playerBenchmarks.map((bench) => bench.points);
-    const subCategoryGroupedBenchmarks = _.groupBy(
+    const subCategoryGroupedBenchmarks = groupBy(
         playerBenchmarks,
         "categoryID"
     );
@@ -397,10 +388,13 @@ export function calculateRevosectBenchmarks(playerData, mode) {
     return {
         overallPoints,
         overallRank,
+        rankingAvailable: true,
+        rankList: benchmarkSubPointsList.map(points => ({ hard: hardSubRanks, medium: mediumSubRanks, easy: easySubRanks }[mode][points])),
+        rankRequirements: benchmarkPointsList.map((points, index) => ({ rank: benchmarkRankList[points], points, minimumSubcategoryPoints: benchmarkSubPointsList[index] })),
+        subCategoryNames: mode === 'easy' ? ['Static', 'Dynamic', 'Precise', 'Flick'] : ['Static', 'Dynamic', 'Precise', 'Reactive', 'Flick', 'Track'],
         allPoints: allPointsList,
         subCategoryPoints: aggregateSubCategoryPoints,
         benchmarks: playerBenchmarks,
-        detailsOpen: false,
     };
 }
 function getPlayerBenchmarkResults(playerTasks, benchData, mode) {

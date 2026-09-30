@@ -6,9 +6,9 @@ services:
     ports:
       - "127.0.0.1:5181:3000"
     environment:
-      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD}@db:5432/umami
-      APP_SECRET: ${UMAMI_APP_SECRET}
-      TWO_FACTOR_ENCRYPTION_KEY: ${UMAMI_TWO_FACTOR_KEY}
+      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD:?Set UMAMI_DB_PASSWORD}@db:5432/umami
+      APP_SECRET: ${UMAMI_APP_SECRET:?Set UMAMI_APP_SECRET}
+      TWO_FACTOR_ENCRYPTION_KEY: ${UMAMI_TWO_FACTOR_KEY:?Set UMAMI_TWO_FACTOR_KEY}
       DISABLE_TELEMETRY: "1"
     depends_on:
       db:
@@ -25,7 +25,7 @@ services:
     environment:
       POSTGRES_DB: umami
       POSTGRES_USER: umami
-      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD:?Set UMAMI_DB_PASSWORD}
       TZ: UTC
     volumes:
       - /home/sai/.local/share/aimlab-analytics/postgres:/var/lib/postgresql/data

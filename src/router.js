@@ -1,17 +1,20 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-import HomePage from "./pages/HomePage.vue";
-import ProfileSearch from "./pages/ProfileSearch.vue";
-import TaskSearch from "./pages/TaskSearch.vue";
-import PlayerProfile from "./pages/PlayerProfile.vue";
-import PlayerTasksOverview from "./pages/PlayerTasksOverview.vue";
-import RevosectBenchmarksPage from "./pages/RevosectBenchmarksPage.vue";
-import VoltaicBenchmarksPage from "./pages/VoltaicBenchmarksPage.vue";
-import LeaderboardsPage from "./pages/LeaderboardsPage.vue";
-import VoltaicLeaderboardsPage from "./pages/VoltaicLeaderboardsPage.vue";
-import RevosectLeaderboardsPage from "./pages/RevosectLeaderboardsPage.vue";
-import TaskView from "./pages/TaskView.vue";
-import AboutPage from "./pages/AboutPage.vue";
+const HomePage = () => import('./pages/HomePage.vue');
+const ProfileSearch = () => import('./pages/ProfileSearch.vue');
+const TaskSearch = () => import('./pages/TaskSearch.vue');
+const PlayerProfile = () => import('./pages/PlayerProfile.vue');
+const PlayerTasksOverview = () => import('./pages/PlayerTasksOverview.vue');
+const PlayerActivityPage = () => import('./pages/PlayerActivityPage.vue');
+const RevosectBenchmarksPage = () => import('./pages/RevosectBenchmarksPage.vue');
+const VoltaicBenchmarksPage = () => import('./pages/VoltaicBenchmarksPage.vue');
+const LeaderboardsPage = () => import('./pages/LeaderboardsPage.vue');
+const BenchmarkLeaderboardsPage = () => import('./pages/BenchmarkLeaderboardsPage.vue');
+const TaskView = () => import('./pages/TaskView.vue');
+const PlayerRunsPage = () => import('./pages/PlayerRunsPage.vue');
+const AboutPage = () => import('./pages/AboutPage.vue');
+
+const BenchmarkCatalogPage = () => import('./pages/BenchmarkCatalogPage.vue');
 
 const router = createRouter({
   history: createWebHistory(),
@@ -21,15 +24,11 @@ const router = createRouter({
     {
       path: "/profile",
       component: ProfileSearch,
-      beforeEnter: (_, from) => {
-        if (from.name == "profile-overview") {
-          sessionStorage.removeItem("currentPlayer");
-          return;
-        }
-        if (sessionStorage.getItem("currentPlayer")) {
-          return "/profile/" + encodeURIComponent(sessionStorage.getItem("currentPlayer"));
-        }
-      },
+    },
+    {
+      path: "/profile/:username/tasks/:taskId/runs",
+      component: PlayerRunsPage,
+      props: true,
     },
     {
       path: "/profile/:username",
@@ -46,6 +45,12 @@ const router = createRouter({
           component: PlayerTasksOverview,
         },
         {
+          name: "profile-activity",
+          path: "activity",
+          component: PlayerActivityPage,
+          props: true,
+        },
+        {
           name: "vt-benches",
           path: "voltaic",
           component: VoltaicBenchmarksPage,
@@ -60,15 +65,6 @@ const router = createRouter({
     {
       path: "/tasks",
       component: TaskSearch,
-      beforeEnter: (_, from) => {
-        if (from.name == "task-view") {
-          sessionStorage.removeItem("currentTask");
-          return;
-        }
-        if (sessionStorage.getItem("currentTask")) {
-          return "/tasks/" + encodeURIComponent(sessionStorage.getItem("currentTask"));
-        }
-      },
     },
     {
       path: "/tasks/:taskId",
@@ -89,15 +85,18 @@ const router = createRouter({
         {
           name: "vt-leaderboards",
           path: "vt",
-          component: VoltaicLeaderboardsPage,
+          component: BenchmarkLeaderboardsPage,
+          props: { community: "voltaic" },
         },
         {
           name: "ra-leaderboards",
           path: "ra",
-          component: RevosectLeaderboardsPage,
+          component: BenchmarkLeaderboardsPage,
+          props: { community: "revosect" },
         },
       ],
     },
+    { path: "/benchmarks/:community(voltaic|revosect)", component: BenchmarkCatalogPage, props: true },
     { path: "/about", component: AboutPage },
     { path: "/:notFound(.*)", component: null },
   ],

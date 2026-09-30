@@ -1,0 +1,1941 @@
+{
+  "id": "aimlabs_s3",
+  "community": "voltaic",
+  "label": "Season 3",
+  "source": "https://app.voltaic.gg/api/v1/aimlabs/benchmarks/aimlabs_s3",
+  "retrievedAt": "2026-09-30",
+  "tiers": [
+    {
+      "playlist_workshop_id": "3266803489",
+      "id": 2,
+      "name": "Novice",
+      "color": "#37eca6"
+    },
+    {
+      "playlist_workshop_id": "3266802818",
+      "id": 3,
+      "name": "Intermediate",
+      "color": "#ffab54"
+    },
+    {
+      "playlist_workshop_id": "3266801451",
+      "id": 4,
+      "name": "Advanced",
+      "color": "#fc596f"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "clicking",
+      "color": "#e53535",
+      "subcategories": [
+        {
+          "id": 1,
+          "name": "dynamic",
+          "color": "#E9C452"
+        },
+        {
+          "id": 2,
+          "name": "static",
+          "color": "#FF5A47"
+        },
+        {
+          "id": 7,
+          "name": "linear",
+          "color": "#ff8a45"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "tracking",
+      "color": "#2663ce",
+      "subcategories": [
+        {
+          "id": 3,
+          "name": "precise",
+          "color": "#61C0E0"
+        },
+        {
+          "id": 4,
+          "name": "reactive",
+          "color": "#8bb7ff"
+        },
+        {
+          "id": 8,
+          "name": "control",
+          "color": "#42a5ff"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "switching",
+      "color": "#7844d9",
+      "subcategories": [
+        {
+          "id": 5,
+          "name": "speed",
+          "color": "#8E6BFF"
+        },
+        {
+          "id": 6,
+          "name": "evasive",
+          "color": "#6B77FF"
+        },
+        {
+          "id": 9,
+          "name": "stability",
+          "color": "#b4a3ff"
+        }
+      ]
+    }
+  ],
+  "ranks": [
+    {
+      "name": "Iron",
+      "tier_id": 2,
+      "energy_threshold": 100
+    },
+    {
+      "name": "Bronze",
+      "tier_id": 2,
+      "energy_threshold": 200
+    },
+    {
+      "name": "Silver",
+      "tier_id": 2,
+      "energy_threshold": 300
+    },
+    {
+      "name": "Gold",
+      "tier_id": 2,
+      "energy_threshold": 400
+    },
+    {
+      "name": "Platinum",
+      "tier_id": 3,
+      "energy_threshold": 500
+    },
+    {
+      "name": "Diamond",
+      "tier_id": 3,
+      "energy_threshold": 600
+    },
+    {
+      "name": "Jade",
+      "tier_id": 3,
+      "energy_threshold": 700
+    },
+    {
+      "name": "Master",
+      "tier_id": 3,
+      "energy_threshold": 800
+    },
+    {
+      "name": "Grandmaster",
+      "tier_id": 4,
+      "energy_threshold": 900
+    },
+    {
+      "name": "Nova",
+      "tier_id": 4,
+      "energy_threshold": 1000
+    },
+    {
+      "name": "Astra",
+      "tier_id": 4,
+      "energy_threshold": 1100
+    },
+    {
+      "name": "Celestial",
+      "tier_id": 4,
+      "energy_threshold": 1200
+    }
+  ],
+  "scenarios": [
+    {
+      "id": 3,
+      "name": "VT Angleshot Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            350,
+            475,
+            575,
+            675
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Angle.SGAB0P",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56Clicker3",
+      "category_id": 1,
+      "workshop_id": "3284539510",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Angle.SGAB0P",
+        "name": "VT Angleshot Novice S3",
+        "weapon_id": "Custom_LG56Clicker3",
+        "mode": 0,
+        "workshop_id": "3284539510",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "name": "VT Popshot Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            125,
+            175,
+            225,
+            275
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Popsh.SEXRD5",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56CLICKER4",
+      "category_id": 1,
+      "workshop_id": "3266014913",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Popsh.SEXRD5",
+        "name": "VT Popshot Novice S3",
+        "weapon_id": "Custom_LG56CLICKER4",
+        "mode": 0,
+        "workshop_id": "3266014913",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 21,
+      "name": "VT Angleshot Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            625,
+            700,
+            800,
+            900
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Angle.SGAAO8",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56Clicker3",
+      "category_id": 1,
+      "workshop_id": "3284539998",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Angle.SGAAO8",
+        "name": "VT Angleshot Intermediate S3",
+        "weapon_id": "Custom_LG56Clicker3",
+        "mode": 0,
+        "workshop_id": "3284539998",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 22,
+      "name": "VT Popshot Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            250,
+            325,
+            400,
+            450
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Popsh.SEXRAC",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56CLICKER4",
+      "category_id": 1,
+      "workshop_id": "3266014182",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Popsh.SEXRAC",
+        "name": "VT Popshot Intermediate S3",
+        "weapon_id": "Custom_LG56CLICKER4",
+        "mode": 0,
+        "workshop_id": "3266014182",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 39,
+      "name": "VT Angleshot Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            825,
+            950,
+            1100,
+            1275
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Angle.SGAAML",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56Clicker3",
+      "category_id": 1,
+      "workshop_id": "3284540997",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Angle.SGAAML",
+        "name": "VT Angleshot Advanced S3",
+        "weapon_id": "Custom_LG56Clicker3",
+        "mode": 0,
+        "workshop_id": "3284540997",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 40,
+      "name": "VT Popshot Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            425,
+            525,
+            625,
+            700
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Popsh.SEXR6M",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56CLICKER4",
+      "category_id": 1,
+      "workshop_id": "3266013188",
+      "subcategory_id": 1,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Popsh.SEXR6M",
+        "name": "VT Popshot Advanced S3",
+        "weapon_id": "Custom_LG56CLICKER4",
+        "mode": 0,
+        "workshop_id": "3266013188",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "name": "VT Quadshot Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            675,
+            875,
+            1050,
+            1175
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Quads.SEY63N",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56Clicker3",
+      "category_id": 1,
+      "workshop_id": "3266128567",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Quads.SEY63N",
+        "name": "VT Quadshot Novice S3",
+        "weapon_id": "Custom_LG56Clicker3",
+        "mode": 0,
+        "workshop_id": "3266128567",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "name": "VT Wideshot Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            650,
+            850,
+            1025,
+            1150
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Wides.SEY6L3",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56CLICKER4",
+      "category_id": 1,
+      "workshop_id": "3266131697",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Wides.SEY6L3",
+        "name": "VT Wideshot Novice S3",
+        "weapon_id": "Custom_LG56CLICKER4",
+        "mode": 0,
+        "workshop_id": "3266131697",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 23,
+      "name": "VT Quadshot Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            1200,
+            1300,
+            1400,
+            1475
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Quads.SEY603",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56Clicker3",
+      "category_id": 1,
+      "workshop_id": "3266127885",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Quads.SEY603",
+        "name": "VT Quadshot Intermediate S3",
+        "weapon_id": "Custom_LG56Clicker3",
+        "mode": 0,
+        "workshop_id": "3266127885",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 24,
+      "name": "VT Wideshot Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            1175,
+            1300,
+            1375,
+            1450
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Wides.SEY6I6",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56CLICKER4",
+      "category_id": 1,
+      "workshop_id": "3266131042",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Wides.SEY6I6",
+        "name": "VT Wideshot Intermediate S3",
+        "weapon_id": "Custom_LG56CLICKER4",
+        "mode": 0,
+        "workshop_id": "3266131042",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 41,
+      "name": "VT Quadshot Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            1525,
+            1625,
+            1750,
+            1875
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Quads.SEY5WD",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56Clicker3",
+      "category_id": 1,
+      "workshop_id": "3266127117",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Quads.SEY5WD",
+        "name": "VT Quadshot Advanced S3",
+        "weapon_id": "Custom_LG56Clicker3",
+        "mode": 0,
+        "workshop_id": "3266127117",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 42,
+      "name": "VT Wideshot Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            1475,
+            1575,
+            1725,
+            1850
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Wides.SEY6DO",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56CLICKER4",
+      "category_id": 1,
+      "workshop_id": "3266130228",
+      "subcategory_id": 2,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Wides.SEY6DO",
+        "name": "VT Wideshot Advanced S3",
+        "weapon_id": "Custom_LG56CLICKER4",
+        "mode": 0,
+        "workshop_id": "3266130228",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "name": "VT Frogshot Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            225,
+            300,
+            400,
+            500
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Frogs.SEY57B",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56Clicker3",
+      "category_id": 1,
+      "workshop_id": "3266121466",
+      "subcategory_id": 7,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Frogs.SEY57B",
+        "name": "VT Frogshot Novice S3",
+        "weapon_id": "Custom_LG56Clicker3",
+        "mode": 0,
+        "workshop_id": "3266121466",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "name": "VT Floatshot Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            200,
+            350,
+            500,
+            600
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Float.SEY5O0",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56CLICKER4",
+      "category_id": 1,
+      "workshop_id": "3266125227",
+      "subcategory_id": 7,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Float.SEY5O0",
+        "name": "VT Floatshot Novice S3",
+        "weapon_id": "Custom_LG56CLICKER4",
+        "mode": 0,
+        "workshop_id": "3266125227",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 25,
+      "name": "VT Frogshot Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            475,
+            575,
+            700,
+            800
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Frogs.SEY55A",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56Clicker3",
+      "category_id": 1,
+      "workshop_id": "3266121067",
+      "subcategory_id": 7,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Frogs.SEY55A",
+        "name": "VT Frogshot Intermediate S3",
+        "weapon_id": "Custom_LG56Clicker3",
+        "mode": 0,
+        "workshop_id": "3266121067",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 26,
+      "name": "VT Floatshot Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            575,
+            675,
+            775,
+            850
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Float.SEY5KV",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56CLICKER4",
+      "category_id": 1,
+      "workshop_id": "3266124432",
+      "subcategory_id": 7,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Float.SEY5KV",
+        "name": "VT Floatshot Intermediate S3",
+        "weapon_id": "Custom_LG56CLICKER4",
+        "mode": 0,
+        "workshop_id": "3266124432",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 43,
+      "name": "VT Frogshot Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            800,
+            925,
+            1025,
+            1125
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Frogs.SEY528",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56Clicker3",
+      "category_id": 1,
+      "workshop_id": "3266120566",
+      "subcategory_id": 7,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Frogs.SEY528",
+        "name": "VT Frogshot Advanced S3",
+        "weapon_id": "Custom_LG56Clicker3",
+        "mode": 0,
+        "workshop_id": "3266120566",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 44,
+      "name": "VT Floatshot Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            825,
+            950,
+            1075,
+            1175
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Float.SEY5FO",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56CLICKER4",
+      "category_id": 1,
+      "workshop_id": "3266123143",
+      "subcategory_id": 7,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Float.SEY5FO",
+        "name": "VT Floatshot Advanced S3",
+        "weapon_id": "Custom_LG56CLICKER4",
+        "mode": 0,
+        "workshop_id": "3266123143",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "name": "VT Verttrack Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1900,
+            2225,
+            2550,
+            2775
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Vertt.SEY6XZ",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "3266134369",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Vertt.SEY6XZ",
+        "name": "VT Verttrack Novice S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266134369",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "name": "VT Shifttrack Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            2025,
+            2275,
+            2525,
+            2700
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Shift.SEY7DQ",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper2",
+      "category_id": 2,
+      "workshop_id": "3266137320",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Shift.SEY7DQ",
+        "name": "VT Shifttrack Novice S3",
+        "weapon_id": "Custom_VoltaicZapper2",
+        "mode": 0,
+        "workshop_id": "3266137320",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 27,
+      "name": "VT Verttrack Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2725,
+            2950,
+            3150,
+            3325
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Vertt.SEY6VH",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "3266133916",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Vertt.SEY6VH",
+        "name": "VT Verttrack Intermediate S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266133916",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 28,
+      "name": "VT Shifttrack Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2575,
+            2900,
+            3200,
+            3375
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Shift.SEY7A3",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper2",
+      "category_id": 2,
+      "workshop_id": "3266136656",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Shift.SEY7A3",
+        "name": "VT Shifttrack Intermediate S3",
+        "weapon_id": "Custom_VoltaicZapper2",
+        "mode": 0,
+        "workshop_id": "3266136656",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 45,
+      "name": "VT Verttrack Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            3200,
+            3400,
+            3750,
+            4100
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Vertt.SEY6SM",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "3266133435",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Vertt.SEY6SM",
+        "name": "VT Verttrack Advanced S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266133435",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 46,
+      "name": "VT Shifttrack Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            3225,
+            3450,
+            3750,
+            4000
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Shift.SEY774",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper2",
+      "category_id": 2,
+      "workshop_id": "3266136082",
+      "subcategory_id": 3,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Shift.SEY774",
+        "name": "VT Shifttrack Advanced S3",
+        "weapon_id": "Custom_VoltaicZapper2",
+        "mode": 0,
+        "workshop_id": "3266136082",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "name": "VT Jettrack Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            2000,
+            2300,
+            2600,
+            2825
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Jettr.SEZZJ9",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper3",
+      "category_id": 2,
+      "workshop_id": "3266744590",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Jettr.SEZZJ9",
+        "name": "VT Jettrack Novice S3",
+        "weapon_id": "Custom_VoltaicZapper3",
+        "mode": 0,
+        "workshop_id": "3266744590",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "name": "VT Quaketrack Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            2000,
+            2225,
+            2450,
+            2600
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Quake.SEZZWD",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 2,
+      "workshop_id": "3266746941",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Quake.SEZZWD",
+        "name": "VT Quaketrack Novice S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266746941",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 29,
+      "name": "VT Jettrack Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2700,
+            3000,
+            3275,
+            3475
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Jettr.SEZZGJ",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper3",
+      "category_id": 2,
+      "workshop_id": "3266744017",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Jettr.SEZZGJ",
+        "name": "VT Jettrack Intermediate S3",
+        "weapon_id": "Custom_VoltaicZapper3",
+        "mode": 0,
+        "workshop_id": "3266744017",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 30,
+      "name": "VT Quaketrack Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2475,
+            2775,
+            3050,
+            3250
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Quake.SEZZS5",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 2,
+      "workshop_id": "3266746240",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Quake.SEZZS5",
+        "name": "VT Quaketrack Intermediate S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266746240",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 47,
+      "name": "VT Jettrack Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            3375,
+            3600,
+            3800,
+            4000
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Jettr.SEZZBG",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper3",
+      "category_id": 2,
+      "workshop_id": "3266743216",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Jettr.SEZZBG",
+        "name": "VT Jettrack Advanced S3",
+        "weapon_id": "Custom_VoltaicZapper3",
+        "mode": 0,
+        "workshop_id": "3266743216",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 48,
+      "name": "VT Quaketrack Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            3100,
+            3325,
+            3550,
+            3800
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Quake.SEZZPH",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 2,
+      "workshop_id": "3266745688",
+      "subcategory_id": 4,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Quake.SEZZPH",
+        "name": "VT Quaketrack Advanced S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266745688",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "name": "VT Controltrack Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1300,
+            1625,
+            1950,
+            2175
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Contr.SEY7RT",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "3266140290",
+      "subcategory_id": 8,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Contr.SEY7RT",
+        "name": "VT Controltrack Novice S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266140290",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "name": "VT Steadytrack Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1600,
+            1925,
+            2275,
+            2500
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Stead.SEZZ3K",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "3266741546",
+      "subcategory_id": 8,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Stead.SEZZ3K",
+        "name": "VT Steadytrack Novice S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266741546",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 31,
+      "name": "VT Controltrack Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2075,
+            2325,
+            2600,
+            2775
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Contr.SEY7P0",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "3266139681",
+      "subcategory_id": 8,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Contr.SEY7P0",
+        "name": "VT Controltrack Intermediate S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266139681",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 32,
+      "name": "VT Steadytrack Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2375,
+            2650,
+            2950,
+            3150
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Stead.SEZZ11",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "3266741142",
+      "subcategory_id": 8,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Stead.SEZZ11",
+        "name": "VT Steadytrack Intermediate S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266741142",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 49,
+      "name": "VT Controltrack Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2600,
+            2950,
+            3300,
+            3550
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Contr.SEY7M7",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "3266138960",
+      "subcategory_id": 8,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Contr.SEY7M7",
+        "name": "VT Controltrack Advanced S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266138960",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 50,
+      "name": "VT Steadytrack Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2950,
+            3325,
+            3675,
+            4000
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Stead.SEZYYC",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 2,
+      "workshop_id": "3266740651",
+      "subcategory_id": 8,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Stead.SEZYYC",
+        "name": "VT Steadytrack Advanced S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266740651",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "name": "VT Pokeswitch Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            2000,
+            2250,
+            2525,
+            2700
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Pokes.SF00IK",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 3,
+      "workshop_id": "3266751082",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Pokes.SF00IK",
+        "name": "VT Pokeswitch Novice S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266751082",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 16,
+      "name": "VT Temposwitch Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1900,
+            2100,
+            2300,
+            2425
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Tempo.SF04A4",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 3,
+      "workshop_id": "3266775817",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Tempo.SF04A4",
+        "name": "VT Temposwitch Novice S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266775817",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 33,
+      "name": "VT Pokeswitch Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2575,
+            2775,
+            2975,
+            3150
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Pokes.SF00E4",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 3,
+      "workshop_id": "3266750393",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Pokes.SF00E4",
+        "name": "VT Pokeswitch Intermediate S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266750393",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 34,
+      "name": "VT Temposwitch Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2300,
+            2500,
+            2700,
+            2900
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Tempo.SF047B",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 3,
+      "workshop_id": "3266775302",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Tempo.SF047B",
+        "name": "VT Temposwitch Intermediate S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266775302",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 51,
+      "name": "VT Pokeswitch Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            3050,
+            3200,
+            3350,
+            3475
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Pokes.SF009C",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 3,
+      "workshop_id": "3266749418",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Pokes.SF009C",
+        "name": "VT Pokeswitch Advanced S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266749418",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 52,
+      "name": "VT Temposwitch Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2775,
+            2975,
+            3175,
+            3400
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Tempo.SF0446",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 3,
+      "workshop_id": "3266774654",
+      "subcategory_id": 5,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Tempo.SF0446",
+        "name": "VT Temposwitch Advanced S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266774654",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 17,
+      "name": "VT Boltswitch Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1950,
+            2225,
+            2500,
+            2700
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Bolts.SF04OM",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper3",
+      "category_id": 3,
+      "workshop_id": "3266778449",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Bolts.SF04OM",
+        "name": "VT Boltswitch Novice S3",
+        "weapon_id": "Custom_VoltaicZapper3",
+        "mode": 0,
+        "workshop_id": "3266778449",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 18,
+      "name": "VT Dartswitch Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            2050,
+            2325,
+            2625,
+            2825
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Darts.SF0531",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 3,
+      "workshop_id": "3266781120",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Darts.SF0531",
+        "name": "VT Dartswitch Novice S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266781120",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 35,
+      "name": "VT Boltswitch Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2575,
+            2725,
+            2900,
+            3050
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Bolts.SF04LI",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper3",
+      "category_id": 3,
+      "workshop_id": "3266777990",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Bolts.SF04LI",
+        "name": "VT Boltswitch Intermediate S3",
+        "weapon_id": "Custom_VoltaicZapper3",
+        "mode": 0,
+        "workshop_id": "3266777990",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 36,
+      "name": "VT Dartswitch Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2700,
+            2850,
+            2950,
+            3150
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Darts.SF050E",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 3,
+      "workshop_id": "3266780628",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Darts.SF050E",
+        "name": "VT Dartswitch Intermediate S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266780628",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 53,
+      "name": "VT Boltswitch Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2900,
+            3150,
+            3425,
+            3600
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Bolts.SF04IX",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper3",
+      "category_id": 3,
+      "workshop_id": "3266777464",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Bolts.SF04IX",
+        "name": "VT Boltswitch Advanced S3",
+        "weapon_id": "Custom_VoltaicZapper3",
+        "mode": 0,
+        "workshop_id": "3266777464",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 54,
+      "name": "VT Dartswitch Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2950,
+            3175,
+            3350,
+            3575
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Darts.SF04WR",
+      "task_mode": 42,
+      "weapon_id": "Custom_LG56TrackMaster",
+      "category_id": 3,
+      "workshop_id": "3266779998",
+      "subcategory_id": 6,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Darts.SF04WR",
+        "name": "VT Dartswitch Advanced S3",
+        "weapon_id": "Custom_LG56TrackMaster",
+        "mode": 0,
+        "workshop_id": "3266779998",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 19,
+      "name": "VT Smoothswitch Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1875,
+            2100,
+            2325,
+            2500
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Smoot.SF05GE",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "3266783795",
+      "subcategory_id": 9,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Smoot.SF05GE",
+        "name": "VT Smoothswitch Novice S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266783795",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "name": "VT Leapswitch Novice S3",
+      "tiers": [
+        {
+          "tier_id": 2,
+          "thresholds": [
+            1200,
+            1375,
+            1575,
+            1725
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Leaps.SF05WI",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "3266786551",
+      "subcategory_id": 9,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Leaps.SF05WI",
+        "name": "VT Leapswitch Novice S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266786551",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 37,
+      "name": "VT Smoothswitch Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            2375,
+            2600,
+            2800,
+            2950
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Smoot.SF05DY",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "3266783187",
+      "subcategory_id": 9,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Smoot.SF05DY",
+        "name": "VT Smoothswitch Intermediate S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266783187",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 38,
+      "name": "VT Leapswitch Intermediate S3",
+      "tiers": [
+        {
+          "tier_id": 3,
+          "thresholds": [
+            1650,
+            1900,
+            2175,
+            2375
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Leaps.SF05T0",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "3266785966",
+      "subcategory_id": 9,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Leaps.SF05T0",
+        "name": "VT Leapswitch Intermediate S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266785966",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 55,
+      "name": "VT Smoothswitch Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2800,
+            3000,
+            3250,
+            3475
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Smoot.SF05AW",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "3266782553",
+      "subcategory_id": 9,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Smoot.SF05AW",
+        "name": "VT Smoothswitch Advanced S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266782553",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    },
+    {
+      "id": 56,
+      "name": "VT Leapswitch Advanced S3",
+      "tiers": [
+        {
+          "tier_id": 4,
+          "thresholds": [
+            2275,
+            2500,
+            2725,
+            2875
+          ]
+        }
+      ],
+      "task_id": "CsLevel.VT Lowgravity56.VT Leaps.SF05P3",
+      "task_mode": 42,
+      "weapon_id": "Custom_VoltaicZapper",
+      "category_id": 3,
+      "workshop_id": "3266785371",
+      "subcategory_id": 9,
+      "taskMetadata": {
+        "id": "CsLevel.VT Lowgravity56.VT Leaps.SF05P3",
+        "name": "VT Leapswitch Advanced S3",
+        "weapon_id": "Custom_VoltaicZapper",
+        "mode": 0,
+        "workshop_id": "3266785371",
+        "duration": 60,
+        "version": 1,
+        "author": {
+          "username": "VT Lowgravity56"
+        }
+      }
+    }
+  ]
+}

@@ -1,24 +1,20 @@
-import { mkdir, rename, rm } from "node:fs/promises";
+import { randomUUID } from 'node:crypto';
+import { copyFile, mkdir, rename, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DatabaseSync } from "node:sqlite";
-import { calculateRevosectBenchmarks, caclulateVT } from "../src/helpers/functions.js";
-import { categories as raCategories, easyBench, mediumBench, hardBench } from "../src/helpers/revosectData.js";
-import { categories as vtCategories, noviceBench, intermediateBench, advancedBench } from "../src/helpers/voltaicData.js";
+import { calculateRevosectBenchmarks, caclulateVT } from "./benchmark-calculations.js";
+import { categories as raCategories } from "./revosectData.js";
+import { categories as vtCategories } from "./voltaicData.js";
 import { fetchLeaderboardPage } from "./aimlab-pages.js";
+import { calculateVoltaicSeason } from "./benchmark-seasons.js";
 
-export const benchmarkSets = {
-  "ra-easy": easyBench,
-  "ra-medium": mediumBench,
-  "ra-hard": hardBench,
-  "vt-novice": noviceBench,
-  "vt-intermediate": intermediateBench,
-  "vt-advanced": advancedBench,
-};
+import { benchmarkSets, seasonModes, sortColumnsFor } from './benchmark-registry.js';
+import { collectionIdentityFor, legacyIdentityFor, publicationFor } from './benchmark-publication.js';
 
 const dataDir = resolve(process.env.AIMLAB_DATA_DIR || "data");
 
-function openStaging(path, mode, benchmarks) {
+function openStaging(path, mode, benchmarks, provider) {
   const db = new DatabaseSync(path);
   db.exec(`
     PRAGMA journal_mode = WAL;
@@ -32,13 +28,20 @@ function openStaging(path, mode, benchmarks) {
       score REAL NOT NULL, PRIMARY KEY (user_id, scenario)
     );
   `);
-  const identity = JSON.stringify(benchmarks.map(({ id, weapon, scores }) => [id, weapon, scores[0]]));
-  const saved = db.prepare("SELECT value FROM metadata WHERE key = 'identity'").get();
-  if (saved && saved.value !== identity) {
+  const identity = legacyIdentityFor(mode);
+  const saved = Object.fromEntries(db.prepare('SELECT key, value FROM metadata').all().map(row => [row.key, row.value]));
+  const incompatible = saved.collectionIdentity
+    ? saved.collectionIdentity !== collectionIdentityFor(mode)
+    : saved.identity && saved.identity !== identity;
+  if (incompatible || (saved.identity && (saved.collectorProvider || 'legacy') !== provider)) {
     db.close();
-    throw new Error(`Benchmark definitions changed during ${mode} refresh; remove its staging database to restart`);
+    throw new Error(`Collection identity changed during ${mode} refresh; retain this staging database and start a separate collection directory`);
   }
   db.prepare("INSERT OR IGNORE INTO metadata (key, value) VALUES ('identity', ?)").run(identity);
+  db.prepare("INSERT OR IGNORE INTO metadata VALUES ('collectionIdentity', ?)").run(collectionIdentityFor(mode));
+  db.prepare("INSERT OR IGNORE INTO metadata VALUES ('collectorProvider', ?)").run(provider);
+  // A resumed old collection has an unknown start time; do not invent one.
+  if (!saved.identity) db.prepare("INSERT INTO metadata VALUES ('collectionStartedAt', ?)").run(new Date().toISOString());
   for (let i = 0; i < benchmarks.length; i++) {
     db.prepare("INSERT OR IGNORE INTO progress (scenario) VALUES (?)").run(i);
   }
@@ -48,6 +51,7 @@ function openStaging(path, mode, benchmarks) {
 async function collectAll(db, benchmarks, getPage, onProgress) {
   for (let index = 0; index < benchmarks.length; index++) {
     const bench = benchmarks[index];
+    const minimumScore = bench.minimumScore ?? bench.scores[0];
     const progress = db.prepare("SELECT offset, complete FROM progress WHERE scenario = ?").get(index);
     if (progress.complete) continue;
     const upsert = db.prepare(`
@@ -63,17 +67,18 @@ async function collectAll(db, benchmarks, getPage, onProgress) {
       if (!Array.isArray(page.data) || !Number.isInteger(page.metadata?.totalRows)) {
         throw new Error(`Invalid Aimlab page for ${bench.name}`);
       }
+      if (!page.data.length && offset < page.metadata.totalRows) throw new Error(`Empty Aimlab page for ${bench.name} at offset ${offset}`);
       let highestScore = -Infinity;
       db.exec("BEGIN");
       try {
         for (const entry of page.data) {
           if (!Number.isFinite(entry.score)) throw new Error(`Invalid Aimlab score for ${bench.name} at offset ${offset}`);
           highestScore = Math.max(highestScore, entry.score);
-          if (entry.score >= bench.scores[0] && entry.user_id && entry.username) {
+          if (entry.score >= minimumScore && entry.user_id && entry.username) {
             upsert.run(entry.user_id, index, entry.username, entry.score);
           }
         }
-        const done = highestScore < bench.scores[0] || offset + page.data.length >= page.metadata.totalRows;
+        const done = highestScore < minimumScore || offset + page.data.length >= page.metadata.totalRows;
         if (!done && page.data.length !== 2000) {
           throw new Error(`Incomplete Aimlab page for ${bench.name} at offset ${offset}`);
         }
@@ -91,16 +96,17 @@ async function collectAll(db, benchmarks, getPage, onProgress) {
 }
 
 function scorePlayers(db, mode, benchmarks, onProgress) {
+  const season = seasonModes[mode];
+  const categoryCount = season?.subcategories.length || 6;
   db.exec(`
-    CREATE TABLE IF NOT EXISTS players (
+    DROP TABLE IF EXISTS players;
+    CREATE TABLE players (
       user_id TEXT PRIMARY KEY, username TEXT NOT NULL, overall INTEGER NOT NULL,
-      overall_rank TEXT NOT NULL, c1 INTEGER NOT NULL, c2 INTEGER NOT NULL,
-      c3 INTEGER NOT NULL, c4 INTEGER NOT NULL, c5 INTEGER NOT NULL, c6 INTEGER NOT NULL
+      overall_rank TEXT NOT NULL, ${Array.from({ length: categoryCount }, (_, index) => `c${index + 1} INTEGER NOT NULL`).join(", ")}
     );
-    DELETE FROM players;
     CREATE INDEX IF NOT EXISTS scores_by_user ON scores (user_id);
   `);
-  const insert = db.prepare("INSERT INTO players VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+  const insert = db.prepare(`INSERT INTO players VALUES (${Array(categoryCount + 4).fill("?").join(", ")})`);
   const rows = db.prepare("SELECT user_id, username, scenario, score FROM scores ORDER BY user_id").iterate();
   let currentId = null;
   let username = "";
@@ -109,7 +115,13 @@ function scorePlayers(db, mode, benchmarks, onProgress) {
   function flush() {
     if (!currentId) return;
     let overall, rank, values;
-    if (mode.startsWith("ra-")) {
+    if (season) {
+      const rows = tasks.map(task => ({ group_by: { task_id: task.id, weapon_id: task.weapon, task_mode_mod: 0 }, aggregate: { count: 1, max: { score: task.maxScore, accuracy: 0 }, avg: { score: task.maxScore, accuracy: 0 } } }));
+      const result = calculateVoltaicSeason(season.definition, rows, season.level).results[`VT${season.tier.name}`];
+      overall = result.overallEnergy;
+      rank = result.overallRank;
+      values = result.categories.map(category => category.energy);
+    } else if (mode.startsWith("ra-")) {
       const result = calculateRevosectBenchmarks({ tasks }, mode.slice(3));
       overall = result.overallPoints;
       rank = result.overallRank;
@@ -138,7 +150,7 @@ function scorePlayers(db, mode, benchmarks, onProgress) {
         username = row.username;
         tasks = [];
       }
-      tasks.push({ id: benchmarks[row.scenario].id, maxScore: row.score, count: 1 });
+      tasks.push({ id: benchmarks[row.scenario].id, weapon: benchmarks[row.scenario].weapon, maxScore: row.score, count: 1 });
     }
     flush();
     db.exec("COMMIT");
@@ -146,53 +158,80 @@ function scorePlayers(db, mode, benchmarks, onProgress) {
     db.exec("ROLLBACK");
     throw error;
   }
-  db.exec(`
-    CREATE INDEX IF NOT EXISTS players_overall ON players (overall DESC, username);
-    CREATE INDEX IF NOT EXISTS players_clicking ON players ((c1 + c2) DESC, username);
-    CREATE INDEX IF NOT EXISTS players_tracking ON players ((c3 + c4) DESC, username);
-    CREATE INDEX IF NOT EXISTS players_switching ON players ((c5 + c6) DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c1 ON players (c1 DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c2 ON players (c2 DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c3 ON players (c3 DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c4 ON players (c4 DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c5 ON players (c5 DESC, username);
-    CREATE INDEX IF NOT EXISTS players_c6 ON players (c6 DESC, username);
-  `);
+  for (const [name, column] of Object.entries(sortColumnsFor(mode))) db.exec(`CREATE INDEX IF NOT EXISTS players_${name} ON players (${column} DESC, username)`);
   db.prepare("INSERT OR REPLACE INTO metadata VALUES ('generatedAt', ?)").run(new Date().toISOString());
   db.prepare("INSERT OR REPLACE INTO metadata VALUES ('mode', ?)").run(mode);
-  db.prepare("INSERT OR REPLACE INTO metadata VALUES ('categories', ?)").run(JSON.stringify(mode.startsWith("ra-") ? raCategories : vtCategories));
+  db.prepare("INSERT OR REPLACE INTO metadata VALUES ('categories', ?)").run(JSON.stringify(season ? season.subcategories.map(category => category.name) : mode.startsWith("ra-") ? raCategories : vtCategories));
+  for (const [key, value] of Object.entries(publicationFor(mode))) {
+    db.prepare('INSERT OR REPLACE INTO metadata VALUES (?, ?)').run(key, value);
+  }
+  db.prepare("INSERT OR REPLACE INTO metadata VALUES ('collectionIdentity', ?)").run(collectionIdentityFor(mode));
+  db.prepare("INSERT OR REPLACE INTO metadata VALUES ('identity', ?)").run(legacyIdentityFor(mode));
   db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
   return count;
 }
 
 export async function refreshDatabase(mode, options = {}) {
   const benchmarks = benchmarkSets[mode];
-  if (!benchmarks) throw new Error(`Unknown benchmark mode: ${mode}`);
+  if (!Object.hasOwn(benchmarkSets, mode)) throw new Error(`Unknown benchmark mode: ${mode}`);
   const directory = resolve(options.dataDir || dataDir);
   await mkdir(directory, { recursive: true });
   const staging = resolve(directory, `${mode}.staging.sqlite`);
   const destination = resolve(directory, `${mode}.sqlite`);
-  const db = openStaging(staging, mode, benchmarks);
+  const provider = options.collectorProvider || 'legacy';
+  if (!['legacy', 'trainer'].includes(provider)) throw new Error('Unknown collector provider');
+  const db = openStaging(staging, mode, benchmarks, provider);
+  let count;
   try {
-    await collectAll(db, benchmarks, options.getPage || fetchLeaderboardPage, options.onProgress);
-    const count = scorePlayers(db, mode, benchmarks, options.onProgress);
-    db.close();
-    await rm(`${staging}-wal`, { force: true });
-    await rm(`${staging}-shm`, { force: true });
-    await rename(staging, destination);
+    await collectAll(db, benchmarks, options.getPage || ((bench, offset) => fetchLeaderboardPage(bench, offset, { provider })), options.onProgress);
+    db.prepare("INSERT OR REPLACE INTO metadata VALUES ('collectionFinishedAt', ?)").run(new Date().toISOString());
+    count = scorePlayers(db, mode, benchmarks, options.onProgress);
+  } finally { db.close(); }
+  await rm(`${staging}-wal`, { force: true });
+  await rm(`${staging}-shm`, { force: true });
+  await rename(staging, destination);
+  return { mode, count, destination };
+}
+
+export async function rescoreDatabase(mode, options = {}) {
+  if (!Object.hasOwn(benchmarkSets, mode)) throw new Error(`Unknown benchmark mode: ${mode}`);
+  const directory = resolve(options.dataDir || dataDir);
+  const destination = resolve(directory, `${mode}.sqlite`);
+  const temporary = resolve(directory, `${mode}.rescore-${randomUUID()}.sqlite`);
+  const source = new DatabaseSync(destination, { readOnly: true });
+  try {
+    const metadata = Object.fromEntries(source.prepare('SELECT key, value FROM metadata').all().map(row => [row.key, row.value]));
+    const compatible = metadata.collectionIdentity
+      ? metadata.collectionIdentity === collectionIdentityFor(mode)
+      : metadata.identity === legacyIdentityFor(mode);
+    if (!compatible) throw new Error('Retained scores do not cover the requested collection identity');
+  } finally { source.close(); }
+  try {
+    await copyFile(destination, temporary);
+    const db = new DatabaseSync(temporary);
+    let count;
+    try { count = scorePlayers(db, mode, benchmarkSets[mode], options.onProgress); }
+    finally { db.close(); }
+    await rename(temporary, destination);
     return { mode, count, destination };
-  } catch (error) {
-    db.close();
-    throw error;
+  } finally {
+    await rm(temporary, { force: true });
+    await rm(`${temporary}-wal`, { force: true });
+    await rm(`${temporary}-shm`, { force: true });
   }
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
-  const modes = process.argv.slice(2);
-  if (!modes.length) modes.push(...Object.keys(benchmarkSets));
+  const rescore = process.argv.includes('--rescore');
+  const provider = process.argv.find(argument => argument.startsWith('--provider='))?.split('=')[1] || 'legacy';
+  const modes = process.argv.slice(2).filter(argument => argument !== '--rescore' && !argument.startsWith('--provider='));
+  if (rescore && provider !== 'legacy') throw new Error('--provider applies only to collection');
+  if (rescore && !modes.length) throw new Error('Specify a benchmark mode for --rescore');
+  if (!modes.length) modes.push(...Object.keys(benchmarkSets).filter(mode => mode.startsWith("ra-") || seasonModes[mode]));
   for (const mode of modes) {
     try {
-      const result = await refreshDatabase(mode, {
+      const result = await (rescore ? rescoreDatabase : refreshDatabase)(mode, {
+        collectorProvider: provider,
         onProgress: (name, offset, total, done) =>
           console.log(`${mode}: ${name}: ${offset}/${total ?? "?"}${done ? " done" : ""}`),
       });

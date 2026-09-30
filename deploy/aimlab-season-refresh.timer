@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh Voltaic season standings daily
+
+[Timer]
+OnCalendar=*-*-* 12:00:00
+Unit=aimlab-season-refresh.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

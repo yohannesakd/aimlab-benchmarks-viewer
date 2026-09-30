@@ -1,0 +1,177 @@
+import { queryAimlabs } from "./aimlabs-graphql.js";
+import { GET_USER_INFO, GET_USER_PLAYS_AGG, GET_TASK_BY_ID, GET_TASKS_BY_NAME, GET_TASK_LEADERBOARD } from "./app-queries.js";
+import { cleanUpUserTasks, cleanUpBenchmarkTasks, calculateRevosectBenchmarks } from "./benchmark-calculations.js";
+import { publicRun, runFields } from "./player-runs.js";
+
+import { voltaicSeasons, calculateVoltaicSeason, calculateRevosectSeason } from './benchmark-seasons.js';
+import { sortColumnsFor } from './benchmark-registry.js';
+
+import { createRequestCache } from './request-cache.js';
+const cached = createRequestCache({ ttlMs: 60_000, maxEntries: 120 });
+
+function notFound(message) {
+  const error = new Error(message);
+  error.status = 404;
+  throw error;
+}
+
+export function getProfileLookup(username) {
+  return cached(`lookup:${username}`, async () => {
+    const { aimlabProfile: profile } = await queryAimlabs(GET_USER_INFO, { username }, "Profile lookup failed");
+    if (!profile) return notFound("Player not found");
+    return { username: profile.username, id: profile.user.id, rank: profile.ranking?.rank?.displayName || "Unranked", skill: profile.ranking?.skill ?? 0 };
+  });
+}
+
+/** @returns {import('./api-contracts.js').ProfileSnapshot} */
+export function calculateProfile(playerInfo, rows) {
+  const tasks = cleanUpUserTasks(rows);
+  const benchmarkTasks = cleanUpBenchmarkTasks(rows);
+  const benchmarks = {};
+  for (const mode of ["hard", "medium", "easy"]) {
+    benchmarks[`RA${mode[0].toUpperCase()}${mode.slice(1)}`] = calculateRevosectBenchmarks({ tasks: benchmarkTasks, id: playerInfo.id }, mode);
+  }
+  return { fetchedAt: new Date().toISOString(), playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", community: "revosect", label: "Series 2", results: benchmarks }, ...voltaicSeasons.map(definition => calculateVoltaicSeason(definition, rows)), calculateRevosectSeason(rows)] };
+}
+
+export function getProfile(username) {
+  return cached(`profile:${username}`, async () => {
+    const playerInfo = await getProfileLookup(username);
+    const trainer = await queryAimlabs(GET_USER_PLAYS_AGG, { where: {
+      is_practice: { _eq: false }, score: { _gt: 0 }, user_id: { _eq: playerInfo.id },
+    } }, "Player statistics failed");
+    if (!Array.isArray(trainer.aimlab?.plays_agg)) throw new Error("Incomplete player statistics");
+    return calculateProfile(playerInfo, trainer.aimlab.plays_agg);
+  });
+}
+
+export function getTask(taskId) {
+  return cached(`task:${taskId}`, async () => {
+    const trainer = await queryAimlabs(GET_TASK_BY_ID, { slug: taskId }, "Task lookup failed");
+    return trainer.aimlab?.task || notFound("Task not found");
+  });
+}
+
+export function getTaskSearch(name) {
+  return cached(`search:${name}`, async () => {
+    const trainer = await queryAimlabs(GET_TASKS_BY_NAME, { name }, "Task search failed");
+    if (!Array.isArray(trainer.aimlab?.tasks)) throw new Error("Incomplete task search");
+    return trainer.aimlab.tasks;
+  });
+}
+
+async function leaderboard(input) {
+  const trainer = await queryAimlabs(GET_TASK_LEADERBOARD, { leaderboardInput: { clientId: "aimlab", taskMode: 0, ...input } }, "Task leaderboard failed");
+  const result = trainer.aimlab?.leaderboard;
+  if (!Array.isArray(result?.data) || !result.metadata) throw new Error("Incomplete task leaderboard");
+  return result;
+}
+
+export function getTaskLeaderboard(taskId, page = 0, weapon = null, mode = 0) {
+  return cached(JSON.stringify(["leaderboard", taskId, page, weapon, mode]), async () => {
+    const task = await getTask(taskId);
+    const result = await leaderboard({ taskId, weaponId: weapon ?? task.weapon_id, taskMode: mode, limit: 25, offset: page * 25 });
+    return {
+      weaponId: weapon ?? task.weapon_id,
+      mode,
+      pagination: { ...result.metadata, pageCount: Math.max(0, Math.ceil(result.metadata.totalRows / 25) - 1) },
+      data: result.data.map((row) => ({ rank: row.rank, username: row.username, score: row.score,
+        accuracy: Number.isFinite(row.accuracy) ? `${Math.round(row.accuracy * 100) / 100}%` : "—",
+        shotsHit: row.shots_hit ?? "—", playId: row.play_id, date: row.ended_at })),
+    };
+  });
+}
+
+function leaderboardRun(row) {
+  const metrics = {};
+  for (const [source, key] of Object.entries({ shots_hit: "hitsTotal", shots_fired: "shotsTotal", shots_missed: "missesTotal", kills: "killTotal", targets: "targetsTotal", accuracy: "accTotal", time_per_kill: "timePerKill" })) {
+    if (Number.isFinite(row[source])) metrics[key] = row[source];
+  }
+  for (const key of ["avgDist", "damageTotal"]) if (Number.isFinite(row.custom?.[key])) metrics[key] = row.custom[key];
+  return { id: row.play_id, score: row.score, startedAt: row.started_at, endedAt: row.ended_at, duration: row.task_duration,
+    pauseDuration: row.pause_duration, inputDevice: row.input_device ? [row.input_device] : [], metrics,
+    detailsSource: "leaderboard", replayAvailable: null };
+}
+
+export function getRunDetails(taskId, username, playId, weapon, score, mode = playId ? null : 0) {
+  return cached(JSON.stringify(["run", taskId, username, playId, weapon, score, mode]), async () => {
+    let row;
+    if (!playId) {
+      const result = await leaderboard({ taskId, username, weaponId: weapon, taskMode: mode, limit: 1 });
+      row = result.data.find((entry) => entry.username === username);
+      if (!row || (score !== null && row.score !== score)) return notFound("Aimlabs no longer lists this score.");
+      playId = row.play_id;
+    }
+    const trainer = await queryAimlabs(`query RunDetails($playId: ID!) { Trainer { publishedReplay(replayId: $playId) {
+      publisher { username } play { taskSlug ${runFields} }
+    } } }`, { playId }, "Run details failed");
+    const replay = trainer.publishedReplay;
+    if (replay) {
+      if (replay.publisher.username !== username || replay.play.taskSlug !== taskId || replay.play.id !== playId || (mode !== null && replay.play.convertedMode !== mode) || (weapon && replay.play.manifest.weaponId !== weapon) || (score !== null && replay.play.score !== score)) return notFound("This run does not match the selected score or player.");
+      return { ...publicRun(replay.play), detailsSource: "replay" };
+    }
+    if (!row) {
+      const result = await leaderboard({ taskId, playId, weaponId: weapon, taskMode: mode ?? 0, limit: 1 });
+      row = result.data.find((entry) => entry.play_id === playId && entry.username === username);
+    }
+    if (!row || (row.task_id && row.task_id !== taskId) || (score !== null && row.score !== score)) return notFound("Aimlabs has no public details for this run.");
+    return leaderboardRun(row);
+  });
+}
+
+export async function handleAppDataRequest(request, response, pathname, params) {
+  const catalog = pathname.match(/^\/api\/benchmarks\/(voltaic|revosect)$/);
+  const profile = pathname.match(/^\/api\/profiles\/([^/]+)(\/lookup)?$/);
+  const task = pathname.match(/^\/api\/tasks\/([^/]+)(\/leaderboard|\/run)?$/);
+  if (!profile && !task && !catalog) return false;
+  let status = 200;
+  let body;
+  let headers = {};
+  try {
+    if (request.method !== "GET") { const error = new Error("Method not allowed"); error.status = 405; throw error; }
+    const id = decodeURIComponent((profile || task || catalog)[1]);
+    const invalid = (value, limit) => !value || value.length > limit || /[\x00-\x1f]/.test(value);
+    if (invalid(id, profile ? 64 : 256)) throw new URIError("Invalid request");
+    const mode = params.has("mode") ? Number(params.get("mode")) : 0;
+    if (task && ["/leaderboard", "/run"].includes(task[2]) && (!Number.isInteger(mode) || mode < 0 || mode > 2147483647)) throw new URIError("Invalid task mode");
+    if (catalog) {
+      const ordinals = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth'];
+      body = { sets: calculateProfile({ id: 'catalog' }, []).benchmarkSets.filter(set => set.community === id).sort((a, b) => Number(a.id === 'legacy') - Number(b.id === 'legacy')).map(set => {
+        const result = Object.values(set.results)[0];
+        if (result.rankingAvailable === false) return set;
+        const mode = id === 'voltaic' ? `vt-${set.id}-novice` : 'ra-hard';
+        const columns = sortColumnsFor(mode);
+        const names = id === 'voltaic' ? result.categories.map(category => category.category) : ['Static', 'Dynamic', 'Precise', 'Reactive', 'Flick', 'Track'];
+        const rankingOptions = Object.keys(columns).map(value => ({ value, label: ordinals.includes(value) ? names[ordinals.indexOf(value)] : value[0].toUpperCase() + value.slice(1) }));
+        return { ...set, rankingOptions };
+      }) };
+    } else if (profile) body = profile[2] ? await getProfileLookup(id) : await getProfile(id);
+    else if (id === "search" && !task[2]) {
+      const name = params.get("name");
+      if (invalid(name, 100)) throw new URIError("Invalid task search");
+      body = await getTaskSearch(name);
+    } else if (task[2] === "/leaderboard") {
+      const page = Number(params.get("page") || 0);
+      if (!Number.isInteger(page) || page < 0 || page > 1_000_000) throw new URIError("Invalid page");
+      const weapon = params.get("weapon");
+      if (weapon !== null && invalid(weapon, 128)) throw new URIError("Invalid weapon");
+      body = await getTaskLeaderboard(id, page, weapon, mode);
+    } else if (task[2] === "/run") {
+      const username = params.get("username");
+      const playId = params.get("playId");
+      const weapon = params.get("weapon");
+      const score = params.has("score") ? Number(params.get("score")) : null;
+      if (invalid(username, 64) || (playId !== null && invalid(playId, 128)) || (weapon !== null && invalid(weapon, 128)) || (score !== null && (!Number.isFinite(score) || score < 0))) throw new URIError("Invalid run request");
+      body = await getRunDetails(id, username, playId, weapon, score, params.has("mode") ? mode : undefined);
+    } else body = await getTask(id);
+    headers["Cache-Control"] = "public, max-age=30";
+  } catch (error) {
+    status = error instanceof URIError ? 400 : error.status || 502;
+    if (status === 502) console.error("App data provider failure", error);
+    body = { error: status === 502 ? "Aimlabs data is unavailable. Try again shortly." : error.message };
+    if (error.retryAfter) headers["Retry-After"] = String(error.retryAfter);
+  }
+  response.writeHead(status, { "Content-Type": "application/json; charset=utf-8", ...headers });
+  response.end(JSON.stringify(body));
+  return true;
+}
