@@ -1,5 +1,12 @@
 let client;
 
+function redactedUrl(value) {
+  try {
+    const url = new URL(value);
+    return `${url.origin}${url.pathname}`;
+  } catch { return null; }
+}
+
 function pageProperties(route) {
   return {
     page_route: route.matched.at(-1)?.path || route.path,
@@ -22,7 +29,13 @@ export async function initAnalytics(router, app) {
       autocapture: false, capture_pageview: false, capture_pageleave: false,
       capture_exceptions: true, capture_performance: { web_vitals: true },
       person_profiles: 'identified_only',
-      session_recording: { maskAllInputs: true },
+      session_recording: {
+        maskAllInputs: true, recordHeaders: false, recordBody: false,
+        maskCapturedNetworkRequestFn(request) {
+          const name = redactedUrl(request.name);
+          return name ? { ...request, name } : null;
+        },
+      },
       enable_recording_console_log: false, disable_surveys: true,
       advanced_feature_flags_polling_interval: 0,
       before_send(event) {
@@ -30,10 +43,9 @@ export async function initAnalytics(router, app) {
           if (!properties) continue;
           for (const key of ['$current_url', '$referrer', '$initial_current_url', '$initial_referrer', '$session_entry_url', '$session_entry_referrer']) {
             if (!properties[key]) continue;
-            try {
-              const url = new URL(properties[key]);
-              properties[key] = `${url.origin}${url.pathname}`;
-            } catch { delete properties[key]; }
+            const value = redactedUrl(properties[key]);
+            if (value) properties[key] = value;
+            else delete properties[key];
           }
         }
         return event;
