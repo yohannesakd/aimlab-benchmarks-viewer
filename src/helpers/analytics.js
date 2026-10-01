@@ -25,7 +25,7 @@ export async function initAnalytics(router, app) {
     if (!config.enabled) return;
     const { default: posthog } = await import('posthog-js');
     client = posthog.init(config.token, {
-      api_host: config.host, defaults: '2026-05-30',
+      api_host: config.host, ui_host: config.uiHost, defaults: '2026-05-30',
       autocapture: false, capture_pageview: false, capture_pageleave: false,
       capture_exceptions: true, capture_performance: { web_vitals: true },
       person_profiles: 'identified_only',
