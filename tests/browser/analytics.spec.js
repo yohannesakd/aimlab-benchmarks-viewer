@@ -16,6 +16,7 @@ function unpack(value) {
 
 test('SPA events and replay exclude query strings and input text', async ({ page }) => {
   const events = [];
+  const logs = [];
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver', { get: () => false });
     Object.defineProperty(navigator, 'userAgentData', { get: () => undefined });
@@ -27,6 +28,10 @@ test('SPA events and replay exclude query strings and input text', async ({ page
 
     if (/umami|aimlab-analytics|vercel\/insights/.test(url.href) || url.hostname.endsWith('posthog.com')) legacyRequests.push(url.href);
     if (url.hostname === 'edge.saibot.site' || url.hostname.endsWith('posthog.com')) {
+      if (url.pathname.endsWith('/logs.js')) {
+        const body = await readFile(new URL('../../node_modules/posthog-js/dist/logs.js', import.meta.url));
+        return route.fulfill({ contentType: 'application/javascript', body });
+      }
       if (/\/(posthog-recorder|lazy-recorder)\.js$/.test(url.pathname)) {
         const body = await readFile(new URL('../../node_modules/posthog-js/dist/posthog-recorder.js', import.meta.url));
         return route.fulfill({ contentType: 'application/javascript', body });
@@ -36,10 +41,11 @@ test('SPA events and replay exclude query strings and input text', async ({ page
         const raw = request.postDataBuffer();
         if (raw) {
           const payload = JSON.parse(url.searchParams.get('compression') === 'gzip-js' ? gunzipSync(raw).toString() : raw.toString());
-          events.push(...(Array.isArray(payload) ? payload : payload.batch || [payload]));
+          if (url.pathname === '/i/v1/logs') logs.push(payload);
+          else events.push(...(Array.isArray(payload) ? payload : payload.batch || [payload]));
         }
       }
-      return route.fulfill({ json: { featureFlags: {}, sessionRecording: {
+      return route.fulfill({ json: { autocapture_opt_out: false, featureFlags: {}, sessionRecording: {
         endpoint: '/s/', sampleRate: 1,
         networkPayloadCapture: { capturePerformance: true, recordHeaders: false, recordBody: false },
       } } });
@@ -58,6 +64,13 @@ test('SPA events and replay exclude query strings and input text', async ({ page
   await page.waitForFunction(() => Boolean(window.__PosthogExtensions__?.rrweb?.record));
   await page.getByRole('link', { name: 'Profile', exact: true }).click();
   await page.getByRole('textbox', { name: 'Aimlab username · case sensitive' }).fill('never-capture-me');
+  await page.evaluate(async () => {
+    const moduleUrl = performance.getEntriesByType('resource').find(entry => /assets\/module-/.test(entry.name)).name;
+    const posthog = (await import(moduleUrl)).default;
+    posthog.logger.info('Diagnostic never-capture-me https://aimlab-tracker.vercel.app/api/tasks/search?q=never-capture-me token=log-secret person@example.com', { api_key: 'log-secret' });
+    console.warn('Diagnostic console never-capture-me');
+  });
+  await expect.poll(() => logs.length, { timeout: 10000 }).toBeGreaterThan(0);
   await expect.poll(() => events.filter(event => event.event === '$snapshot').length, { timeout: 10000 }).toBeGreaterThan(0);
   await page.getByRole('link', { name: 'About this project', exact: true }).click();
   await expect.poll(() => events.filter(event => event.event === '$pageview').length).toBe(3);
@@ -83,6 +96,13 @@ test('SPA events and replay exclude query strings and input text', async ({ page
   expect(snapshots.some(snapshot => snapshot.type === 4 && snapshot.data.href === 'https://aimlab-tracker.vercel.app/home')).toBe(true);
   expect(JSON.stringify(snapshots)).toContain('https://aimlab-tracker.vercel.app/api/tasks/search');
   expect(JSON.stringify(decoded).includes('never-capture-me')).toBe(false);
+  const logged = JSON.stringify(logs);
+  expect(logged.includes('never-capture-me') || logged.includes('log-secret') || logged.includes('person@example.com')).toBe(false);
+  expect(logged).toContain('Diagnostic console');
+  expect(events.some(event => event.event === '$autocapture')).toBe(true);
+  const heatmap = events.find(event => event.event === '$$heatmap');
+  expect(heatmap.properties.$heatmap_data['https://aimlab-tracker.vercel.app/home'].length).toBeGreaterThan(0);
+  expect(events.filter(event => event.event === '$pageleave').map(event => event.properties.$pathname)).toEqual(['/home', '/profile']);
   expect(legacyRequests).toEqual([]);
 });
 

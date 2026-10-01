@@ -13,7 +13,7 @@
           requirements come from Voltaic and Revosect.
         </p>
         <p>
-          PostHog collects usage, errors, and sampled session recordings.
+          PostHog collects usage, performance, errors, and session recordings.
           Form inputs are masked in recordings.
         </p>
         <p>
