@@ -31,7 +31,7 @@ const query = `
   }
 `;
 
-const cached = createRequestCache({ ttlMs: cacheLifeMs, maxEntries: maxCacheEntries });
+const cached = createRequestCache({ ttlMs: cacheLifeMs, maxEntries: maxCacheEntries, name: 'runs' });
 
 function send(response, status, body, extraHeaders = {}) {
   response.writeHead(status, {

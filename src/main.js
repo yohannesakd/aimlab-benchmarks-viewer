@@ -3,6 +3,7 @@ import "./style.css";
 import router from "./router.js";
 import store from "./store/index.js";
 import App from "./App.vue";
+import { initAnalytics } from './helpers/analytics.js';
 
 import BaseCard from "./components/UI/BaseCard.vue";
 import ProgressBar from "./components/UI/ProgressBar.vue";
@@ -11,7 +12,9 @@ import Dropdown from "./components/UI/Dropdown.vue";
 import PlayIcon from "./components/UI/PlayIcon.vue";
 import LoadingSpinner from "./components/LoadingSpinner.vue";
 
-createApp(App)
+const app = createApp(App);
+void initAnalytics(router, app);
+app
   .component("base-card", BaseCard)
   .component("loading-spinner", LoadingSpinner)
   .component("progress-bar", ProgressBar)

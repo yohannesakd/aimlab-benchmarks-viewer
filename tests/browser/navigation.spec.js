@@ -17,7 +17,8 @@ async function fixtures(page, overrides = {}) {
     const custom = overrides[url.pathname];
     if (custom) return custom(route, url);
     let body;
-    if (url.pathname.endsWith('/runs')) body = { taskName: 'Sixshot', totalCount: 1, pageInfo: { hasNextPage: false }, runs: [run] };
+    if (url.pathname === '/api/telemetry/config') body = { enabled: false };
+    else if (url.pathname.endsWith('/runs')) body = { taskName: 'Sixshot', totalCount: 1, pageInfo: { hasNextPage: false }, runs: [run] };
     else if (url.pathname.endsWith('/details')) body = {};
     else if (url.pathname.endsWith('/lookup')) body = { username: url.pathname.split('/')[3] };
     else if (url.pathname.startsWith('/api/profiles/')) body = snapshot(url.pathname.split('/')[3]);

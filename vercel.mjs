@@ -7,7 +7,7 @@ if (origin.protocol !== 'https:' || origin.pathname !== '/' || origin.search || 
 
 export default {
   rewrites: [
-    ...['leaderboards', 'profiles', 'tasks', 'benchmarks'].map(namespace => ({
+  ...['leaderboards', 'profiles', 'tasks', 'benchmarks', 'telemetry'].map(namespace => ({
       source: `/api/${namespace}/:path*`,
       destination: `${origin.origin}/api/${namespace}/:path*`,
     })),

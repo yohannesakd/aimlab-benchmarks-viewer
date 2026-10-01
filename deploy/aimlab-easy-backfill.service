@@ -8,6 +8,9 @@ ConditionPathExists=!/home/sai/.local/share/aimlab-viewer/ra-easy.sqlite
 Type=simple
 WorkingDirectory=/home/sai/apps/aimlab-viewer
 Environment=AIMLAB_DATA_DIR=/home/sai/.local/share/aimlab-viewer
+EnvironmentFile=-/home/sai/.config/aimlab-viewer/posthog.env
+Environment=AIMLAB_ENV=production
+Environment=POSTHOG_SERVICE=aimlab-collector
 ExecStart=/usr/bin/flock -n /home/sai/.local/share/aimlab-viewer/refresh.lock /home/sai/.nvm/versions/node/v24.16.0/bin/node server/refresh-database.js ra-easy
 Restart=on-failure
 RestartSec=60s

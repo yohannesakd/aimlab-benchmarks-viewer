@@ -17,8 +17,8 @@ async function configuration(environment, origin) {
 test('preview and production proxies choose the intended API and reject credential-bearing or path origins', async () => {
   for (const [environment, host] of [['preview', 'aimlab-staging-api.saibot.site'], ['production', 'aimlab-api.saibot.site']]) {
     const config = await configuration(environment);
-    assert.equal(config.rewrites.length, 5);
-    assert.deepEqual(config.rewrites.slice(0, 4).map(rule => rule.destination), ['leaderboards', 'profiles', 'tasks', 'benchmarks'].map(namespace => `https://${host}/api/${namespace}/:path*`));
+    assert.equal(config.rewrites.length, 6);
+    assert.deepEqual(config.rewrites.slice(0, 5).map(rule => rule.destination), ['leaderboards', 'profiles', 'tasks', 'benchmarks', 'telemetry'].map(namespace => `https://${host}/api/${namespace}/:path*`));
   }
   assert.equal((await configuration('preview', 'https://fixture.invalid')).rewrites[0].destination, 'https://fixture.invalid/api/leaderboards/:path*');
   for (const origin of ['http://fixture.invalid', 'https://secret:password@fixture.invalid', 'https://fixture.invalid/path']) {

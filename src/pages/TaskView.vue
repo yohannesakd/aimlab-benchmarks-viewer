@@ -10,7 +10,7 @@
       <div v-if="currentTask.description || currentTask.workshop_id" class="panel task-summary">
         <div class="task-summary-main">
           <p v-if="currentTask.description" class="muted">{{ currentTask.description }}</p>
-          <a v-if="currentTask.workshop_id" :href="taskLink" class="btn-primary" target="_blank" rel="noopener noreferrer"><play-icon class="h-5 w-5"></play-icon>Play task</a>
+          <a v-if="currentTask.workshop_id" :href="taskLink" class="btn-primary" target="_blank" rel="noopener noreferrer" @click="captureEvent('task_play', { task_id: currentTask.id })"><play-icon class="h-5 w-5"></play-icon>Play task</a>
         </div>
       </div>
 
@@ -70,6 +70,7 @@ import { mapGetters } from "vuex";
 import { fetchData } from "../helpers/api.js";
 import { openRunDetails } from "../helpers/runDetails.js";
 import { taskDeepLink } from "../helpers/taskLinks.js";
+import { captureEvent } from '../helpers/analytics.js';
 export default {
   props: ["taskId"],
   data() {
@@ -129,6 +130,7 @@ export default {
     this.leaderboardRequestVersion++;
   },
   methods: {
+    captureEvent,
     handlePageSelect(event) {
       let value = parseInt(event.target.textContent);
       if (value) {

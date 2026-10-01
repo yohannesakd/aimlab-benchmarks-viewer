@@ -7,6 +7,7 @@ import { calculateRevosectBenchmarks, caclulateVT } from "./benchmark-calculatio
 import { categories as raCategories } from "./revosectData.js";
 import { categories as vtCategories } from "./voltaicData.js";
 import { fetchLeaderboardPage } from "./aimlab-pages.js";
+import { captureTelemetry, logTelemetry, shutdownTelemetry } from './telemetry.js';
 import { calculateVoltaicSeason } from "./benchmark-seasons.js";
 
 import { benchmarkSets, seasonModes, sortColumnsFor } from './benchmark-registry.js';
@@ -229,16 +230,24 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1
   if (rescore && !modes.length) throw new Error('Specify a benchmark mode for --rescore');
   if (!modes.length) modes.push(...Object.keys(benchmarkSets).filter(mode => mode.startsWith("ra-") || seasonModes[mode]));
   for (const mode of modes) {
+    const started = performance.now();
+    captureTelemetry('collection_started', { mode, provider, rescore });
     try {
       const result = await (rescore ? rescoreDatabase : refreshDatabase)(mode, {
         collectorProvider: provider,
-        onProgress: (name, offset, total, done) =>
-          console.log(`${mode}: ${name}: ${offset}/${total ?? "?"}${done ? " done" : ""}`),
+        onProgress: (name, offset, total, done) => {
+          console.log(`${mode}: ${name}: ${offset}/${total ?? "?"}${done ? " done" : ""}`);
+          logTelemetry('collection_progress', { mode, scenario: name, offset, total, done });
+        },
       });
       console.log(`${result.mode}: ${result.count} players`);
+      captureTelemetry('collection_completed', { mode, provider, rescore, players: result.count, duration_ms: Math.round(performance.now() - started) });
     } catch (error) {
       console.error(`${mode}: ${error.message}`);
       process.exitCode = 1;
+      captureTelemetry('collection_failed', { mode, provider, rescore, error_type: error.name, duration_ms: Math.round(performance.now() - started) });
+      logTelemetry('collection_failed', { mode, error_type: error.name }, 'ERROR');
     }
   }
+  await shutdownTelemetry();
 }

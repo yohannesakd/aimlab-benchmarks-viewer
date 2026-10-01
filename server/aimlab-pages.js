@@ -1,3 +1,5 @@
+import { logTelemetry } from './telemetry.js';
+
 const pageSize = 100;
 const pagesPerRequest = 20;
 const pageNames = Array.from(
@@ -71,6 +73,7 @@ export async function fetchLeaderboardPage(bench, offset, { provider = 'legacy',
       const result = await readBulkJson(response);
       body = result.body;
       onResponse?.({ provider, bytes: result.bytes, status: response.status });
+      logTelemetry('collector_batch', { provider, bytes: result.bytes, status: response.status, offset, attempt: attempt + 1 });
     } catch (error) {
       if (response.status !== 429) throw error;
       body = {};
@@ -83,6 +86,7 @@ export async function fetchLeaderboardPage(bench, offset, { provider = 'legacy',
       const seconds = Number.isFinite(retryAfter) && retryAfter > 0
         ? retryAfter
         : waitMessage ? Number(waitMessage[1]) : 10;
+      logTelemetry('collector_rate_limit', { provider, offset, attempt: attempt + 1, retry_after_seconds: seconds }, 'WARN');
       await sleep(seconds * 1000 + 250);
       continue;
     }

@@ -13,6 +13,10 @@
           requirements come from Voltaic and Revosect.
         </p>
         <p>
+          PostHog collects usage, errors, and sampled session recordings.
+          Form inputs are masked in recordings.
+        </p>
+        <p>
           Created by Yohannes, known in the aim training community as Saibot.
         </p>
         <div

@@ -26,6 +26,7 @@
 
 <script>
 import { fetchData } from "../helpers/api.js";
+import { captureEvent } from '../helpers/analytics.js';
 export default {
   data() {
     return {
@@ -66,12 +67,12 @@ export default {
         const data = await fetchData(`/api/profiles/${encodeURIComponent(username)}/lookup`);
         if (version !== this.requestVersion) return;
         this.playerInfo = data;
-        window.umami?.track("profile-search", { result: "found" });
+        captureEvent('profile_search', { result: 'found' });
       } catch (error) {
         if (version === this.requestVersion) {
           console.error(error);
           this.searchError = error.status !== 404;
-          window.umami?.track("profile-search", { result: "error" });
+          captureEvent('profile_search', { result: error.status === 404 ? 'missing' : 'error' });
         }
       } finally {
         if (version === this.requestVersion) this.isLoading = false;

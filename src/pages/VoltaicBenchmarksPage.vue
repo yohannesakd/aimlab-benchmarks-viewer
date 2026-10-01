@@ -72,6 +72,7 @@ import {
 import { rankImage } from "../helpers/rankAssets.js";
 import BenchmarkControls from "../components/BenchmarkControls.vue";
 import { openRunDetails } from "../helpers/runDetails.js";
+import { captureEvent } from '../helpers/analytics.js';
 export default {
     components: { BenchmarkControls },
     data() {
@@ -132,6 +133,7 @@ export default {
             try {
                 const workshopId = bench.workshopId || await findWorkshopId(bench.id);
                 window.open(taskDeepLink(workshopId), "_blank");
+                captureEvent('task_play', { task_id: bench.id, community: 'voltaic' });
             } catch (error) {
                 console.error(error);
                 this.actionError = "Could not open this task. Try again.";

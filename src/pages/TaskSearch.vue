@@ -35,6 +35,7 @@
 
 <script>
 import { fetchData } from "../helpers/api.js";
+import { captureEvent } from '../helpers/analytics.js';
 export default {
   data() {
     return {
@@ -60,14 +61,14 @@ export default {
         if (!Array.isArray(data)) throw new Error("Missing task search results");
         this.taskList = data;
         this.searchStatus = this.taskList.length ? "" : "No tasks found";
-        window.umami?.track("task-search", {
+        captureEvent('task_search', {
           result: this.taskList.length ? "found" : "missing",
         });
       } catch (error) {
         if (version === this.requestVersion) {
           console.error(error);
           this.searchStatus = "Search is unavailable. Try again.";
-          window.umami?.track("task-search", { result: "error" });
+          captureEvent('task_search', { result: 'error' });
         }
       }
     },

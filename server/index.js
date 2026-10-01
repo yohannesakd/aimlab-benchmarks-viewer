@@ -5,6 +5,7 @@ import { handleLeaderboardRequest } from "./leaderboard-db.js";
 import { handlePlayerRunsRequest } from "./player-runs.js";
 import { handleAppDataRequest } from "./app-data.js";
 import { handlePublicDetailsRequest } from "./public-details.js";
+import { handleTelemetryConfig, instrumentRequest, installTelemetryShutdown } from './telemetry.js';
 
 const port = Number(process.env.PORT || 5180);
 const distDir = resolve("dist");
@@ -23,7 +24,7 @@ function send(response, status, body, type) {
   response.end(body);
 }
 
-const server = createServer(async (request, response) => {
+const server = createServer(instrumentRequest(async (request, response) => {
   if (request.method !== "GET") {
     send(response, 405, "Method not allowed", "text/plain");
     return;
@@ -46,6 +47,8 @@ const server = createServer(async (request, response) => {
     send(response, 200, "ok", "text/plain");
     return;
   }
+
+  if (handleTelemetryConfig(request, response, pathname)) return;
 
   if (await handleLeaderboardRequest(request, response, pathname, searchParams)) return;
   if (await handlePlayerRunsRequest(request, response, rawPathname, searchParams)) return;
@@ -81,7 +84,9 @@ const server = createServer(async (request, response) => {
     if (error.code !== "ENOENT") console.error(error);
     send(response, 404, "Not found", "text/plain");
   }
-});
+}));
+
+installTelemetryShutdown(server);
 
 server.listen(port, "127.0.0.1", () => {
   console.log(`Aimlab viewer listening on 127.0.0.1:${server.address().port}`);

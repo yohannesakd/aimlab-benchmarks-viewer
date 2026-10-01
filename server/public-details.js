@@ -44,7 +44,7 @@ const activityQuery = `
   }
 `;
 
-const cached = createRequestCache({ ttlMs: cacheLifeMs, maxEntries: maxCacheEntries });
+const cached = createRequestCache({ ttlMs: cacheLifeMs, maxEntries: maxCacheEntries, name: 'details' });
 
 function send(response, status, body, headers = {}) {
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8", ...headers });
