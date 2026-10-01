@@ -3,7 +3,8 @@ let client;
 function redactedUrl(value) {
   try {
     const url = new URL(value);
-    return `${url.origin}${url.pathname}`;
+    const path = url.pathname.replace(/^(\/api\/profiles\/)[^/]+(?=\/|$)/, '$1:username');
+    return `${url.origin}${path}`;
   } catch { return null; }
 }
 
@@ -22,7 +23,8 @@ export async function initAnalytics(router, app) {
     const response = await fetch('/api/telemetry/config', { signal: AbortSignal.timeout(3000) });
     if (!response.ok) return;
     const config = await response.json();
-    if (!config.enabled) return;
+    if (!config.enabled || config.environment !== 'production'
+      || location.hostname !== 'aimlab-tracker.vercel.app' || navigator.webdriver) return;
     const { default: posthog } = await import('posthog-js');
     client = posthog.init(config.token, {
       api_host: config.host, ui_host: config.uiHost, defaults: '2026-05-30',

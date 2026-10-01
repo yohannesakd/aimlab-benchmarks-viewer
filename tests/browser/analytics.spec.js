@@ -44,16 +44,16 @@ test('SPA events and replay exclude query strings and input text', async ({ page
         networkPayloadCapture: { capturePerformance: true, recordHeaders: false, recordBody: false },
       } } });
     }
-    if (url.pathname === '/api/telemetry/config') return route.fulfill({ json: { enabled: true, token: 'phc_fixture', host: 'https://edge.saibot.site', uiHost: 'https://eu.posthog.com', environment: 'test' } });
+    if (url.pathname === '/api/telemetry/config') return route.fulfill({ json: { enabled: true, token: 'phc_fixture', host: 'https://edge.saibot.site', uiHost: 'https://eu.posthog.com', environment: 'production' } });
     if (url.pathname.startsWith('/api/')) return route.fulfill({ json: { sets: [], pagination: { pageCount: 0 }, data: [] } });
-    if (url.hostname === 'aimlab.test') {
+    if (url.hostname === 'aimlab-tracker.vercel.app') {
       const response = await route.fetch({ url: `http://127.0.0.1:5294${url.pathname}${url.search}` });
       return route.fulfill({ response });
     }
     return route.continue();
   });
   // A non-localhost origin exercises the SDK's real network recording path.
-  await page.goto('http://aimlab.test/home?private=never-capture-me');
+  await page.goto('https://aimlab-tracker.vercel.app/home?private=never-capture-me');
   await expect.poll(() => events.filter(event => event.event === '$pageview').length).toBe(1);
   await page.waitForFunction(() => Boolean(window.__PosthogExtensions__?.rrweb?.record));
   await page.getByRole('link', { name: 'Profile', exact: true }).click();
@@ -68,7 +68,7 @@ test('SPA events and replay exclude query strings and input text', async ({ page
   await expect.poll(() => events.filter(event => event.event === 'benchmark_selection').length).toBe(1);
   await page.evaluate(() => fetch('/api/tasks/search?name=never-capture-me'));
   await page.getByRole('heading', { name: 'About Aimlab Tracker', exact: true }).click();
-  await expect.poll(() => JSON.stringify(unpack(events)).includes('http://aimlab.test/api/tasks/search'), { timeout: 10000 }).toBe(true);
+  await expect.poll(() => JSON.stringify(unpack(events)).includes('https://aimlab-tracker.vercel.app/api/tasks/search'), { timeout: 10000 }).toBe(true);
   await page.evaluate(async () => {
     const moduleUrl = performance.getEntriesByType('resource').find(entry => /assets\/module-/.test(entry.name)).name;
     const posthog = (await import(moduleUrl)).default;
@@ -80,8 +80,43 @@ test('SPA events and replay exclude query strings and input text', async ({ page
   const decoded = unpack(events);
   const snapshots = decoded.filter(event => event.event === '$snapshot').flatMap(event => event.properties.$snapshot_data);
   expect(snapshots.some(snapshot => snapshot.type === 2)).toBe(true);
-  expect(snapshots.some(snapshot => snapshot.type === 4 && snapshot.data.href === 'http://aimlab.test/home')).toBe(true);
-  expect(JSON.stringify(snapshots)).toContain('http://aimlab.test/api/tasks/search');
-  expect(JSON.stringify(decoded)).not.toContain('never-capture-me');
+  expect(snapshots.some(snapshot => snapshot.type === 4 && snapshot.data.href === 'https://aimlab-tracker.vercel.app/home')).toBe(true);
+  expect(JSON.stringify(snapshots)).toContain('https://aimlab-tracker.vercel.app/api/tasks/search');
+  expect(JSON.stringify(decoded).includes('never-capture-me')).toBe(false);
   expect(legacyRequests).toEqual([]);
 });
+
+for (const scenario of [
+  { name: 'private VPS', origin: 'https://vps.snapper-cod.ts.net:5194', environment: 'production', automated: false },
+  { name: 'staging', origin: 'https://aimlab-tracker.vercel.app', environment: 'staging', automated: false },
+  { name: 'automation', origin: 'https://aimlab-tracker.vercel.app', environment: 'production', automated: true },
+]) {
+  test(`${scenario.name} visits do not initialize browser analytics`, async ({ page }) => {
+    await page.addInitScript(automated => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => automated });
+    }, scenario.automated);
+    const analyticsRequests = [];
+    await page.route('**/*', async route => {
+      const url = new URL(route.request().url());
+      if (url.hostname === 'edge.saibot.site' || url.hostname.endsWith('posthog.com')) {
+        analyticsRequests.push(url.href);
+        return route.fulfill({ json: {} });
+      }
+      if (url.pathname === '/api/telemetry/config') return route.fulfill({ json: {
+        enabled: true, token: 'phc_fixture', host: 'https://edge.saibot.site',
+        uiHost: 'https://eu.posthog.com', environment: scenario.environment,
+      } });
+      if (url.origin === scenario.origin) {
+        const response = await route.fetch({ url: `http://127.0.0.1:5294${url.pathname}${url.search}` });
+        return route.fulfill({ response });
+      }
+      return route.continue();
+    });
+    const configured = page.waitForResponse(response => new URL(response.url()).pathname === '/api/telemetry/config');
+    await page.goto(`${scenario.origin}/home`);
+    await configured;
+    await page.getByRole('link', { name: 'About this project', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'About Aimlab Tracker', exact: true })).toBeVisible();
+    expect(analyticsRequests).toEqual([]);
+  });
+}
