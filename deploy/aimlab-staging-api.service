@@ -5,9 +5,9 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/sai/aimlab-staging
-Environment=AIMLAB_DATA_DIR=/home/sai/.local/share/aimlab-viewer
-EnvironmentFile=-/home/sai/.config/aimlab-viewer/posthog.env
+WorkingDirectory=/home/sai/code/aimlab/worktrees/staging
+Environment=AIMLAB_DATA_DIR=/home/sai/code/aimlab/data/leaderboards
+EnvironmentFile=-/home/sai/code/aimlab/config/viewer/posthog.env
 Environment=AIMLAB_ENV=staging
 Environment=POSTHOG_SERVICE=aimlab-api
 Environment=PUBLIC_API_PORT=5282
