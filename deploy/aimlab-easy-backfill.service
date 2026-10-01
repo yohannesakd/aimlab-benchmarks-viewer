@@ -2,16 +2,16 @@
 Description=Complete the initial Revosect Easy leaderboard backfill
 After=network-online.target
 Wants=network-online.target
-ConditionPathExists=!/home/sai/.local/share/aimlab-viewer/ra-easy.sqlite
+ConditionPathExists=!/home/sai/code/aimlab/data/leaderboards/ra-easy.sqlite
 
 [Service]
 Type=simple
-WorkingDirectory=/home/sai/apps/aimlab-viewer
-Environment=AIMLAB_DATA_DIR=/home/sai/.local/share/aimlab-viewer
-EnvironmentFile=-/home/sai/.config/aimlab-viewer/posthog.env
+WorkingDirectory=/home/sai/code/aimlab/runtime/current
+Environment=AIMLAB_DATA_DIR=/home/sai/code/aimlab/data/leaderboards
+EnvironmentFile=-/home/sai/code/aimlab/config/viewer/posthog.env
 Environment=AIMLAB_ENV=production
 Environment=POSTHOG_SERVICE=aimlab-collector
-ExecStart=/usr/bin/flock -n /home/sai/.local/share/aimlab-viewer/refresh.lock /home/sai/.nvm/versions/node/v24.16.0/bin/node server/refresh-database.js ra-easy
+ExecStart=/usr/bin/flock -n /home/sai/code/aimlab/data/leaderboards/refresh.lock /home/sai/.nvm/versions/node/v24.16.0/bin/node server/refresh-database.js ra-easy
 Restart=on-failure
 RestartSec=60s
 Nice=10

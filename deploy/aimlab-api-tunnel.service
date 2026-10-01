@@ -5,7 +5,7 @@ Wants=aimlab-api.service network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/cloudflared tunnel --config /home/sai/.cloudflared/aimlab-api.yml run aimlab-api
+ExecStart=/usr/local/bin/cloudflared tunnel --config /home/sai/code/aimlab/config/tunnel/aimlab-api.yml run aimlab-api
 Restart=always
 RestartSec=5
 

@@ -1,6 +1,6 @@
 # Aimlabs data inventory
 
-Checked **2026-09-29** against the public `https://api.aimlab.gg/graphql` endpoint. This is a field and behavior inventory for future product work, not a claim that Aimlabs supports these calls as a stable, unauthenticated integration contract. The archived SDL at `/home/sai/code/aimlab-schema-reference/latest-schema.graphql` is a historical reference; live validation takes precedence. [The archived schema map](aimlabs-archived-schema-map.md) and [full field index](aimlabs-archived-schema-fields.tsv) cover its declared paths, including fields not checked live. Probes used small result limits and public profiles or tasks. No private account token was used.
+Checked **2026-09-29** against the public `https://api.aimlab.gg/graphql` endpoint. This is a field and behavior inventory for future product work, not a claim that Aimlabs supports these calls as a stable, unauthenticated integration contract. The archived SDL at `/home/sai/code/aimlab/references/schemas/latest-schema.graphql` is a historical reference; live validation takes precedence. [The archived schema map](aimlabs-archived-schema-map.md) and [full field index](aimlabs-archived-schema-fields.tsv) cover its declared paths, including fields not checked live. Probes used small result limits and public profiles or tasks. No private account token was used.
 
 ## What the viewer currently uses
 
@@ -111,7 +111,7 @@ The earlier scan of `api.aimlab.gg` was targeted: introspection there returned H
 
 ### Current official endpoint: full schema and public checks
 
-The [current Aimlabs web client](https://aimlabs.com/_next/static/chunks/pages/_app-236ef93a88d9fbfd.js) names `https://api.aimlabs.com/graphql` as its API and sends queries under `Trainer { ... }`. `get-graphql-schema https://api.aimlabs.com/graphql` succeeded anonymously on 2026-09-29. Its 15,191-line, 409,544-byte SDL is [saved in this repository](aimlabs-current-schema-2026-09-29.graphql) and mirrored at `/home/sai/code/aimlab-schema-reference/current-api-2026-09-29.graphql` (SHA-256 `93a9570fb03f572137196de33a01aeaaa10b45fb47ffc2218e9fc5fb02c5ad15`). This is a full structural schema, **not** evidence that every field can be read anonymously. The archived SDL remains useful for identifying newly added names. [Source: official web client and dated direct introspection.]
+The [current Aimlabs web client](https://aimlabs.com/_next/static/chunks/pages/_app-236ef93a88d9fbfd.js) names `https://api.aimlabs.com/graphql` as its API and sends queries under `Trainer { ... }`. `get-graphql-schema https://api.aimlabs.com/graphql` succeeded anonymously on 2026-09-29. Its 15,191-line, 409,544-byte SDL is [saved in this repository](aimlabs-current-schema-2026-09-29.graphql) and mirrored at `/home/sai/code/aimlab/references/schemas/current-api-2026-09-29.graphql` (SHA-256 `93a9570fb03f572137196de33a01aeaaa10b45fb47ffc2218e9fc5fb02c5ad15`). This is a full structural schema, **not** evidence that every field can be read anonymously. The archived SDL remains useful for identifying newly added names. [Source: official web client and dated direct introspection.]
 
 | Current field or family | Anonymous result and limit |
 | --- | --- |
