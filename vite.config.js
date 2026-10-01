@@ -3,9 +3,6 @@ import vue from "@vitejs/plugin-vue";
 import { fileURLToPath } from "node:url";
 const apiOrigin = process.env.AIMLAB_API_ORIGIN || 'http://127.0.0.1:5282';
 export default defineConfig({
-  define: {
-    "import.meta.env.VITE_VERCEL_ANALYTICS_ENABLED": process.env.VERCEL === "1",
-  },
   plugins: [vue()],
   resolve: {
     alias: {

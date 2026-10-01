@@ -7,7 +7,7 @@ import { voltaicSeasons, calculateVoltaicSeason, calculateRevosectSeason } from 
 import { sortColumnsFor } from './benchmark-registry.js';
 
 import { createRequestCache } from './request-cache.js';
-const cached = createRequestCache({ ttlMs: 60_000, maxEntries: 120 });
+const cached = createRequestCache({ ttlMs: 60_000, maxEntries: 120, name: 'app-data' });
 
 function notFound(message) {
   const error = new Error(message);

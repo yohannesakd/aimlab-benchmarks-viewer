@@ -1,3 +1,5 @@
+import { logTelemetry, withTelemetrySpan } from './telemetry.js';
+
 const endpoint = "https://api.aimlabs.com/graphql";
 const maxConcurrentRequests = 4;
 const maxResponseBytes = 1_000_000;
@@ -22,7 +24,17 @@ async function readBoundedJson(response) {
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
 
-export async function queryAimlabs(query, variables, missingDataMessage) {
+export function queryAimlabs(query, variables, missingDataMessage) {
+  return withTelemetrySpan('aimlabs.query', async span => {
+    try { return await executeQuery(query, variables, missingDataMessage, span); }
+    catch (error) {
+      logTelemetry('aimlabs_failure', { error_type: error.name, provider_status: error.providerStatus, provider_codes: error.providerCodes, retry_after_seconds: error.retryAfter }, 'WARN');
+      throw error;
+    }
+  });
+}
+
+async function executeQuery(query, variables, missingDataMessage, span) {
   if (Date.now() < retryAfter) {
     const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
     error.status = 503;
@@ -43,11 +55,13 @@ export async function queryAimlabs(query, variables, missingDataMessage) {
       body: JSON.stringify({ query, variables }),
       signal: AbortSignal.timeout(10_000),
     });
+    span?.setAttribute('http.response.status_code', response.status);
     if (response.status === 429) {
       const seconds = retryDelaySeconds(response.headers.get("Retry-After"));
       retryAfter = Math.max(retryAfter, Date.now() + seconds * 1000);
       const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
       error.status = 503;
+      error.providerStatus = 429;
       error.retryAfter = seconds;
       throw error;
     }

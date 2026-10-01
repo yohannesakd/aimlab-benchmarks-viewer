@@ -20,7 +20,7 @@
         <h3>Run</h3>
         <dl class="run-facts"><div v-for="item in metadata" :key="item.label"><dt>{{ item.label }}</dt><dd>{{ item.value }}</dd></div></dl>
       </section>
-      <a v-if="run.replayAvailable !== false" :href="replayLink" target="_blank" rel="noopener noreferrer" class="text-link">Open run in Aimlabs ↗</a>
+      <a v-if="run.replayAvailable !== false" :href="replayLink" target="_blank" rel="noopener noreferrer" class="text-link" @click="captureEvent('replay_opened', { run_id: run.id, task_id: selection.taskId })">Open run in Aimlabs ↗</a>
     </div>
     <div v-if="selection" class="modal-footer">
       <router-link v-if="$route.path !== historyLink" class="text-link" :to="historyLink" @click="close">Player’s run history →</router-link>
@@ -33,6 +33,7 @@
 import { selectedRun, closeRunDetails } from "../helpers/runDetails.js";
 import { fetchData } from "../helpers/api.js";
 import { replayDeepLink } from "../helpers/taskLinks.js";
+import { captureEvent } from '../helpers/analytics.js';
 
 export default {
   data() { return { run: null, loading: false, error: "", controller: null, previousOverflow: null }; },
@@ -88,6 +89,7 @@ export default {
   },
   beforeUnmount() { this.controller?.abort(); this.restoreScroll(); },
   methods: {
+    captureEvent,
     close: closeRunDetails,
     restoreScroll() {
       if (this.previousOverflow !== null) document.body.style.overflow = this.previousOverflow;
@@ -114,8 +116,12 @@ export default {
           const run = await fetchData(`/api/tasks/${encodeURIComponent(selection.taskId)}/run?${params}`, { signal: controller.signal });
           if (!controller.signal.aborted && selection === this.selection) this.run = run;
         }
+        if (!controller.signal.aborted && selection === this.selection) captureEvent('run_loaded', { task_id: selection.taskId, replay_available: this.run.replayAvailable !== false });
       } catch (error) {
-        if (!controller.signal.aborted && selection === this.selection) this.error = error.message;
+        if (!controller.signal.aborted && selection === this.selection) {
+          this.error = error.message;
+          captureEvent('run_failed', { task_id: selection.taskId, status: error.status });
+        }
       } finally {
         if (!controller.signal.aborted && selection === this.selection) this.loading = false;
       }
