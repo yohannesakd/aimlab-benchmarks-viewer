@@ -6,6 +6,7 @@ import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 
 test('telemetry keeps concurrent requests separate, redacts query values, and survives export failure', async t => {
   process.env.POSTHOG_PROJECT_TOKEN = 'phc_fixture';
+  process.env.POSTHOG_BROWSER_HOST = 'https://edge.saibot.site';
   process.env.AIMLAB_ENV = 'test';
   const logs = [];
   const exports = [];
@@ -50,7 +51,10 @@ test('telemetry keeps concurrent requests separate, redacts query values, and su
   assert.equal((await failed.json()).error, 'Data is unavailable. Try again.');
   const config = await fetch(`${origin}/api/telemetry/config`);
   assert.equal(config.headers.get('cache-control'), 'no-store');
-  assert.equal((await config.json()).token, 'phc_fixture');
+  const browserConfig = await config.json();
+  assert.equal(browserConfig.token, 'phc_fixture');
+  assert.equal(browserConfig.host, 'https://edge.saibot.site');
+  assert.equal(browserConfig.uiHost, 'https://eu.posthog.com');
   const started = performance.now();
   await shutdownTelemetry();
   stopped = true;

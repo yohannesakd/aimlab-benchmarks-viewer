@@ -7,11 +7,14 @@ import { context as otelContext, trace } from '@opentelemetry/api';
 
 const key = process.env.POSTHOG_PROJECT_TOKEN;
 const host = process.env.POSTHOG_HOST || 'https://eu.i.posthog.com';
+const browserHost = process.env.POSTHOG_BROWSER_HOST || host;
 const environment = process.env.AIMLAB_ENV || 'development';
 const service = process.env.POSTHOG_SERVICE || 'aimlab-api';
 const configured = Boolean(key);
-if (configured && (!/^phc_[A-Za-z0-9]+$/.test(key) || !['https://eu.i.posthog.com', 'https://us.i.posthog.com'].includes(host))) {
-  throw new Error('Use a PostHog project token and its EU or US ingestion host');
+const ingestionHosts = ['https://eu.i.posthog.com', 'https://us.i.posthog.com'];
+if (configured && (!/^phc_[A-Za-z0-9]+$/.test(key) || !ingestionHosts.includes(host)
+  || ![...ingestionHosts, 'https://edge.saibot.site'].includes(browserHost))) {
+  throw new Error('Use a PostHog project token, its EU or US ingestion host, and an approved browser proxy');
 }
 
 const client = configured ? new PostHog(key, {
@@ -31,7 +34,9 @@ const logProvider = configured ? new LoggerProvider({
 const logger = logProvider?.getLogger('aimlab-tracker');
 
 export function publicTelemetryConfig() {
-  return { enabled: configured, ...(configured ? { token: key, host, environment } : {}) };
+  return { enabled: configured, ...(configured ? {
+    token: key, host: browserHost, uiHost: host === 'https://eu.i.posthog.com' ? 'https://eu.posthog.com' : 'https://us.posthog.com', environment,
+  } : {}) };
 }
 
 export function handleTelemetryConfig(request, response, pathname) {

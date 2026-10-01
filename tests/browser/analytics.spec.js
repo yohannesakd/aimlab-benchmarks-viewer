@@ -25,8 +25,8 @@ test('SPA events and replay exclude query strings and input text', async ({ page
     const request = route.request();
     const url = new URL(request.url());
 
-    if (/umami|aimlab-analytics|vercel\/insights/.test(url.href)) legacyRequests.push(url.href);
-    if (url.hostname.endsWith('posthog.com')) {
+    if (/umami|aimlab-analytics|vercel\/insights/.test(url.href) || url.hostname.endsWith('posthog.com')) legacyRequests.push(url.href);
+    if (url.hostname === 'edge.saibot.site' || url.hostname.endsWith('posthog.com')) {
       if (/\/(posthog-recorder|lazy-recorder)\.js$/.test(url.pathname)) {
         const body = await readFile(new URL('../../node_modules/posthog-js/dist/posthog-recorder.js', import.meta.url));
         return route.fulfill({ contentType: 'application/javascript', body });
@@ -44,7 +44,7 @@ test('SPA events and replay exclude query strings and input text', async ({ page
         networkPayloadCapture: { capturePerformance: true, recordHeaders: false, recordBody: false },
       } } });
     }
-    if (url.pathname === '/api/telemetry/config') return route.fulfill({ json: { enabled: true, token: 'phc_fixture', host: 'https://eu.i.posthog.com', environment: 'test' } });
+    if (url.pathname === '/api/telemetry/config') return route.fulfill({ json: { enabled: true, token: 'phc_fixture', host: 'https://edge.saibot.site', uiHost: 'https://eu.posthog.com', environment: 'test' } });
     if (url.pathname.startsWith('/api/')) return route.fulfill({ json: { sets: [], pagination: { pageCount: 0 }, data: [] } });
     if (url.hostname === 'aimlab.test') {
       const response = await route.fetch({ url: `http://127.0.0.1:5294${url.pathname}${url.search}` });
