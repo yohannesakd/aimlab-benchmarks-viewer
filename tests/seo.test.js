@@ -52,6 +52,21 @@ test('concurrent SSR profiles cannot share player state or serialize executable 
   assert.match(pages[3].body, /<title>\$&amp;/);
 });
 
+test('concurrent SSR tasks keep their metadata and standings separate', async () => {
+  const tasks = ['first-task', 'second-task'];
+  const pages = await Promise.all(tasks.map((id, index) => renderPage(`/tasks/${id}/leaderboard`, {
+    indexable: true,
+    read: async path => ({ status: 200, body: path.includes('/leaderboard?')
+      ? { pagination: { pageCount: 0 }, data: [{ rank: 1, username: `Player-${id}`, score: 200 + index }] }
+      : { id, name: `Scenario-${id}` } }),
+  })));
+  for (let index = 0; index < tasks.length; index++) {
+    assert.match(pages[index].body, new RegExp(`<title>Scenario-${tasks[index]} Leaderboard`));
+    assert.match(pages[index].body, new RegExp(`Player-${tasks[index]}`));
+    assert.ok(!pages[index].body.includes(tasks[1 - index]));
+  }
+});
+
 test('missing data returns 404 and provider failure returns retryable 503 without caching either', async () => {
   for (const [upstream, expected] of [[404, 404], [502, 503]]) {
     const result = await renderPage('/profile/Missing/overview', { indexable: true, read: async () => ({ status: upstream, body: { error: 'Unavailable' } }) });

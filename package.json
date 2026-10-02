@@ -21,12 +21,12 @@
     "@opentelemetry/resources": "^2.11.0",
     "@opentelemetry/sdk-logs": "^0.222.0",
     "energy-calculation": "1.0.1",
+    "pinia": "^4.0.3",
     "posthog-js": "^1.435.7",
     "posthog-node": "5.55.0",
     "sharp": "^0.35.5",
     "vue": "^3.5.43",
-    "vue-router": "^5.3.1",
-    "vuex": "^4.1.0"
+    "vue-router": "^5.3.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

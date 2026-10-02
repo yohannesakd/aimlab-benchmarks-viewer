@@ -68,7 +68,8 @@
 
 <script>
 import { savedProfile, saveProfile } from '../helpers/savedProfile.js';
-import { mapGetters } from "vuex";
+import { mapState, mapActions } from 'pinia';
+import { usePlayerStore } from '../store/player.js';
 import { fetchData } from "../helpers/api.js";
 import { takeInitialResponse } from '../helpers/initialData.js';
 export default {
@@ -98,15 +99,7 @@ export default {
   computed: {
     avatarUrl() { return `/api/profiles/${encodeURIComponent(this.username)}/avatar`; },
     savedProfile() { return savedProfile.value; },
-    ...mapGetters([
-      "currentPlayerInfo",
-    ]),
-    tasksPlayed() {
-      return this.$store.getters.tasksPlayed;
-    },
-    totalPlays() {
-      return this.$store.getters.totalPlays;
-    },
+    ...mapState(usePlayerStore, ['currentPlayerInfo', 'tasksPlayed', 'totalPlays', 'profileFetchedAt']),
   },
   watch: {
     username: { immediate: true, handler(username) {
@@ -121,6 +114,7 @@ export default {
     this.detailsController?.abort();
   },
   methods: {
+    ...mapActions(usePlayerStore, ['setProfileSnapshot']),
     toggleSavedProfile() {
       const username = savedProfile.value === this.currentPlayerInfo.username ? '' : this.currentPlayerInfo.username;
       this.saveError = saveProfile(username) ? '' : 'This browser could not save the profile. Check its storage settings.';
@@ -161,12 +155,12 @@ export default {
         const data = await fetchData(`/api/profiles/${encodeURIComponent(username)}`, { signal: this.profileController.signal });
         if (version !== this.requestVersion) return;
         this.$setSeoStatus(200);
-        this.$store.dispatch("setProfileSnapshot", { ...data, fetchedAt: data.fetchedAt || new Date().toISOString() });
+        this.setProfileSnapshot({ ...data, fetchedAt: data.fetchedAt || new Date().toISOString() });
       } catch (error) {
         if (version === this.requestVersion) {
           this.$setSeoStatus(error.status || 503);
           this.loadError = username === this.currentPlayerInfo.username
-            ? `Could not refresh. Showing the profile fetched at ${new Date(this.$store.getters.profileFetchedAt).toLocaleString('en-US')}.`
+            ? `Could not refresh. Showing the profile fetched at ${new Date(this.profileFetchedAt).toLocaleString('en-US')}.`
             : "Could not load this profile.";
         }
       } finally {
