@@ -25,7 +25,7 @@
             <tr v-if="group.label" class="catalog-group-heading"><th scope="rowgroup" :colspan="hasRequirements ? rankList.length + 2 : 3">{{ group.label }}</th></tr>
             <tr v-for="bench in group.benchmarks" :key="bench.id" class="catalog-row">
               <th scope="row" class="catalog-name">{{ bench.name }}</th>
-              <template v-if="hasRequirements"><td v-for="(score, index) in scoreRequirements(bench)" :key="index" class="catalog-score"><span class="catalog-score-label">{{ rankList[index] }}</span>{{ score.toLocaleString() }}</td></template>
+              <template v-if="hasRequirements"><td v-for="(score, index) in scoreRequirements(bench)" :key="index" class="catalog-score"><span class="catalog-score-label">{{ rankList[index] }}</span>{{ score.toLocaleString('en-US') }}</td></template>
               <td v-else class="catalog-unavailable muted">Unavailable</td>
               <td class="catalog-action"><router-link class="text-link" :to="{ path: '/tasks/' + encodeURIComponent(bench.id) + '/leaderboard', query: { weapon: bench.weapon } }">Leaderboard →</router-link></td>
             </tr>
@@ -38,6 +38,7 @@
 <script>
 import BenchmarkControls from '../components/BenchmarkControls.vue';
 import { fetchData } from '../helpers/api.js';
+import { takeInitialResponse } from '../helpers/initialData.js';
 export default {
   components: { BenchmarkControls },
   props: { community: String },
@@ -64,6 +65,9 @@ export default {
   beforeUnmount() { this.requestVersion++; },
   methods: {
     async load() {
+      const initial = takeInitialResponse(this, `/api/benchmarks/${this.community}`);
+      if (initial) { this.sets = initial.body?.sets || []; this.error = initial.status === 200 ? '' : 'Could not load benchmark definitions.'; return; }
+      if (import.meta.env.SSR) return;
       const version = ++this.requestVersion; this.sets = []; this.error = '';
       try { const data = await fetchData(`/api/benchmarks/${this.community}`); if (version === this.requestVersion) this.sets = data.sets; }
       catch { if (version === this.requestVersion) this.error = 'Could not load benchmark definitions.'; }

@@ -19,6 +19,9 @@ test('preview and production proxies choose the intended API and reject credenti
     const config = await configuration(environment);
     assert.equal(config.rewrites.length, 6);
     assert.deepEqual(config.rewrites.slice(0, 5).map(rule => rule.destination), ['leaderboards', 'profiles', 'tasks', 'benchmarks', 'telemetry'].map(namespace => `https://${host}/api/${namespace}/:path*`));
+    assert.equal(config.rewrites.at(-1).destination, '/api/render?__page=/$1');
+    assert.equal(config.functions['api/render.js'].includeFiles, '{dist/index.html,dist-ssr/**}');
+    assert.equal(config.headers.some(rule => rule.source === '/:path*'), environment === 'preview');
   }
   assert.equal((await configuration('preview', 'https://fixture.invalid')).rewrites[0].destination, 'https://fixture.invalid/api/leaderboards/:path*');
   for (const origin of ['http://fixture.invalid', 'https://secret:password@fixture.invalid', 'https://fixture.invalid/path']) {

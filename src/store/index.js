@@ -2,7 +2,8 @@ import { createStore } from "vuex";
 import PlayerData from "./modules/PlayerData";
 import TaskData from "./modules/TaskData";
 
-const store = createStore({
+export function createAppStore() {
+  return createStore({
   modules: {
     PlayerData,
     TaskData,
@@ -11,5 +12,4 @@ const store = createStore({
     return {};
   },
 });
-
-export default store;
+}

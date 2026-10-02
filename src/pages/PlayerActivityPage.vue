@@ -9,8 +9,8 @@
     <div v-else-if="loadError" class="status-panel" role="alert">{{ loadError }}</div>
     <div v-else-if="activity" class="activity-content">
       <div class="activity-summary">
-        <p><strong>{{ activity.activeDays.toLocaleString() }}</strong><span>active days in total</span></p>
-        <p><strong>{{ activity.recentActiveDays.toLocaleString() }}</strong><span>active days in the last 12 months</span></p>
+        <p><strong>{{ activity.activeDays.toLocaleString('en-US') }}</strong><span>active days in total</span></p>
+        <p><strong>{{ activity.recentActiveDays.toLocaleString('en-US') }}</strong><span>active days in the last 12 months</span></p>
         <p v-if="activity.learning.stars !== null || activity.learning.completedPlans !== null">
           Learning: {{ activity.learning.stars ?? '—' }} stars · {{ activity.learning.completedPlans ?? '—' }} plans completed
         </p>
@@ -42,6 +42,7 @@
 
 <script>
 import { fetchData } from "../helpers/api.js";
+import { takeInitialResponse } from '../helpers/initialData.js';
 export default {
   props: { username: String },
   data() {
@@ -63,6 +64,9 @@ export default {
       return `${Math.round(days / this.maxDays * 100)}%`;
     },
     async loadActivity(username) {
+      const initial = takeInitialResponse(this, `/api/profiles/${encodeURIComponent(username)}/activity`);
+      if (initial) { this.activity = initial.status === 200 ? initial.body : null; this.loadError = initial.status === 200 ? '' : 'Could not load activity.'; return; }
+      if (import.meta.env.SSR) return;
       const version = ++this.requestVersion;
       this.activity = null;
       this.isLoading = true;

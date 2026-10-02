@@ -111,7 +111,15 @@ The Revosect calculations use the [Aim Lab progression sheet](https://docs.googl
 
 ## Verification and publication
 
-Run `npm test`, `npm run test:import`, and `npm run build`. Install the test browser with `npx playwright install chromium`, then run `npm run test:browser`. Browser tests serve the built site on loopback port 5294 and substitute only external data; they do not crawl Aimlabs or attach live databases. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` when using an existing Chromium installation.
+Run `npm run build`, `npm test`, and `npm run test:import`. Install the test browser with `npx playwright install chromium`, then run `npm run test:browser`. SEO and browser tests use the built client and server bundles. Browser tests serve the built site on loopback port 5294 and substitute only external data; they do not crawl Aimlabs or attach live databases. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` when using an existing Chromium installation.
+
+### Search indexing
+
+Public pages render the existing Vue components on the server through `api/render.js` on Vercel and `server/page-renderer.js` on the VPS. Each request has its own router, store, and initial API responses; the browser hydrates those responses without repeating the initial reads. All Aimlabs requests and calculations remain on the VPS. Public HTML caches for 60 seconds, with up to 300 seconds of stale serving; pages with failed data reads are not cached. Missing pages return 404 and upstream failures return 503.
+
+`shared/seo.js` owns page titles, descriptions, canonical URLs, structured data, and social previews. `npm run build` generates `/robots.txt` and `/sitemap.xml` from the committed benchmark definitions without fetching Aimlabs. The sitemap includes benchmark selections and their scenario leaderboards, not player profiles or run histories. Profiles can be indexed through public links; run histories, selected-run links, and alternate standings pages use `noindex`. Vercel previews and private VPS pages are excluded from indexing. Only `https://aimlab-tracker.vercel.app` is the canonical public host.
+
+The public Google Search Console verification file is in `public/`. Verify the URL-prefix property and submit `/sitemap.xml` after deployment. Search Console reports Google's crawl and indexing decisions; an accepted sitemap does not guarantee search placement.
 
 [API contracts](server/api-contracts.js) document profile snapshots, ranked/scores-only sets and public runs. Calculations and legacy definitions live in `server/benchmark-calculations.js`, `server/benchmark-seasons.js`, and `server/benchmark-registry.js`; browser helpers contain presentation and links.
 

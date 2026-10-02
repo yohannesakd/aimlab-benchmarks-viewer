@@ -119,6 +119,19 @@ export function getRunDetails(taskId, username, playId, weapon, score, mode = pl
   });
 }
 
+export function getBenchmarkCatalog(community) {
+  const ordinals = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth'];
+  return { sets: calculateProfile({ id: 'catalog' }, []).benchmarkSets.filter(set => set.community === community).sort((a, b) => Number(a.id === 'legacy') - Number(b.id === 'legacy')).map(set => {
+    const result = Object.values(set.results)[0];
+    if (result.rankingAvailable === false) return set;
+    const mode = community === 'voltaic' ? `vt-${set.id}-novice` : 'ra-hard';
+    const columns = sortColumnsFor(mode);
+    const names = community === 'voltaic' ? result.categories.map(category => category.category) : ['Static', 'Dynamic', 'Precise', 'Reactive', 'Flick', 'Track'];
+    const rankingOptions = Object.keys(columns).map(value => ({ value, label: ordinals.includes(value) ? names[ordinals.indexOf(value)] : value[0].toUpperCase() + value.slice(1) }));
+    return { ...set, rankingOptions };
+  }) };
+}
+
 export async function handleAppDataRequest(request, response, pathname, params) {
   const catalog = pathname.match(/^\/api\/benchmarks\/(voltaic|revosect)$/);
   const profile = pathname.match(/^\/api\/profiles\/([^/]+)(\/lookup)?$/);
@@ -135,16 +148,7 @@ export async function handleAppDataRequest(request, response, pathname, params) 
     const mode = params.has("mode") ? Number(params.get("mode")) : 0;
     if (task && ["/leaderboard", "/run"].includes(task[2]) && (!Number.isInteger(mode) || mode < 0 || mode > 2147483647)) throw new URIError("Invalid task mode");
     if (catalog) {
-      const ordinals = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth'];
-      body = { sets: calculateProfile({ id: 'catalog' }, []).benchmarkSets.filter(set => set.community === id).sort((a, b) => Number(a.id === 'legacy') - Number(b.id === 'legacy')).map(set => {
-        const result = Object.values(set.results)[0];
-        if (result.rankingAvailable === false) return set;
-        const mode = id === 'voltaic' ? `vt-${set.id}-novice` : 'ra-hard';
-        const columns = sortColumnsFor(mode);
-        const names = id === 'voltaic' ? result.categories.map(category => category.category) : ['Static', 'Dynamic', 'Precise', 'Reactive', 'Flick', 'Track'];
-        const rankingOptions = Object.keys(columns).map(value => ({ value, label: ordinals.includes(value) ? names[ordinals.indexOf(value)] : value[0].toUpperCase() + value.slice(1) }));
-        return { ...set, rankingOptions };
-      }) };
+      body = getBenchmarkCatalog(id);
     } else if (profile) body = profile[2] ? await getProfileLookup(id) : await getProfile(id);
     else if (id === "search" && !task[2]) {
       const name = params.get("name");

@@ -19,11 +19,11 @@
         <div class="standings-heading"><h2>{{ selectedSet.label }} · {{ levelLabel }}</h2><time v-if="pageData.generatedAt" :datetime="pageData.generatedAt">Updated {{ formatDate(pageData.generatedAt) }}</time></div>
         <div class="leaderboard-row leaderboard-row--head" aria-hidden="true"><span>Rank</span><span>Player</span><span>{{ community === 'voltaic' ? 'Energy' : 'Points' }}</span><span>Overall rank</span></div>
         <router-link v-for="(player, index) in pageData.players" :key="player.username" class="leaderboard-row leaderboard-row--player" :aria-label="`${(page - 1) * 25 + index + 1}. ${player.username}: ${player.selectedPoints} ${community === 'voltaic' ? 'energy' : 'points'}, overall rank ${player.overallRank}`" :to="{ path: '/profile/' + encodeURIComponent(player.username) + '/' + community, query: { benchmark: selectedSet.id, level } }">
-          <span>{{ (page - 1) * 25 + index + 1 }}</span><span class="player-name">{{ player.username }}</span><span class="points">{{ player.selectedPoints.toLocaleString() }}</span><span class="rank-badge"><img :src="rankImage(player.overallRank)" alt="" /><span>{{ player.overallRank }}</span></span>
+          <span>{{ (page - 1) * 25 + index + 1 }}</span><span class="player-name">{{ player.username }}</span><span class="points">{{ player.selectedPoints.toLocaleString('en-US') }}</span><span class="rank-badge"><img :src="rankImage(player.overallRank)" alt="" /><span>{{ player.overallRank }}</span></span>
         </router-link>
         <p v-if="!pageData.total" class="status-panel">No standings yet.</p>
         <div v-else class="pagination">
-          <span>{{ (page - 1) * 25 + 1 }}–{{ Math.min(page * 25, pageData.total) }} of {{ pageData.total.toLocaleString() }}</span>
+          <span>{{ (page - 1) * 25 + 1 }}–{{ Math.min(page * 25, pageData.total) }} of {{ pageData.total.toLocaleString('en-US') }}</span>
           <div class="pagination-controls">
             <button type="button" class="page-button" :disabled="page <= 1" aria-label="Previous page" @click="changePage(page - 1)"><chevron-icon direction="left" class="h-4 w-4" /></button><span class="page-button active">{{ page }} / {{ pageData.pageCount }}</span><button type="button" class="page-button" :disabled="page >= pageData.pageCount" aria-label="Next page" @click="changePage(page + 1)"><chevron-icon direction="right" class="h-4 w-4" /></button>
             <input v-model.number="goToPageInput" class="page-input" type="number" min="1" :max="pageData.pageCount" aria-label="Go to page" @keydown.enter="goToPage" /><button type="button" class="page-button" @click="goToPage">Go</button>
@@ -37,6 +37,7 @@
 import { rankImage } from '../helpers/rankAssets.js';
 import BenchmarkControls from '../components/BenchmarkControls.vue';
 import { fetchData } from '../helpers/api.js';
+import { takeInitialResponse } from '../helpers/initialData.js';
 export default {
   components: { BenchmarkControls },
   props: { community: String },
@@ -66,10 +67,13 @@ export default {
       return groups;
     },
   },
-  watch: { community: { immediate: true, handler: 'loadCatalog' }, selectionKey: 'loadLeaderboard' },
+  watch: { community: { immediate: true, handler: 'loadCatalog' }, selectionKey: { immediate: true, handler: 'loadLeaderboard' } },
   beforeUnmount() { this.requestVersion++; this.catalogVersion++; },
   methods: {
     async loadCatalog() {
+      const initial = takeInitialResponse(this, `/api/benchmarks/${this.community}`);
+      if (initial) { this.sets = initial.body?.sets || []; this.error = initial.status === 200 ? '' : 'Could not load benchmark definitions.'; return; }
+      if (import.meta.env.SSR) return;
       const version = ++this.catalogVersion;
       this.requestVersion++; this.sets = []; this.error = ''; this.loading = false; this.catalogLoading = true;
       try {
@@ -88,6 +92,13 @@ export default {
       const version = ++this.requestVersion;
       this.error = ''; this.loading = false;
       if (!this.selectedSet || this.view !== 'overall') return;
+      const initial = takeInitialResponse(this, `/api/leaderboards/${this.community === 'voltaic' ? 'vt' : 'ra'}/${this.selectedSet.id}/${this.level}/page?page=${this.page}&sort=${this.sort}`);
+      if (initial) {
+        if (initial.status === 200) this.pageData = initial.body;
+        else this.error = initial.status === 503 ? 'Standings are being collected.' : 'Could not load standings. Try again later.';
+        return;
+      }
+      if (import.meta.env.SSR) return;
       this.loading = true;
       const prefix = this.community === 'voltaic' ? 'vt' : 'ra';
       const set = this.selectedSet.id;
@@ -102,7 +113,7 @@ export default {
     },
     goToPage() { if (Number.isInteger(this.goToPageInput)) this.changePage(Math.min(Math.max(this.goToPageInput, 1), this.pageData.pageCount || 1)); this.goToPageInput = null; },
     rankImage(rank) { return rankImage(this.community, rank); },
-    formatDate(value) { return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); },
+    formatDate(value) { return this.$formatDate(value, { month: 'short', day: 'numeric', year: 'numeric' }); },
   },
 };
 </script>
