@@ -4,6 +4,10 @@ This is a simple website I created to track Profiles on [Aimlab](https://aimlab.
 
 In addition to tracking Profiles the website also provides stat tracking for [Voltaic](https://voltaic.gg) and [Revosect](https://revosect.com) Benchmarks
 
+The frontend uses Vue 3, Pinia 4, Vue Router 5, Tailwind CSS 4, and Vite 8 on Node 24. Pinia stores are created per application so server-rendered requests cannot share player or task state. Tailwind's theme lives in `src/style.css`; Vite handles its compilation. Prettier loads its Tailwind plugin through `.prettierrc.json`.
+
+Tailwind 4 requires Chrome 111+, Safari 16.4+, or Firefox 128+. See the [browser requirements](https://tailwindcss.com/docs/compatibility) and [upgrade verification record](docs/stack-upgrade.md).
+
 ## How to use:
 
 ## Player Profile

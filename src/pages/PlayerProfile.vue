@@ -173,7 +173,8 @@ export default {
 
 <style scoped>
 #profile-nav .router-link-active {
-  @apply bg-slate-900 border-b-transparent;
+  background-color: #0f172a;
+  border-bottom-color: transparent;
 }
 
 #profile-nav {

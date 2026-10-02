@@ -17,3 +17,10 @@ Keep the current pages, URLs, calculations, API contracts, hosting, and analytic
 - Release: independently verify the final PR, merge through GitHub, deploy an immutable VPS release with the previous release retained, and verify Vercel production, canonical redirects, private source maps, telemetry and health endpoints.
 
 The staging and production source trees match at the baseline. Preview browser capture is intentionally disabled; absence of preview pageviews in PostHog is expected.
+
+## Results
+
+- Router/tooling and Pinia chunks pass build, Node tests and all browser checks; all 28 screenshots match the original baseline exactly.
+- Tailwind 4 also matches all 28 screenshots with zero differing pixels. Existing benchmark colors and progress-bar blue remain exact hex values.
+- The personal PostHog project reports 55 production pageviews and no `$exception` events in the day before release. Versioned browser observations in the previous seven days meet Tailwind 4's requirements; imported history without browser versions cannot establish compatibility.
+- One lasting regression test extends existing SSR coverage to concurrent task metadata and standings. The 28 screenshot comparisons are scratch checks retained outside Git.

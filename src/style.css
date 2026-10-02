@@ -1,3 +1,7 @@
+@import 'tailwindcss' source(none);
+@source './';
+@source '../index.html';
+
 /* Poppins v24 from Google Fonts, licensed under public/fonts/OFL.txt. */
 /* devanagari */
 @font-face {
@@ -108,9 +112,32 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --color-mainCyan: #68c7c3;
+  --color-alBlue: #263258;
+  --color-alDarkBlue: #202151;
+  --color-iron: #afafaf;
+  --color-bronze: #ff9900;
+  --color-silver: #cbd9e6;
+  --color-gold: #d8bf52;
+  --color-platinum: #2fcfc2;
+  --color-diamond: #b9f2ff;
+  --color-jade: #85fa85;
+  --color-master: #ff66e9;
+  --color-grandmaster: #ffd700;
+  --color-nova: #7d4ac5;
+  --color-astra: #ff1761;
+  --color-celestial: #ffffff;
+  --color-mythic: #ffd700;
+  --color-immortal: #c36eff;
+  --color-archon: #ff0000;
+  --color-ethereal: #91d7e4;
+  --color-divine: #fff;
+  --color-blue-700: #1d4ed8;
+  --color-slate-900: #0f172a;
+  --font-poppins: 'Poppins', sans-serif;
+  --font-oswald: 'Oswald', sans-serif;
+}
 
 :root {
   color-scheme: dark;
