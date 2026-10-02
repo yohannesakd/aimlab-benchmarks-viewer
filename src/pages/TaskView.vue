@@ -71,6 +71,7 @@ import { fetchData } from "../helpers/api.js";
 import { openRunDetails } from "../helpers/runDetails.js";
 import { taskDeepLink } from "../helpers/taskLinks.js";
 import { captureEvent } from '../helpers/analytics.js';
+import { takeInitialResponse } from '../helpers/initialData.js';
 export default {
   props: ["taskId"],
   data() {
@@ -153,6 +154,9 @@ export default {
       this.goToPageInput = null;
     },
     async loadTask(taskId) {
+      const initial = takeInitialResponse(this, `/api/tasks/${encodeURIComponent(taskId)}`);
+      if (initial) { this.loadLeaderboard(initial.body); return; }
+      if (import.meta.env.SSR) return;
       const version = ++this.taskRequestVersion;
       this.leaderboardRequestVersion++;
       this.headLoading = true;
@@ -164,6 +168,7 @@ export default {
       try {
         const response = await fetchData(`/api/tasks/${encodeURIComponent(taskId)}`);
         if (version !== this.taskRequestVersion) return;
+        this.$setSeoStatus(200);
         const task = response;
         if (!task) {
           this.taskError = "Task not found";
@@ -174,6 +179,7 @@ export default {
         await this.loadLeaderboard(task);
       } catch (error) {
         if (version === this.taskRequestVersion) {
+          this.$setSeoStatus(error.status || 503);
           console.error(error);
           this.taskError = "Could not load this task. Try again.";
         }
@@ -185,6 +191,12 @@ export default {
       }
     },
     async loadLeaderboard(task) {
+      const initialParams = new URLSearchParams({ page: this.currentPage });
+      if (this.$route.query.weapon) initialParams.set('weapon', this.$route.query.weapon);
+      if (this.$route.query.mode !== undefined) initialParams.set('mode', this.$route.query.mode);
+      const initial = takeInitialResponse(this, `/api/tasks/${encodeURIComponent(task.id)}/leaderboard?${initialParams}`);
+      if (initial) { this.leaderboardError = initial.status === 200 ? '' : 'Could not load the leaderboard. Try again.'; return; }
+      if (import.meta.env.SSR) return;
       const version = ++this.leaderboardRequestVersion;
       this.isLoading = true;
       this.leaderboardError = "";

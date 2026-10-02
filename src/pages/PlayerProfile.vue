@@ -23,8 +23,8 @@
           </div>
         </div>
         <dl class="profile-stats">
-          <div><dt>Tasks played</dt><dd>{{ Number(tasksPlayed).toLocaleString() }}</dd></div>
-          <div><dt>Total plays</dt><dd>{{ Number(totalPlays).toLocaleString() }}</dd></div>
+          <div><dt>Tasks played</dt><dd>{{ Number(tasksPlayed).toLocaleString('en-US') }}</dd></div>
+          <div><dt>Total plays</dt><dd>{{ Number(totalPlays).toLocaleString('en-US') }}</dd></div>
           <template v-if="publicDetails">
             <div><dt>Account age</dt><dd>{{ daysLabel(publicDetails.accountAgeDays) }}</dd></div>
             <div><dt>Current streak</dt><dd>{{ daysLabel(publicDetails.currentStreakDays) }}</dd></div>
@@ -70,6 +70,7 @@
 import { savedProfile, saveProfile } from '../helpers/savedProfile.js';
 import { mapGetters } from "vuex";
 import { fetchData } from "../helpers/api.js";
+import { takeInitialResponse } from '../helpers/initialData.js';
 export default {
   props: {
     username: String,
@@ -123,9 +124,12 @@ export default {
       this.saveError = saveProfile(username) ? '' : 'This browser could not save the profile. Check its storage settings.';
     },
     daysLabel(value) {
-      return Number.isFinite(value) ? `${value.toLocaleString()} ${value === 1 ? "day" : "days"}` : "Unavailable";
+      return Number.isFinite(value) ? `${value.toLocaleString('en-US')} ${value === 1 ? "day" : "days"}` : "Unavailable";
     },
     async loadPublicDetails(username) {
+      const initial = takeInitialResponse(this, `/api/profiles/${encodeURIComponent(username)}/details`);
+      if (initial) { this.publicDetails = initial.status === 200 ? initial.body : null; return; }
+      if (import.meta.env.SSR) return;
       const version = ++this.detailsVersion;
       this.detailsController?.abort();
       this.detailsController = new AbortController();
@@ -142,6 +146,9 @@ export default {
       this.$router.push("/profile");
     },
     async loadPlayer(username) {
+      const initial = takeInitialResponse(this, `/api/profiles/${encodeURIComponent(username)}`);
+      if (initial) return;
+      if (import.meta.env.SSR) return;
       const version = ++this.requestVersion;
       this.profileController?.abort();
       this.profileController = new AbortController();
@@ -151,11 +158,13 @@ export default {
       try {
         const data = await fetchData(`/api/profiles/${encodeURIComponent(username)}`, { signal: this.profileController.signal });
         if (version !== this.requestVersion) return;
+        this.$setSeoStatus(200);
         this.$store.dispatch("setProfileSnapshot", { ...data, fetchedAt: data.fetchedAt || new Date().toISOString() });
       } catch (error) {
         if (version === this.requestVersion) {
+          this.$setSeoStatus(error.status || 503);
           this.loadError = username === this.currentPlayerInfo.username
-            ? `Could not refresh. Showing the profile fetched at ${new Date(this.$store.getters.profileFetchedAt).toLocaleString()}.`
+            ? `Could not refresh. Showing the profile fetched at ${new Date(this.$store.getters.profileFetchedAt).toLocaleString('en-US')}.`
             : "Could not load this profile.";
         }
       } finally {

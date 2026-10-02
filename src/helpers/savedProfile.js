@@ -3,7 +3,9 @@ import { captureEvent } from './analytics.js';
 
 const storageKey = 'aimlab-tracker-saved-profile';
 export const savedProfile = ref('');
-try { savedProfile.value = localStorage.getItem(storageKey) || ''; } catch {}
+export function loadSavedProfile() {
+  try { savedProfile.value = localStorage.getItem(storageKey) || ''; } catch {}
+}
 
 export function saveProfile(username) {
   try {

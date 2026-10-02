@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, createMemoryHistory } from "vue-router";
 
 const HomePage = () => import('./pages/HomePage.vue');
 const ProfileSearch = () => import('./pages/ProfileSearch.vue');
@@ -15,9 +15,11 @@ const PlayerRunsPage = () => import('./pages/PlayerRunsPage.vue');
 const AboutPage = () => import('./pages/AboutPage.vue');
 
 const BenchmarkCatalogPage = () => import('./pages/BenchmarkCatalogPage.vue');
+import NotFoundPage from './pages/NotFoundPage.vue';
 
-const router = createRouter({
-  history: createWebHistory(),
+export function createAppRouter() {
+  return createRouter({
+  history: import.meta.env.SSR ? createMemoryHistory() : createWebHistory(),
   routes: [
     { path: "/", redirect: "/home" },
     { path: "/home", component: HomePage },
@@ -98,8 +100,7 @@ const router = createRouter({
     },
     { path: "/benchmarks/:community(voltaic|revosect)", component: BenchmarkCatalogPage, props: true },
     { path: "/about", component: AboutPage },
-    { path: "/:notFound(.*)", component: null },
+    { path: "/:notFound(.*)", component: NotFoundPage },
   ],
 });
-
-export default router;
+}

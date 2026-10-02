@@ -6,6 +6,7 @@ import { handlePlayerRunsRequest } from "./player-runs.js";
 import { handleAppDataRequest } from "./app-data.js";
 import { handlePublicDetailsRequest } from "./public-details.js";
 import { handleTelemetryConfig, instrumentRequest, installTelemetryShutdown } from './telemetry.js';
+import { renderPage, isPublicHost } from './page-renderer.js';
 
 const port = Number(process.env.PORT || 5180);
 const distDir = resolve("dist");
@@ -17,6 +18,8 @@ const contentTypes = {
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
+  ".xml": "application/xml; charset=utf-8",
+  ".txt": "text/plain; charset=utf-8",
 };
 
 function send(response, status, body, type) {
@@ -25,7 +28,7 @@ function send(response, status, body, type) {
 }
 
 const server = createServer(instrumentRequest(async (request, response) => {
-  if (request.method !== "GET") {
+  if (!["GET", "HEAD"].includes(request.method)) {
     send(response, 405, "Method not allowed", "text/plain");
     return;
   }
@@ -47,6 +50,12 @@ const server = createServer(instrumentRequest(async (request, response) => {
     send(response, 200, "ok", "text/plain");
     return;
   }
+  const publicSite = process.env.AIMLAB_ENV === 'production' && isPublicHost(request.headers.host);
+  if (!publicSite || pathname.startsWith('/api/')) response.setHeader('X-Robots-Tag', 'noindex, follow');
+  if (pathname === '/robots.txt' && !publicSite) {
+    send(response, 200, 'User-agent: *\nDisallow: /\n', 'text/plain; charset=utf-8');
+    return;
+  }
 
   if (handleTelemetryConfig(request, response, pathname)) return;
 
@@ -66,18 +75,23 @@ const server = createServer(instrumentRequest(async (request, response) => {
     return;
   }
 
-  const spaRoute =
-    pathname === "/" ||
-    ["/home", "/profile", "/tasks", "/leaderboards", "/benchmarks", "/about"].some(
-      (route) => pathname === route || pathname.startsWith(`${route}/`)
-    );
-  const file = spaRoute ? resolve(distDir, "index.html") : requested;
+  if (!extname(pathname) || pathname === '/index.html' || ['/profile/', '/tasks/'].some(prefix => pathname.startsWith(prefix))) {
+    try {
+      const result = await renderPage(request.url, { apiOrigin: process.env.AIMLAB_API_ORIGIN || `http://127.0.0.1:${port}`, indexable: publicSite });
+      response.writeHead(result.status, result.headers).end(request.method === 'HEAD' ? '' : result.body);
+    } catch (error) {
+      console.error('Page rendering failed', error.name);
+      response.writeHead(503, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store', 'Retry-After': '60' }).end('Page temporarily unavailable.');
+    }
+    return;
+  }
+  const file = requested;
   try {
     const body = await readFile(file);
     send(
       response,
       200,
-      body,
+      request.method === 'HEAD' ? '' : body,
       contentTypes[extname(file)] || "application/octet-stream"
     );
   } catch (error) {

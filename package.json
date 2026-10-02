@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --ssrManifest && vite build --ssr src/entry-server.js --outDir dist-ssr && node scripts/build-seo.js",
     "preview": "vite preview",
     "test": "node --test tests/*.test.js",
     "start": "node server/index.js",

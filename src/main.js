@@ -1,26 +1,17 @@
-import { createApp } from "vue";
 import "./style.css";
-import router from "./router.js";
-import store from "./store/index.js";
-import App from "./App.vue";
+import { createApplication } from './app.js';
 import { initAnalytics } from './helpers/analytics.js';
+import { initSeo } from './helpers/seo.js';
+import { loadSavedProfile } from './helpers/savedProfile.js';
 
-import BaseCard from "./components/UI/BaseCard.vue";
-import ProgressBar from "./components/UI/ProgressBar.vue";
-import ChevronIcon from "./components/UI/ChevronIcon.vue";
-import Dropdown from "./components/UI/Dropdown.vue";
-import PlayIcon from "./components/UI/PlayIcon.vue";
-import LoadingSpinner from "./components/LoadingSpinner.vue";
-
-const app = createApp(App);
+const element = document.getElementById('page-data');
+const bootstrap = element ? JSON.parse(element.textContent) : null;
+element?.remove();
+const { app, router, store, displayZone, clearInitialData } = createApplication(bootstrap);
+initSeo(router, store, app);
 void initAnalytics(router, app);
-app
-  .component("base-card", BaseCard)
-  .component("loading-spinner", LoadingSpinner)
-  .component("progress-bar", ProgressBar)
-  .component("dropdown", Dropdown)
-  .component("chevron-icon", ChevronIcon)
-  .component("play-icon", PlayIcon)
-  .use(router)
-  .use(store)
-  .mount("#app");
+await router.isReady();
+app.mount('#app');
+clearInitialData();
+loadSavedProfile();
+displayZone.value = { locale: navigator.language, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone };

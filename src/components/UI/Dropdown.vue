@@ -12,14 +12,16 @@
   </div>
 </template>
 <script>
+import { useId } from 'vue';
 export default {
+  setup() { return { listId: `dropdown-${useId()}` }; },
   props: {
     options: { type: Array, required: true },
     modelValue: { type: [String, Number], required: true },
     label: { type: String, required: true },
   },
   emits: ['update:modelValue'],
-  data() { return { isOpen: false, activeIndex: 0, listId: `dropdown-${this.$.uid}` }; },
+  data() { return { isOpen: false, activeIndex: 0 }; },
   computed: { selectedLabel() { return this.options.find(option => option.value === this.modelValue)?.label || 'Select'; } },
   mounted() { document.addEventListener('pointerdown', this.onClickAway); },
   beforeUnmount() { document.removeEventListener('pointerdown', this.onClickAway); },

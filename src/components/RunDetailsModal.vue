@@ -11,7 +11,7 @@
       <p>{{ error }}</p><button type="button" class="text-link" @click="load">Try again</button>
     </div>
     <div v-else-if="selection && run" class="modal-content">
-      <div class="run-summary"><strong>{{ run.score.toLocaleString() }} points</strong><router-link class="text-link" :to="`/profile/${encodeURIComponent(selection.username)}`" @click="close">{{ selection.username }}</router-link><time>{{ dateLabel }}</time></div>
+      <div class="run-summary"><strong>{{ run.score.toLocaleString('en-US') }} points</strong><router-link class="text-link" :to="`/profile/${encodeURIComponent(selection.username)}`" @click="close">{{ selection.username }}</router-link><time>{{ dateLabel }}</time></div>
       <section v-if="performance.length">
         <h3>Performance</h3>
         <dl class="run-facts"><div v-for="item in performance" :key="item.label"><dt>{{ item.label }}</dt><dd>{{ item.value }}</dd></div></dl>
@@ -40,7 +40,7 @@ export default {
   computed: {
     selection() { return selectedRun.value; },
     historyLink() { return `/profile/${encodeURIComponent(this.selection.username)}/tasks/${encodeURIComponent(this.selection.taskId)}/runs`; },
-    dateLabel() { const value = this.run?.endedAt || this.run?.startedAt; return value ? new Date(value).toLocaleString() : "Date unavailable"; },
+    dateLabel() { const value = this.run?.endedAt || this.run?.startedAt; return value ? new Date(value).toLocaleString('en-US') : "Date unavailable"; },
     replayLink() { return replayDeepLink(this.run.id); },
     metadata() {
       const run = this.run;
@@ -62,7 +62,7 @@ export default {
       const metrics = this.run?.metrics || {};
       return [["hitsTotal", "Hits"], ["shotsTotal", "Shots"], ["missesTotal", "Misses"], ["killTotal", "Kills"], ["targetsTotal", "Targets"], ["headshots", "Headshots"], ["bodyshots", "Bodyshots"], ["damageTotal", "Damage"], ["accTotal", "Accuracy"], ["avgDist", "Average distance"], ["timePerKill", "Time per kill"]]
         .filter(([key]) => Number.isFinite(metrics[key]) && (key !== "timePerKill" || metrics.killTotal > 0))
-        .map(([key, label]) => ({ label, value: `${metrics[key].toLocaleString(undefined, { maximumFractionDigits: 3 })}${key === 'accTotal' ? '%' : ''}` }));
+        .map(([key, label]) => ({ label, value: `${metrics[key].toLocaleString('en-US', { maximumFractionDigits: 3 })}${key === 'accTotal' ? '%' : ''}` }));
     },
   },
   watch: {

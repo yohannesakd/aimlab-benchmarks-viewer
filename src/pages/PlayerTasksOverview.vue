@@ -14,7 +14,7 @@
     </div>
     <p v-else class="status-panel">No played tasks match this search.</p>
     <div v-if="paginatedTaskList.data.length" class="pagination">
-      <span>{{ currentPlayerTasks.length.toLocaleString() }} played tasks</span>
+      <span>{{ currentPlayerTasks.length.toLocaleString('en-US') }} played tasks</span>
       <div class="pagination-controls">
         <button type="button" class="page-button" :disabled="currentPage <= 0" aria-label="Previous page" @click="currentPage--"><chevron-icon direction="left" class="h-4 w-4"></chevron-icon></button>
         <button v-for="(page, index) in pageNumbers" :key="index" type="button" class="page-button page-number" :class="{ active: page === currentPage + 1 }" :disabled="page === '...'" @click="handlePageSelect($event)">{{ page }}</button>

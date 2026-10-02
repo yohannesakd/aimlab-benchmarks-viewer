@@ -95,6 +95,10 @@ Query strings are removed from analytics URLs, including heatmap page keys. Prof
 
 Surveys and feature-flag loading are enabled in the browser. Experiments can use those flags when a specific change is implemented. No survey or experiment is running. Web analytics, heatmaps, product analytics, SQL, cohorts, replay, errors, logs, and traces share this personal project. Data warehouse sources, external destinations, workflows, AI instrumentation, and Inbox require an actual source, recipient, or app feature; none are connected just to consume an allowance.
 
+[Replay Vision](https://eu.posthog.com/project/289968/replay-vision/01a0f797-f26c-7ac8-a83f-d200200fea4f) automatically checks future recordings for navigation and loading problems. It scans all eligible medium/high-activity sessions, filters internal/test users, uses Gemini 3 Flash at five credits per observation, and has a 2,500-credit monthly cap matching the free allowance. Its initial estimate was zero matching recordings; findings will require real traffic. No historical backfill, automated PRs, or external notifications are enabled. Rate findings on its Calibration tab to improve the prompt.
+
+No-code DOM experiments remain disabled: [PostHog warns that Vue rerenders can overwrite their changes](https://posthog.com/docs/experiments/no-code-web-experiments). Use feature-flag experiments for this app.
+
 On October 1, the personal organization’s USD usage limits were set to **$0** for analytics, replay, flags, errors, surveys, logs, warehouse, destinations, workflows, AI analytics, AI credits, Replay Vision, code usage, and Inbox. Usage stays within each product’s monthly free allowance; capture can stop when an allowance is exhausted. Paid support and retention add-ons are not enabled. Recheck [billing](https://eu.posthog.com/organization/billing) before enabling a new product or paid add-on. The [current free allowances](https://posthog.com/pricing) include 1 million events, 5,000 recordings, 1 million flag requests, 100,000 exceptions, 1,500 survey responses, and 10 GB of logs monthly.
 
 The previous [Umami dashboard](https://vps.snapper-cod.ts.net:5181/websites/101682cb-3775-497a-b68a-b59a22ad10a5) remains an archive. Its frontend script and the Vercel Analytics SDK have been removed. Umami 3.4.0/PostgreSQL run from `deploy/analytics/compose.yaml`; live configuration and owner-only credentials are in `/home/sai/code/aimlab/runtime/analytics`. The database is at `/home/sai/code/aimlab/data/analytics/postgres`, and daily dumps remain indefinitely at `/home/sai/code/aimlab/data/analytics/backups`. Existing Vercel aggregate CSV exports remain at `/home/sai/code/aimlab/data/analytics/vercel-export-2026-09-28-30d/`. They cannot reconstruct sessions or be imported as new PostHog event history.
@@ -107,7 +111,15 @@ The Revosect calculations use the [Aim Lab progression sheet](https://docs.googl
 
 ## Verification and publication
 
-Run `npm test`, `npm run test:import`, and `npm run build`. Install the test browser with `npx playwright install chromium`, then run `npm run test:browser`. Browser tests serve the built site on loopback port 5294 and substitute only external data; they do not crawl Aimlabs or attach live databases. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` when using an existing Chromium installation.
+Run `npm run build`, `npm test`, and `npm run test:import`. Install the test browser with `npx playwright install chromium`, then run `npm run test:browser`. SEO and browser tests use the built client and server bundles. Browser tests serve the built site on loopback port 5294 and substitute only external data; they do not crawl Aimlabs or attach live databases. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` when using an existing Chromium installation.
+
+### Search indexing
+
+Public pages render the existing Vue components on the server through `api/render.js` on Vercel and `server/page-renderer.js` on the VPS. Each request has its own router, store, and initial API responses; the browser hydrates those responses without repeating the initial reads. All Aimlabs requests and calculations remain on the VPS. Public HTML caches for 60 seconds, with up to 300 seconds of stale serving; pages with failed data reads are not cached. Missing pages return 404 and upstream failures return 503.
+
+`shared/seo.js` owns page titles, descriptions, canonical URLs, structured data, and social previews. `npm run build` generates `/robots.txt` and `/sitemap.xml` from the committed benchmark definitions without fetching Aimlabs. The sitemap includes benchmark selections and their scenario leaderboards, not player profiles or run histories. Profiles can be indexed through public links; run histories, selected-run links, and alternate standings pages use `noindex`. Vercel previews and private VPS pages are excluded from indexing. Only `https://aimlab-tracker.vercel.app` is the canonical public host.
+
+The public Google Search Console verification file is in `public/`. Verify the URL-prefix property and submit `/sitemap.xml` after deployment. Search Console reports Google's crawl and indexing decisions; an accepted sitemap does not guarantee search placement.
 
 [API contracts](server/api-contracts.js) document profile snapshots, ranked/scores-only sets and public runs. Calculations and legacy definitions live in `server/benchmark-calculations.js`, `server/benchmark-seasons.js`, and `server/benchmark-registry.js`; browser helpers contain presentation and links.
 

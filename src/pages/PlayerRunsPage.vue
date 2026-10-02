@@ -5,7 +5,7 @@
       <div>
         <h1 class="page-title">{{ history?.taskName || taskId }}</h1>
         <p v-if="history" class="page-subtitle">
-          {{ history.totalCount.toLocaleString() }} solo runs
+          {{ history.totalCount.toLocaleString('en-US') }} solo runs
         </p>
       </div>
       <router-link :to="`/tasks/${encodeURIComponent(taskId)}/leaderboard`" class="btn-secondary">
@@ -21,9 +21,9 @@
           <span>Score</span><span>Accuracy</span><span>Shots</span><span class="run-date">Date</span><span class="run-action">Run</span>
         </div>
         <div v-for="run in history.runs" :key="run.id" class="run-row">
-          <strong>{{ run.score.toLocaleString() }} points</strong>
+          <strong>{{ run.score.toLocaleString('en-US') }} points</strong>
           <span class="run-accuracy muted">{{ accuracy(run) }}</span>
-          <span class="run-shots muted">{{ run.metrics.shotsTotal?.toLocaleString() ?? '—' }}</span>
+          <span class="run-shots muted">{{ run.metrics.shotsTotal?.toLocaleString('en-US') ?? '—' }}</span>
           <time class="run-date muted" :datetime="run.endedAt || run.startedAt">
             <span>{{ formatDay(run.endedAt || run.startedAt) }}</span>
             <small> · {{ formatClock(run.endedAt || run.startedAt) }}</small>
@@ -70,11 +70,12 @@
 <script>
 import { fetchData } from "../helpers/api.js";
 import { openRunDetails } from "../helpers/runDetails.js";
+import { takeInitialResponse } from '../helpers/initialData.js';
 
 export default {
   props: { username: String, taskId: String },
   data() {
-    return { history: null, isLoading: false, loadError: "", requestVersion: 0 };
+    return { history: null, isLoading: false, loadError: "", requestVersion: 0, historyMounted: false };
   },
   computed: {
     afterCursor() {
@@ -95,21 +96,26 @@ export default {
   beforeUnmount() {
     this.requestVersion++;
   },
+  mounted() { this.historyMounted = true; this.openLinkedRun(); },
   methods: {
     accuracy(run) { return Number.isFinite(run.metrics.accTotal) ? `${Math.round(run.metrics.accTotal * 100) / 100}%` : '—'; },
     showRun(run) { openRunDetails({ username: this.username, taskId: this.taskId, taskName: this.history.taskName, run }); },
     openLinkedRun() {
-      if (!this.selectedRunId || !this.history) return;
+      if (!this.historyMounted || !this.selectedRunId || !this.history) return;
       const run = this.history.runs.find(run => run.id === this.selectedRunId);
       openRunDetails({ username: this.username, taskId: this.taskId, taskName: this.history.taskName, playId: this.selectedRunId, run });
     },
     formatDay(value) {
-      return new Date(value).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+      return this.$formatDate(value, { year: "numeric", month: "short", day: "numeric" });
     },
     formatClock(value) {
-      return new Date(value).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+      return this.$formatDate(value, { hour: "numeric", minute: "2-digit" });
     },
     async loadRuns() {
+      const initialPath = `/api/profiles/${encodeURIComponent(this.username)}/tasks/${encodeURIComponent(this.taskId)}/runs`;
+      const initial = takeInitialResponse(this, this.afterCursor ? `${initialPath}?after=${encodeURIComponent(this.afterCursor)}` : initialPath);
+      if (initial) { this.history = initial.status === 200 ? initial.body : null; this.loadError = initial.status === 200 ? '' : 'Could not load run history.'; return; }
+      if (import.meta.env.SSR) return;
       const version = ++this.requestVersion;
       this.isLoading = true;
       this.loadError = "";

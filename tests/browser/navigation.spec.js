@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { calculateProfile } from '../../server/app-data.js';
+import { readFile } from 'node:fs/promises';
 
 const run = { id: 'selected-run', score: 200, mode: 42, convertedMode: 0, weaponId: '9mm', endedAt: '2026-09-24T12:00:00Z', metrics: { accTotal: 85, shotsTotal: 100 }, replayAvailable: false };
 function snapshot(username, count = 1) {
@@ -13,6 +14,7 @@ async function fixtures(page, overrides = {}) {
   await page.route('**/*', async route => {
     const url = new URL(route.request().url());
     if (url.origin !== 'http://127.0.0.1:5294') return route.fulfill({ status: 200, body: '' });
+    if (route.request().isNavigationRequest()) return route.fulfill({ contentType: 'text/html', body: await readFile('dist/index.html', 'utf8') });
     if (!url.pathname.startsWith('/api/')) return route.continue();
     const custom = overrides[url.pathname];
     if (custom) return custom(route, url);
