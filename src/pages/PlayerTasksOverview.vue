@@ -41,6 +41,8 @@
 </style>
 
 <script>
+import { mapStores } from 'pinia';
+import { usePlayerStore } from '../store/player.js';
 import { openRunDetails } from '../helpers/runDetails.js';
 export default {
   props: ["isLoading"],
@@ -52,7 +54,7 @@ export default {
     };
   },
   methods: {
-    showRun(task) { openRunDetails({ username: this.$store.getters.currentPlayerInfo.username, taskId: task.id, taskName: task.name, weapon: task.weapon, mode: task.mode, score: task.maxScore }); },
+    showRun(task) { openRunDetails({ username: this.playerStore.currentPlayerInfo.username, taskId: task.id, taskName: task.name, weapon: task.weapon, mode: task.mode, score: task.maxScore }); },
     handlePageSelect(event) {
       let value = parseInt(event.target.textContent);
       if (value) {
@@ -73,8 +75,9 @@ export default {
     },
   },
   computed: {
+    ...mapStores(usePlayerStore),
     currentPlayerTasks() {
-      let taskList = [...this.$store.getters.currentPlayerTasks];
+      let taskList = [...this.playerStore.currentPlayerTasks];
       if (this.searchQuery) {
         return taskList.filter((task) =>
           task.name.toLowerCase().includes(this.searchQuery.toLowerCase())
@@ -117,7 +120,7 @@ export default {
   },
   watch: {
     searchQuery() { this.currentPage = 0; },
-    '$store.getters.currentPlayerTasks'() { this.currentPage = 0; },
+    'playerStore.currentPlayerTasks'() { this.currentPage = 0; },
   },
 };
 </script>

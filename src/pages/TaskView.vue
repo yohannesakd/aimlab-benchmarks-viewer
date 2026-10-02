@@ -66,7 +66,8 @@
 </style>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapState, mapActions } from 'pinia';
+import { useTaskStore } from '../store/task.js';
 import { fetchData } from "../helpers/api.js";
 import { openRunDetails } from "../helpers/runDetails.js";
 import { taskDeepLink } from "../helpers/taskLinks.js";
@@ -87,7 +88,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters([
+    ...mapState(useTaskStore, [
       "currentTask",
       "currentTaskLeaderboard",
     ]),
@@ -131,6 +132,7 @@ export default {
     this.leaderboardRequestVersion++;
   },
   methods: {
+    ...mapActions(useTaskStore, ['setCurrentTask', 'setCurrentTaskLeaderboard']),
     captureEvent,
     handlePageSelect(event) {
       let value = parseInt(event.target.textContent);
@@ -174,7 +176,7 @@ export default {
           this.taskError = "Task not found";
           return;
         }
-        this.$store.dispatch("setCurrentTask", task);
+        this.setCurrentTask(task);
         this.headLoading = false;
         await this.loadLeaderboard(task);
       } catch (error) {
@@ -206,7 +208,7 @@ export default {
         if (this.$route.query.mode !== undefined) params.set("mode", this.$route.query.mode);
         const response = await fetchData(`/api/tasks/${encodeURIComponent(task.id)}/leaderboard?${params}`);
         if (version !== this.leaderboardRequestVersion || task.id !== this.taskId) return;
-        this.$store.dispatch("setCurrentTaskLeaderboard", response);
+        this.setCurrentTaskLeaderboard(response);
       } catch (error) {
         if (version === this.leaderboardRequestVersion) {
           console.error(error);

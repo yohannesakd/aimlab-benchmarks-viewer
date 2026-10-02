@@ -63,6 +63,8 @@
 </template>
 
 <script>
+import { mapStores } from 'pinia';
+import { usePlayerStore } from '../store/player.js';
 import {
     findWorkshopId,
     taskDeepLink,
@@ -81,10 +83,11 @@ export default {
         };
     },
     computed: {
+        ...mapStores(usePlayerStore),
         currentPlayerInfo() {
-            return this.$store.getters.currentPlayerInfo;
+            return this.playerStore.currentPlayerInfo;
         },
-        benchmarkSets() { return this.$store.getters.benchmarkSets.filter(set => !set.community || set.community === 'revosect').map(set => set.id === 'legacy' ? { ...set, label: 'Series 2' } : set); },
+        benchmarkSets() { return this.playerStore.benchmarkSets.filter(set => !set.community || set.community === 'revosect').map(set => set.id === 'legacy' ? { ...set, label: 'Series 2' } : set); },
         selectedSet() { return this.benchmarkSets.find(set => set.id === this.$route.query.benchmark) || this.benchmarkSets.find(set => set.id === "revosect_s4") || this.benchmarkSets[0]; },
         currentTab() {
             const label = this.dropdownElements.find(value => value.toLowerCase() === this.$route.query.level) || "Hard";

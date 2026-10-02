@@ -21,23 +21,22 @@
     "@opentelemetry/resources": "^2.11.0",
     "@opentelemetry/sdk-logs": "^0.222.0",
     "energy-calculation": "1.0.1",
-    "posthog-js": "^1.435.5",
+    "pinia": "^4.0.3",
+    "posthog-js": "^1.435.7",
     "posthog-node": "5.55.0",
     "sharp": "^0.35.5",
     "vue": "^3.5.43",
-    "vue-router": "^4.6.4",
-    "vuex": "^4.1.0"
+    "vue-router": "^5.3.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@posthog/cli": "0.18.9",
+    "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-vue": "^6.0.9",
-    "autoprefixer": "^10.4.27",
-    "postcss": "^8.5.10",
-    "prettier": "^2.7.1",
-    "prettier-plugin-tailwindcss": "^0.1.13",
-    "tailwindcss": "^3.4.19",
-    "vite": "^8.3.1"
+    "prettier": "^3.9.9",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.2"
   },
   "engines": {
     "node": ">=24.0.0 <25"

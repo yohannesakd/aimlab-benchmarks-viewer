@@ -1,4 +1,6 @@
-export default {
+import { defineStore } from 'pinia';
+
+export const usePlayerStore = defineStore('player', {
   state: () => ({ snapshot: null }),
   getters: {
     currentPlayerInfo: state => state.snapshot?.playerInfo || {},
@@ -8,10 +10,7 @@ export default {
     benchmarkSets: state => state.snapshot?.benchmarkSets || [],
     profileFetchedAt: state => state.snapshot?.fetchedAt || null,
   },
-  mutations: {
-    setProfileSnapshot(state, snapshot) { state.snapshot = snapshot; },
-  },
   actions: {
-    setProfileSnapshot({ commit }, snapshot) { commit('setProfileSnapshot', snapshot); },
+    setProfileSnapshot(snapshot) { this.snapshot = snapshot; },
   },
-};
+});

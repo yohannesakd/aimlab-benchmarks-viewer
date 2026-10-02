@@ -65,6 +65,8 @@
 </template>
 
 <script>
+import { mapStores } from 'pinia';
+import { usePlayerStore } from '../store/player.js';
 import {
     findWorkshopId,
     taskDeepLink,
@@ -83,10 +85,11 @@ export default {
         };
     },
     computed: {
+        ...mapStores(usePlayerStore),
         currentPlayerInfo() {
-            return this.$store.getters.currentPlayerInfo;
+            return this.playerStore.currentPlayerInfo;
         },
-        benchmarkSets() { return this.$store.getters.benchmarkSets.filter(set => set.community === 'voltaic'); },
+        benchmarkSets() { return this.playerStore.benchmarkSets.filter(set => set.community === 'voltaic'); },
         selectedSet() { return this.benchmarkSets.find(set => set.id === (this.$route.query.benchmark === 'legacy' ? 'aimlabs_s2' : this.$route.query.benchmark)) || this.benchmarkSets.find(set => set.id === "aimlabs_s3") || this.benchmarkSets[0]; },
         currentTab() {
             const label = this.dropdownElements.find(value => value.toLowerCase() === this.$route.query.level) || "Advanced";
