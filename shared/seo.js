@@ -1,4 +1,4 @@
-export const SITE_ORIGIN = 'https://aimlab-tracker.vercel.app';
+export const SITE_ORIGIN = 'https://aimlab-tracker.saibot.site';
 export const SITE_NAME = 'Aimlab Tracker';
 const communities = { voltaic: 'Voltaic', revosect: 'Revosect' };
 const levels = { voltaic: ['novice', 'intermediate', 'advanced'], revosect: ['easy', 'medium', 'hard'] };

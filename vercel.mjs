@@ -1,3 +1,5 @@
+import { SITE_ORIGIN } from './shared/seo.js';
+
 const origin = new URL(process.env.AIMLAB_API_ORIGIN || (process.env.VERCEL_ENV === 'production'
   ? 'https://aimlab-api.saibot.site'
   : 'https://aimlab-staging-api.saibot.site'));
@@ -13,6 +15,10 @@ export default {
     ...(process.env.VERCEL_ENV !== 'production' ? [{ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }] : []),
   ],
   redirects: [
+    ...(process.env.VERCEL_ENV === 'production' ? [
+      { source: '/', has: [{ type: 'host', value: 'aimlab-tracker.vercel.app' }], destination: `${SITE_ORIGIN}/home`, permanent: true },
+      { source: '/((?!googleb46c4e92b2751d24\\.html$).*)', has: [{ type: 'host', value: 'aimlab-tracker.vercel.app' }], destination: `${SITE_ORIGIN}/$1`, permanent: true },
+    ] : []),
     { source: '/', destination: '/home', permanent: true },
     { source: '/index.html', destination: '/home', permanent: true },
     { source: '/leaderboards', destination: '/leaderboards/ra', permanent: true },
