@@ -16,7 +16,7 @@
     <template v-if="!isLoading && currentPlayerInfo.username === username">
       <section class="panel profile-summary" aria-label="Player statistics">
         <div class="profile-identity">
-          <img v-if="publicDetails?.imageUrl" class="profile-avatar" :src="publicDetails.imageUrl" alt="" />
+          <img v-if="publicDetails?.imageUrl && failedAvatar !== avatarUrl" :key="avatarUrl" class="profile-avatar" :src="avatarUrl" width="44" height="44" decoding="async" alt="" @error="failedAvatar = $event.target.getAttribute('src')" />
           <div class="profile-name">
             <strong class="profile-username">{{ currentPlayerInfo.username }}</strong>
             <span class="muted profile-aimlab">Aimlab {{ currentPlayerInfo.rank }} · {{ Math.floor(currentPlayerInfo.skill || 0) }} skill</span>
@@ -29,7 +29,7 @@
             <div><dt>Account age</dt><dd>{{ daysLabel(publicDetails.accountAgeDays) }}</dd></div>
             <div><dt>Current streak</dt><dd>{{ daysLabel(publicDetails.currentStreakDays) }}</dd></div>
             <div><dt>Best streak</dt><dd>{{ daysLabel(publicDetails.bestDailyStreakDays) }}</dd></div>
-            <div><dt>Latest streak</dt><dd>{{ daysLabel(publicDetails.latestDailyStreak?.days) }}</dd><small v-if="publicDetails.latestDailyStreak?.endedOn" class="result-meta">Ended {{ publicDetails.latestDailyStreak.endedOn }}</small></div>
+            <div><dt>Latest streak</dt><dd>{{ daysLabel(publicDetails.latestDailyStreak?.days) }}<small v-if="publicDetails.latestDailyStreak?.endedOn" class="result-meta">Ended {{ publicDetails.latestDailyStreak.endedOn }}</small></dd></div>
           </template>
         </dl>
       </section>
@@ -55,7 +55,7 @@
 .profile-stats > div:last-child { border-right: 0; }
 .profile-stats dt { color: var(--muted); font-size: .73rem; }
 .profile-stats dd { margin: 6px 0 0; font-size: .94rem; font-weight: 600; line-height: 1.3; }
-.profile-stats small { display: block; margin-top: 3px; font-size: .68rem; }
+.profile-stats small { display: block; margin-top: 3px; font-size: .68rem; font-weight: 400; }
 .profile-details-error { margin: -6px 0 16px; }
 @media (max-width: 1050px) {
   .profile-summary { grid-template-columns: 1fr; }
@@ -84,6 +84,7 @@ export default {
       profileController: null,
       detailsController: null,
       publicDetails: null,
+      failedAvatar: null,
       detailsError: "",
       detailsVersion: 0,
       tabs: {
@@ -95,6 +96,7 @@ export default {
     };
   },
   computed: {
+    avatarUrl() { return `/api/profiles/${encodeURIComponent(this.username)}/avatar`; },
     savedProfile() { return savedProfile.value; },
     ...mapGetters([
       "currentPlayerInfo",

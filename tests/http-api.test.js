@@ -31,6 +31,16 @@ test('public API serves bounded namespaces and distinguishes invalid sorts, coll
       assert.ok(await response.json());
     }
     const invalid = await fetch(origin + '/api/leaderboards/vt/aimlabs_s3/advanced/page?sort=constructor');
+    const avatar = await fetch(origin + '/api/profiles/Fixture/avatar');
+    assert.equal(avatar.status, 200);
+    assert.equal(avatar.headers.get('content-type'), 'image/webp');
+    assert.match(avatar.headers.get('cache-control'), /max-age=300/);
+    const { default: sharp } = await import('sharp');
+    const image = await sharp(Buffer.from(await avatar.arrayBuffer())).metadata();
+    assert.equal(image.width, 88);
+    assert.equal(image.height, 88);
+    assert.equal((await fetch(origin + '/api/profiles/Fixture/avatar', { headers: { 'If-None-Match': avatar.headers.get('etag') } })).status, 304);
+    assert.equal((await fetch(origin + '/api/profiles/%ZZ/avatar')).status, 400);
     assert.equal(invalid.status, 400);
     assert.equal((await invalid.json()).error, 'Invalid sort');
     assert.equal((await fetch(origin + '/api/leaderboards/vt/aimlabs_s3/advanced/page')).status, 503);

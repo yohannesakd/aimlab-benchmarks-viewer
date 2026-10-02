@@ -5,6 +5,7 @@ import { handleLeaderboardRequest } from "./leaderboard-db.js";
 import { handlePlayerRunsRequest } from "./player-runs.js";
 import { handleAppDataRequest } from "./app-data.js";
 import { handlePublicDetailsRequest } from "./public-details.js";
+import { handlePlayerAvatarRequest } from './player-avatar.js';
 import { handleTelemetryConfig, instrumentRequest, installTelemetryShutdown } from './telemetry.js';
 import { renderPage, isPublicHost } from './page-renderer.js';
 
@@ -18,6 +19,7 @@ const contentTypes = {
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".webp": "image/webp",
+  ".woff2": "font/woff2",
   ".xml": "application/xml; charset=utf-8",
   ".txt": "text/plain; charset=utf-8",
 };
@@ -61,6 +63,7 @@ const server = createServer(instrumentRequest(async (request, response) => {
 
   if (await handleLeaderboardRequest(request, response, pathname, searchParams)) return;
   if (await handlePlayerRunsRequest(request, response, rawPathname, searchParams)) return;
+  if (await handlePlayerAvatarRequest(request, response, rawPathname)) return;
   if (await handlePublicDetailsRequest(request, response, rawPathname)) return;
   if (await handleAppDataRequest(request, response, rawPathname, searchParams)) return;
 
@@ -88,6 +91,7 @@ const server = createServer(instrumentRequest(async (request, response) => {
   const file = requested;
   try {
     const body = await readFile(file);
+    if (pathname.startsWith('/fonts/')) response.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     send(
       response,
       200,

@@ -49,6 +49,7 @@ The VPS owns Aimlabs requests, profile aggregation, weighted averages, totals, a
 
 - `GET /api/benchmarks/:community`: available sets and score requirements for `voltaic` or `revosect`.
 - `GET /api/profiles/:username/lookup`: username and Aimlabs ranking.
+- `GET /api/profiles/:username/avatar`: cached 88×88 WebP for the 44-pixel avatar. The VPS accepts only Aimlabs' public avatar bucket, refuses redirects, and limits downloads to 5 MiB, 16 million pixels and four concurrent transforms. Unsupported or unavailable images are omitted.
 - `GET /api/profiles/:username`: task summaries, totals, and results grouped by benchmark set.
 - `GET /api/tasks/search?name=...` and `GET /api/tasks/:taskId`: search and task metadata.
 - `GET /api/tasks/:taskId/leaderboard?page=...`: 25 scores per page, defaulting to normalized mode 0. Run links preserve `mode`; benchmark links supply `weapon` to preserve the benchmark score population when Aimlabs’ task default differs.
@@ -71,6 +72,10 @@ npm start
 The private site listens on `127.0.0.1:5180` and is published through Tailscale Serve. The production and staging read-only APIs listen on `127.0.0.1:5182` and `127.0.0.1:5282` and share a Cloudflare Tunnel; its live configuration and credentials stay under `/home/sai/code/aimlab/config/tunnel/`. The staging API service runs from `/home/sai/code/aimlab/worktrees/staging` and reads the published leaderboard databases. The staging season refresh units in `deploy/` collect Voltaic S3/S2 daily at 12:00, use the same refresh lock, and publish only complete difficulty tables. Production keeps its existing archive datasets until its own release. The production systemd user units in `deploy/` run from `/home/sai/code/aimlab/runtime/current`, store databases in `/home/sai/code/aimlab/data/leaderboards`, and refresh at 04:00 local time. The enabled `aimlab-easy-backfill.service` resumes the initial Easy crawl after a reboot and skips itself once the first Easy database is published. Set `AIMLAB_DATA_DIR` to use another data directory.
 
 The VPS workspace is grouped under `/home/sai/code/aimlab`: `repo/` holds the main checkout, `worktrees/staging/` holds consolidated development, `references/` holds schemas and historical repositories, and `runtime/`, `data/`, and `config/` hold deployment files. The workspace's `README.md` records the directory map and temporary paths retained for the active collector.
+
+Poppins is served locally from versioned `public/fonts/` files under the included SIL Open Font License. Only the four used weights are bundled; existing language subsets are preserved. The regular and semibold Latin subsets are preloaded.
+
+Deploy the VPS avatar route and its `sharp` dependency before the frontend release. The route is additive, so the previous frontend remains compatible; rollback the frontend before removing this backend route.
 
 ## Analytics
 

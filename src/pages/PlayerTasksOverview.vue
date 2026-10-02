@@ -7,9 +7,11 @@
     </div>
     <div v-if="paginatedTaskList.data.length" class="task-grid profile-task-grid">
       <div v-for="task in paginatedTaskList.data" :key="task.id" class="task-card player-task-card">
-        <button type="button" class="player-task-run" :aria-label="`Open ${task.name} run: ${task.maxScore} points`" @click="showRun(task)"></button>
         <h3><router-link class="player-task-name" :to="'/tasks/' + encodeURIComponent(task.id) + '/leaderboard'">{{ task.name }}</router-link></h3>
-        <div class="task-card-meta"><span>Best score: {{ task.maxScore }}</span><span>{{ task.count }} plays</span></div>
+        <button type="button" class="player-task-run" @click="showRun(task)">
+          <span class="sr-only">Open {{ task.name }} run. </span>
+          <span class="task-card-meta"><span>Best score: {{ task.maxScore }}</span><span>{{ task.count }} plays</span></span>
+        </button>
       </div>
     </div>
     <p v-else class="status-panel">No played tasks match this search.</p>
@@ -30,9 +32,11 @@
 .profile-tasks-header { flex-wrap: wrap; }
 .task-filter { width: min(100%, 290px); }
 .profile-task-grid { padding: 18px; }
-.player-task-card { position: relative; }
-.player-task-run { position: absolute; inset: 0; width: 100%; }
-.player-task-name { position: relative; }
+.player-task-card { display: flex; flex-direction: column; padding: 0; }
+.player-task-name { display: flex; align-items: center; min-height: 44px; padding: 14px 16px 0; }
+.player-task-run { flex: 1; width: 100%; min-height: 44px; padding: 12px 16px 16px; text-align: left; }
+.player-task-run .task-card-meta { margin-top: 0; }
+.player-task-name:focus-visible, .player-task-run:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .player-task-name:hover { color: var(--accent); }
 </style>
 
