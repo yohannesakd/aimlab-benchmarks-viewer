@@ -73,6 +73,13 @@ export async function initAnalytics(router, app) {
       },
       enable_recording_console_log: false, disable_surveys: false,
       before_send(event) {
+        for (const metric of ['LCP', 'INP', 'CLS', 'FCP', 'TTFB']) {
+          const measurement = event?.properties?.[`$web_vitals_${metric}_event`];
+          if (!measurement) continue;
+          for (const key of ['$current_url', 'navigationURL']) {
+            if (measurement[key]) measurement[key] = redactedUrl(measurement[key]);
+          }
+        }
         const heatmap = event?.properties?.$heatmap_data;
         if (heatmap) {
           const pages = {};
@@ -94,7 +101,7 @@ export async function initAnalytics(router, app) {
         return event;
       },
     });
-    client.register({ environment: config.environment });
+    client.register({ environment: config.environment, app_release: import.meta.env.VITE_APP_RELEASE });
     const previousErrorHandler = app.config.errorHandler;
     app.config.errorHandler = (error, instance, info) => {
       client.captureException(error, { vue_info: info });
