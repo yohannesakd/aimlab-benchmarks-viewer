@@ -1,3 +1,5 @@
+import { SITE_ORIGIN } from '../../shared/seo.js';
+
 let client;
 
 function redactedUrl(value) {
@@ -37,7 +39,7 @@ export async function initAnalytics(router, app) {
     if (!response.ok) return;
     const config = await response.json();
     if (!config.enabled || config.environment !== 'production'
-      || location.hostname !== 'aimlab-tracker.vercel.app' || navigator.webdriver) return;
+      || location.origin !== SITE_ORIGIN || navigator.webdriver) return;
     const { default: posthog } = await import('posthog-js');
     client = posthog.init(config.token, {
       api_host: config.host, ui_host: config.uiHost, defaults: '2026-05-30',

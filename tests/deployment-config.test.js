@@ -22,6 +22,16 @@ test('preview and production proxies choose the intended API and reject credenti
     assert.equal(config.rewrites.at(-1).destination, '/api/render?__page=/$1');
     assert.equal(config.functions['api/render.js'].includeFiles, '{dist/index.html,dist-ssr/**}');
     assert.equal(config.headers.some(rule => rule.source === '/:path*'), environment === 'preview');
+    const migration = config.redirects.filter(rule => rule.has?.some(condition => condition.type === 'host' && condition.value === 'aimlab-tracker.vercel.app'));
+    assert.equal(migration.length, environment === 'production' ? 2 : 0);
+    if (environment === 'production') {
+      assert.equal(migration[0].destination, 'https://aimlab-tracker.saibot.site/home');
+      assert.equal(migration[1].destination, 'https://aimlab-tracker.saibot.site/$1');
+      assert.equal(migration[1].permanent, true);
+      const paths = new RegExp('^' + migration[1].source + '$');
+      assert.equal(paths.test('/googleb46c4e92b2751d24.html'), false);
+      assert.equal(paths.exec('/profile/Fixture/tasks/sixshot/runs')[1], 'profile/Fixture/tasks/sixshot/runs');
+    }
   }
   assert.equal((await configuration('preview', 'https://fixture.invalid')).rewrites[0].destination, 'https://fixture.invalid/api/leaderboards/:path*');
   for (const origin of ['http://fixture.invalid', 'https://secret:password@fixture.invalid', 'https://fixture.invalid/path']) {
