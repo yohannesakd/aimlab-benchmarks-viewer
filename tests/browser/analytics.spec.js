@@ -67,6 +67,10 @@ test('SPA events and replay exclude query strings and input text', async ({ page
   await page.evaluate(async () => {
     const moduleUrl = performance.getEntriesByType('resource').find(entry => /assets\/module-/.test(entry.name)).name;
     const posthog = (await import(moduleUrl)).default;
+    posthog.capture('$web_vitals', { $web_vitals_LCP_value: 1234, $web_vitals_LCP_event: {
+      $current_url: 'https://aimlab-tracker.saibot.site/home?private=never-capture-me',
+      navigationURL: 'https://aimlab-tracker.saibot.site/home?private=never-capture-me',
+    } });
     posthog.logger.info('Diagnostic never-capture-me https://aimlab-tracker.saibot.site/api/tasks/search?q=never-capture-me token=log-secret person@example.com', { api_key: 'log-secret' });
     console.warn('Diagnostic console never-capture-me');
   });
@@ -90,6 +94,10 @@ test('SPA events and replay exclude query strings and input text', async ({ page
   });
   await expect.poll(() => events.filter(event => event.event === '$snapshot').length, { timeout: 10000 }).toBeGreaterThan(1);
   expect(events.filter(event => event.event === '$pageview').map(event => event.properties.$pathname)).toEqual(['/home', '/profile', '/about']);
+  const vital = events.find(event => event.event === '$web_vitals');
+  expect(vital.properties.$web_vitals_LCP_value).toBe(1234);
+  expect(vital.properties.$web_vitals_LCP_event.navigationURL).toBe('https://aimlab-tracker.saibot.site/home');
+  expect(vital.properties.app_release).toMatch(/^[a-f0-9]{40}$/);
   const decoded = unpack(events);
   const snapshots = decoded.filter(event => event.event === '$snapshot').flatMap(event => event.properties.$snapshot_data);
   expect(snapshots.some(snapshot => snapshot.type === 2)).toBe(true);
