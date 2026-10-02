@@ -14,6 +14,25 @@ function unpack(value) {
   return value;
 }
 
+test('analytics configuration loads alongside the route and its failure does not block navigation', async ({ page }) => {
+  let releasePage;
+  const pageReady = new Promise(resolve => { releasePage = resolve; });
+  await page.route('**/assets/HomePage-*.js', async route => {
+    await pageReady;
+    await route.continue();
+  });
+  await page.route('**/api/telemetry/config', route => route.fulfill({ status: 503, json: { error: 'Unavailable' } }));
+  const configured = page.waitForResponse(response => new URL(response.url()).pathname === '/api/telemetry/config');
+  const navigation = page.goto('/home');
+  try {
+    await configured;
+    expect(await page.evaluate(() => Boolean(document.querySelector('#app').__vue_app__))).toBe(false);
+  } finally { releasePage(); }
+  await navigation;
+  await page.getByRole('link', { name: 'About this project', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'About Aimlab Tracker', exact: true })).toBeVisible();
+});
+
 test('SPA events and replay exclude query strings and input text', async ({ page }) => {
   const events = [];
   const logs = [];
@@ -62,6 +81,8 @@ test('SPA events and replay exclude query strings and input text', async ({ page
   await page.goto('https://aimlab-tracker.saibot.site/home?private=never-capture-me');
   await expect.poll(() => events.filter(event => event.event === '$pageview').length).toBe(1);
   await page.waitForFunction(() => Boolean(window.__PosthogExtensions__?.rrweb?.record));
+  const menu = page.getByRole('button', { name: 'Toggle navigation' });
+  if (await menu.isVisible()) await menu.click();
   await page.getByRole('link', { name: 'Profile', exact: true }).click();
   await page.getByRole('textbox', { name: 'Aimlab username · case sensitive' }).fill('never-capture-me');
   await page.evaluate(async () => {
