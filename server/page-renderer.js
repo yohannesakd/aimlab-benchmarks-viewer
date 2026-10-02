@@ -74,13 +74,8 @@ export async function renderPage(address, { apiOrigin, indexable = false, read }
   manifest ||= readFile(new URL('../dist-ssr/client-manifest.json', import.meta.url), 'utf8').then(JSON.parse);
   const [html, { render }, files] = await Promise.all([template, bundle, manifest]);
   const { content, modules } = await render(bootstrap.url, bootstrap);
-  const assets = [...new Set(modules.flatMap(module => files[module] || []).map(file => file.startsWith('/') ? file : '/' + file))]
-    .filter(file => !html.includes(`"${file}"`));
-  const links = assets.map(file => file.endsWith('.css')
-    ? `<link rel="stylesheet" href="${file}" />`
-    : file.endsWith('.js') ? `<link rel="modulepreload" crossorigin href="${file}" />` : '').join('');
-  const analyticsConnection = indexable ? '<link rel="preconnect" href="https://edge.saibot.site" crossorigin />' : '';
-  const body = html.replace('<!--page-head-->', () => metadataHtml(metadata, indexable && metadata.indexable) + links + analyticsConnection)
+  const styles = [...new Set(modules.flatMap(module => files[module] || []).filter(file => file.endsWith('.css')))];
+  const body = html.replace('<!--page-head-->', () => metadataHtml(metadata, indexable && metadata.indexable) + styles.map(file => `<link rel="stylesheet" href="${file.startsWith('/') ? file : '/' + file}" />`).join(''))
     .replace('<!--page-content-->', () => content)
     .replace('<!--page-data-->', () => `<script id="page-data" type="application/json">${safeJson(bootstrap)}</script>`);
   const hasFailure = Object.values(bootstrap.responses).some(result => result.status !== 200);
