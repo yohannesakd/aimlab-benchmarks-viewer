@@ -33,20 +33,12 @@ function pageProperties(route) {
   };
 }
 
-export async function loadAnalyticsConfig() {
+export async function initAnalytics(router, app) {
   try {
     const response = await fetch('/api/telemetry/config', { signal: AbortSignal.timeout(3000) });
-    return response.ok ? await response.json() : null;
-  } catch (error) {
-    console.warn('Analytics could not initialize', error);
-    return null;
-  }
-}
-
-export async function initAnalytics(router, app, configuration) {
-  try {
-    const config = await configuration;
-    if (!config?.enabled || config.environment !== 'production'
+    if (!response.ok) return;
+    const config = await response.json();
+    if (!config.enabled || config.environment !== 'production'
       || location.origin !== SITE_ORIGIN || navigator.webdriver) return;
     const { default: posthog } = await import('posthog-js');
     client = posthog.init(config.token, {
