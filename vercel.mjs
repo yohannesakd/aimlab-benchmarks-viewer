@@ -11,6 +11,7 @@ export const apiOrigin = origin.origin;
 export default {
   functions: { 'api/render.js': { includeFiles: '{dist/index.html,dist-ssr/**}', maxDuration: 30 } },
   headers: [
+    { source: '/fonts/:path*', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
     ...['leaderboards', 'profiles', 'tasks', 'benchmarks', 'telemetry'].map(namespace => ({ source: `/api/${namespace}/:path*`, headers: [{ key: 'X-Robots-Tag', value: 'noindex' }] })),
     ...(process.env.VERCEL_ENV !== 'production' ? [{ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }] : []),
   ],

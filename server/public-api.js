@@ -3,6 +3,7 @@ import { handleLeaderboardRequest } from "./leaderboard-db.js";
 import { handlePlayerRunsRequest } from "./player-runs.js";
 import { handleAppDataRequest } from "./app-data.js";
 import { handlePublicDetailsRequest } from "./public-details.js";
+import { handlePlayerAvatarRequest } from './player-avatar.js';
 import { handleTelemetryConfig, instrumentRequest, installTelemetryShutdown } from './telemetry.js';
 
 const port = Number(process.env.PUBLIC_API_PORT || 5182);
@@ -25,6 +26,7 @@ const server = createServer(instrumentRequest(async (request, response) => {
   if (handleTelemetryConfig(request, response, url.pathname)) return;
   if (await handleLeaderboardRequest(request, response, url.pathname, url.searchParams)) return;
   if (await handlePlayerRunsRequest(request, response, url.pathname, url.searchParams)) return;
+  if (await handlePlayerAvatarRequest(request, response, url.pathname)) return;
   if (await handlePublicDetailsRequest(request, response, url.pathname)) return;
   if (await handleAppDataRequest(request, response, url.pathname, url.searchParams)) return;
   response.writeHead(404, { "Content-Type": "text/plain" }).end("Not found");
