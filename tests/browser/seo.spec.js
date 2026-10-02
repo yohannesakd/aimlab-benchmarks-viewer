@@ -16,6 +16,8 @@ test('server HTML hydrates without mismatch, duplicate initial reads, or losing 
   await page.getByRole('option', { name: 'Season 2' }).click();
   await expect(page).toHaveURL(/benchmark=aimlabs_s2/);
   await expect(page).toHaveTitle(/Season 2/);
+  const menu = page.getByRole('button', { name: 'Toggle navigation' });
+  if (await menu.isVisible()) await menu.click();
   await page.getByRole('link', { name: 'Home', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Open saved profile' })).toHaveAttribute('href', '/profile/SavedPlayer');
   expect(errors).toEqual([]);

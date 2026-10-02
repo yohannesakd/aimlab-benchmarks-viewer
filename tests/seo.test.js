@@ -30,10 +30,17 @@ test('SSR renders catalog content and styles before JavaScript; private pages st
   assert.match(html, /VT Angleshot Novice S3/);
   assert.match(html, /350/);
   assert.match(html, /stylesheet[^>]+BenchmarkCatalogPage/);
+  assert.match(html, /modulepreload[^>]+BenchmarkCatalogPage[^>]+\.js/);
+  assert.ok(!html.includes('modulepreload" crossorigin href="/assets/HomePage'));
+  const preloads = [...html.matchAll(/rel="modulepreload"[^>]+href="([^"]+)"/g)].map(match => match[1]);
+  assert.equal(preloads.length, new Set(preloads).size);
+  assert.match(html, /rel="preconnect" href="https:\/\/edge.saibot.site" crossorigin/);
   assert.match(html, /name="robots" content="index,follow/);
   const privatePage = await renderPage('/home');
   assert.match(privatePage.headers['X-Robots-Tag'], /noindex/);
   assert.equal(privatePage.headers['Cache-Control'], 'no-store');
+  assert.match(privatePage.body, /modulepreload[^>]+HomePage[^>]+\.js/);
+  assert.ok(!privatePage.body.includes('rel="preconnect"'));
 });
 
 test('concurrent SSR profiles cannot share player state or serialize executable names', async () => {
