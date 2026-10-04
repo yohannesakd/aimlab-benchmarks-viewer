@@ -5,6 +5,7 @@ import { handleAppDataRequest } from "./app-data.js";
 import { handlePublicDetailsRequest } from "./public-details.js";
 import { handlePlayerAvatarRequest } from './player-avatar.js';
 import { handleTelemetryConfig, instrumentRequest, installTelemetryShutdown } from './telemetry.js';
+import { handlePublicPageRequest } from './public-pages.js';
 
 const port = Number(process.env.PUBLIC_API_PORT || 5182);
 const server = createServer(instrumentRequest(async (request, response) => {
@@ -23,6 +24,9 @@ const server = createServer(instrumentRequest(async (request, response) => {
     response.writeHead(200, { "Content-Type": "text/plain" }).end("ok");
     return;
   }
+  if (await handlePublicPageRequest(request, response, url, {
+    apiOrigin: `http://127.0.0.1:${server.address().port}`, environment: process.env.AIMLAB_ENV,
+  })) return;
   if (handleTelemetryConfig(request, response, url.pathname)) return;
   if (await handleLeaderboardRequest(request, response, url.pathname, url.searchParams)) return;
   if (await handlePlayerRunsRequest(request, response, url.pathname, url.searchParams)) return;

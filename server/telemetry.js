@@ -48,6 +48,8 @@ export function handleTelemetryConfig(request, response, pathname) {
 
 export function requestRoute(pathname) {
   const patterns = [
+    [/^\/api\/pages\/(public|preview)\/.*$/, '/api/pages/:visibility/:page'],
+    [/^\/api\/site-assets\/.*$/, '/api/site-assets/:file'],
     [/^\/api\/profiles\/[^/]+\/tasks\/[^/]+\/runs$/, '/api/profiles/:username/tasks/:taskId/runs'],
     [/^\/api\/profiles\/[^/]+\/(lookup|details|activity)$/, '/api/profiles/:username/$1'],
     [/^\/api\/profiles\/[^/]+$/, '/api/profiles/:username'],
