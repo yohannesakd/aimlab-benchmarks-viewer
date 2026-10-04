@@ -1,6 +1,10 @@
 tunnel: 8657036f-19bd-4e43-b286-536f448c6987
 credentials-file: /home/sai/code/aimlab/config/tunnel/8657036f-19bd-4e43-b286-536f448c6987.json
 ingress:
+  - hostname: aimlab-tracker.saibot.site
+    service: http://127.0.0.1:5180
+    originRequest:
+      httpHostHeader: aimlab-tracker.saibot.site
   - hostname: aimlab-api.saibot.site
     service: http://127.0.0.1:5182
   - hostname: aimlab-staging-api.saibot.site
