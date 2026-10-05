@@ -24,6 +24,8 @@ test('preview and production proxies choose the intended API and reject credenti
     assert.equal(config.functions, undefined);
     assert.ok(config.rewrites.every(rule => rule.destination.startsWith('https://')));
     assert.equal(config.headers.filter(rule => rule.headers.some(header => header.key === 'x-vercel-enable-rewrite-caching' && header.value === '1')).length, 2);
+    assert.equal(config.headers[0].source, '/((?!api(?:/|$)|assets(?:/|$)).*)');
+    assert.ok([...config.headers, ...config.rewrites, ...config.redirects].every(rule => typeof rule.source === 'string'));
     if (environment === 'production') {
       assert.equal(config.rewrites[6].destination, `https://${host}/api/pages/public/$1`);
       assert.deepEqual(config.rewrites[6].has, [{ type: 'host', value: 'aimlab-tracker.saibot.site' }]);
