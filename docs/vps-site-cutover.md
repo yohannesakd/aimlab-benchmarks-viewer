@@ -4,7 +4,10 @@ The public request path is:
 
 `https://aimlab-tracker.saibot.site` → Cloudflare HTTPS → existing `aimlab-api` tunnel → `127.0.0.1:5180` → `server/index.js`.
 
-The viewer serves HTML, built JavaScript/CSS, fonts, images, verification files, robots, sitemap and the existing read-only APIs on one origin. SSR reads the same server over loopback. Vercel external rewrites are retained only for existing Vercel aliases/previews; the canonical site's DNS must point directly to the Cloudflare tunnel. No new inbound port or credential is needed.
+The viewer serves HTML, built JavaScript/CSS, fonts, images, verification files, robots, sitemap and the existing read-only APIs on one origin.
+SSR reads the same server over loopback. The canonical site's DNS points directly to the Cloudflare tunnel.
+Vercel serves static redirects to the canonical site and retains the Google verification file.
+Application previews use the private VPS staging viewer. No new inbound port or credential is needed.
 
 The tunnel template in `deploy/aimlab-api-tunnel.yml` preserves both API hostnames and adds only the canonical site. Its explicit origin host selects canonical production SEO. The same viewer remains noindex on the existing private Tailscale hostname. The private staging viewer at `https://vps.snapper-cod.ts.net:5194` remains the VPS preview; this migration does not expose a new public staging hostname.
 
@@ -21,7 +24,12 @@ Use existing Cloudflare account authorization. The installed `cloudflared tunnel
 
 ## Release and checks
 
-Build the committed release on Node 24 with its recorded commit identity. The ordinary production source-map process may use the existing build environment privately; isolated verification builds omit credentials and generate no maps. Retain `dist`, `dist-ssr`, server/shared files and dependencies. Verify no source maps are present. `server/index.js` serves robots according to the live canonical host and production environment, so its robots policy does not depend on a Vercel build variable.
+Build the committed VPS release on Node 24 with its recorded commit identity.
+Set `AIMLAB_ENV=production` and `AIMLAB_APP_RELEASE` to the committed release SHA for a production build.
+The VPS production build uploads source maps to PostHog through the existing private build environment, then removes them.
+Isolated verification builds omit credentials and generate no maps. Vercel skips application builds and needs no PostHog build credentials.
+Retain `dist`, `dist-ssr`, server/shared files and dependencies. Verify no source maps are present.
+`server/index.js` serves robots according to the live canonical host and production environment.
 
 Use an immutable release directory and atomically replace `runtime/current`. Keep a known-good complete-site release available for rollback. Restart the existing viewer and API only after the candidate passes isolated fixture tests and browser hydration. Do not restart collectors or trigger imports. Existing read-only API clients remain compatible.
 
@@ -46,4 +54,7 @@ Before rollback, copy the new release's hashed assets into the rollback release 
 
 For a tunnel problem, restore the saved ingress file and restart the connector. Restore the saved canonical Cloudflare DNS record only if returning to Vercel is acceptable; Vercel's already exhausted quotas can make that fallback unavailable. Never claim a guaranteed quota-safe rollback solely because the old Vercel deployment still exists. Keep both application releases and tunnel/DNS snapshots until the cutover is verified.
 
-Old immutable Vercel deployments and the former `aimlab-tracker.vercel.app` hostname can still use the old functions or redirects. Their retirement/protection needs separately authorized Vercel account access. Moving the canonical hostname removes Vercel from Aimlab's normal public page/asset/API path; it does not reset team quotas or migrate unrelated projects.
+Old immutable Vercel deployments can still use their original functions or rewrites.
+The VPS retains `/api/pages` and `/api/site-assets` for those existing deployments during migration.
+New Vercel deployments and legacy aliases redirect to the canonical VPS site.
+Moving the canonical hostname does not reset team quotas or migrate unrelated projects.

@@ -1,0 +1,25 @@
+{
+  "framework": null,
+  "ignoreCommand": "exit 1",
+  "installCommand": "true",
+  "buildCommand": "mkdir -p .vercel-static && cp public/googleb46c4e92b2751d24.html .vercel-static/",
+  "outputDirectory": ".vercel-static",
+  "headers": [
+    {
+      "source": "/:path*",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://aimlab-tracker.saibot.site/home",
+      "permanent": true
+    },
+    {
+      "source": "/((?!googleb46c4e92b2751d24\\.html$).*)",
+      "destination": "https://aimlab-tracker.saibot.site/$1",
+      "permanent": true
+    }
+  ]
+}

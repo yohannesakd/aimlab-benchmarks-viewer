@@ -18,7 +18,7 @@ for (const community of ['voltaic', 'revosect']) {
 }
 const canonicals = [...new Set([...paths].map(path => pageMetadata(parsePage(path)).canonical))].sort();
 await writeFile('dist/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${canonicals.map(url => `  <url><loc>${escapeHtml(url)}</loc></url>`).join('\n')}\n</urlset>\n`);
-await writeFile('dist/robots.txt', process.env.VERCEL_ENV === 'production'
+await writeFile('dist/robots.txt', process.env.AIMLAB_ENV === 'production'
   ? `User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${SITE_ORIGIN}/sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n');
 console.log(`SEO: sitemap generated with ${canonicals.length} canonical URLs; no upstream API calls.`);

@@ -45,7 +45,12 @@ The Task is Presented as such, the option to launch Aimlab and play as well as w
 
 ## Running on a VPS
 
-The VPS site at [https://vps.snapper-cod.ts.net:5180/](https://vps.snapper-cod.ts.net:5180/) is private to the owner's tailnet. The canonical production site serves pages, static files, and read-only APIs from the VPS through the existing Cloudflare tunnel. See [the VPS deployment guide](docs/vps-site-cutover.md) for routing and rollback. Existing Vercel aliases use the read-only API at `aimlab-api.saibot.site`. The staging Vercel preview uses `aimlab-staging-api.saibot.site` for benchmark leaderboards and all profile/task data. `vercel.mjs` selects the production API for `VERCEL_ENV=production` and the staging API otherwise. Set `AIMLAB_API_ORIGIN` to override the target explicitly. It proxies the `/api/leaderboards`, `/api/profiles`, `/api/tasks`, `/api/benchmarks`, and `/api/telemetry` namespaces.
+The canonical production site serves pages, static files, and read-only APIs from the VPS through the existing Cloudflare tunnel.
+The [private production site](https://vps.snapper-cod.ts.net:5180/) and [private staging preview](https://vps.snapper-cod.ts.net:5194/) require the owner's tailnet.
+See [the VPS deployment guide](docs/vps-site-cutover.md) for routing and rollback.
+Vercel aliases and deployment URLs redirect to the canonical site, preserving paths and query strings.
+Vercel serves only redirects and the Google verification file. Its deployment URLs have `noindex, nofollow` headers.
+Use the private VPS staging preview to verify application changes.
 
 The Node server serves the built site and paged Revosect and Voltaic leaderboards. The refresh command collects Aimlab scores into a resumable SQLite staging database, calculates ranks using the same benchmark functions as player profiles, then atomically publishes one database per benchmark season and level. It keeps the previous published database if Aimlab fails. Large levels take longer to backfill; until one completes, its API returns 503 and the site shows its collection status.
 

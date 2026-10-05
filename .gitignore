@@ -11,6 +11,8 @@ node_modules
 dist
 data/
 dist-ssr
+.vercel/
+.vercel-static/
 *.local
 
 # Editor directories and files
