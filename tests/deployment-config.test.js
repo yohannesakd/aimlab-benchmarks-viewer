@@ -17,10 +17,17 @@ async function configuration(environment, origin) {
 test('preview and production proxies choose the intended API and reject credential-bearing or path origins', async () => {
   for (const [environment, host] of [['preview', 'aimlab-staging-api.saibot.site'], ['production', 'aimlab-api.saibot.site']]) {
     const config = await configuration(environment);
-    assert.equal(config.rewrites.length, 6);
+    assert.equal(config.rewrites.length, environment === 'production' ? 8 : 7);
     assert.deepEqual(config.rewrites.slice(0, 5).map(rule => rule.destination), ['leaderboards', 'profiles', 'tasks', 'benchmarks', 'telemetry'].map(namespace => `https://${host}/api/${namespace}/:path*`));
-    assert.equal(config.rewrites.at(-1).destination, '/api/render?__page=/$1');
-    assert.equal(config.functions['api/render.js'].includeFiles, '{dist/index.html,dist-ssr/**}');
+    assert.equal(config.rewrites[5].destination, `https://${host}/api/site-assets/:path*`);
+    assert.equal(config.rewrites.at(-1).destination, `https://${host}/api/pages/preview/$1`);
+    assert.equal(config.functions, undefined);
+    assert.ok(config.rewrites.every(rule => rule.destination.startsWith('https://')));
+    assert.equal(config.headers.filter(rule => rule.headers.some(header => header.key === 'x-vercel-enable-rewrite-caching' && header.value === '1')).length, 2);
+    if (environment === 'production') {
+      assert.equal(config.rewrites[6].destination, `https://${host}/api/pages/public/$1`);
+      assert.deepEqual(config.rewrites[6].has, [{ type: 'host', value: 'aimlab-tracker.saibot.site' }]);
+    }
     assert.equal(config.headers.some(rule => rule.source === '/:path*'), environment === 'preview');
     const migration = config.redirects.filter(rule => rule.has?.some(condition => condition.type === 'host' && condition.value === 'aimlab-tracker.vercel.app'));
     assert.equal(migration.length, environment === 'production' ? 2 : 0);

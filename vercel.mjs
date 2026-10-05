@@ -6,11 +6,12 @@ const origin = new URL(process.env.AIMLAB_API_ORIGIN || (process.env.VERCEL_ENV 
 if (origin.protocol !== 'https:' || origin.pathname !== '/' || origin.search || origin.hash || origin.username || origin.password) {
   throw new Error('AIMLAB_API_ORIGIN must be an HTTPS origin');
 }
-export const apiOrigin = origin.origin;
+const pageSource = '/((?!api(?:/|$)|assets(?:/|$)).*)';
 
 export default {
-  functions: { 'api/render.js': { includeFiles: '{dist/index.html,dist-ssr/**}', maxDuration: 30 } },
   headers: [
+    { source: pageSource, headers: [{ key: 'x-vercel-enable-rewrite-caching', value: '1' }] },
+    { source: '/assets/:path*', headers: [{ key: 'x-vercel-enable-rewrite-caching', value: '1' }] },
     { source: '/fonts/:path*', headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] },
     ...['leaderboards', 'profiles', 'tasks', 'benchmarks', 'telemetry'].map(namespace => ({ source: `/api/${namespace}/:path*`, headers: [{ key: 'X-Robots-Tag', value: 'noindex' }] })),
     ...(process.env.VERCEL_ENV !== 'production' ? [{ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }] : []),
@@ -29,6 +30,12 @@ export default {
       source: `/api/${namespace}/:path*`,
       destination: `${origin.origin}/api/${namespace}/:path*`,
     })),
-    { source: '/((?!api(?:/|$)|assets(?:/|$)).*)', destination: '/api/render?__page=/$1' },
+    { source: '/assets/:path*', destination: `${origin.origin}/api/site-assets/:path*` },
+    ...(process.env.VERCEL_ENV === 'production' ? [{
+      source: pageSource,
+      has: [{ type: 'host', value: new URL(SITE_ORIGIN).host }],
+      destination: `${origin.origin}/api/pages/public/$1`,
+    }] : []),
+    { source: pageSource, destination: `${origin.origin}/api/pages/preview/$1` },
   ],
 };

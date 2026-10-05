@@ -11,5 +11,5 @@ EnvironmentFile=-/home/sai/code/aimlab/config/viewer/posthog.env
 Environment=AIMLAB_ENV=production
 Environment=POSTHOG_SERVICE=aimlab-collector
 ExecStart=/usr/bin/flock -n /home/sai/code/aimlab/data/leaderboards/refresh.lock /home/sai/.nvm/versions/node/v24.16.0/bin/node server/refresh-database.js
-TimeoutStartSec=12h
+TimeoutStartSec=24h
 Nice=10
