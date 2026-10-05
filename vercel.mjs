@@ -1,8 +1,8 @@
 import { SITE_ORIGIN } from './shared/seo.js';
 
-const apiOrigin = (process.env.AIMLAB_API_ORIGIN || (process.env.VERCEL_ENV === 'production'
+export const apiOrigin = process.env.AIMLAB_API_ORIGIN || (process.env.VERCEL_ENV === 'production'
   ? 'https://aimlab-api.saibot.site'
-  : 'https://aimlab-staging-api.saibot.site')).replace(/\/$/, '');
+  : 'https://aimlab-staging-api.saibot.site');
 const origin = new URL(apiOrigin);
 if (origin.protocol !== 'https:' || origin.pathname !== '/' || origin.search || origin.hash || origin.username || origin.password) {
   throw new Error('AIMLAB_API_ORIGIN must be an HTTPS origin');
