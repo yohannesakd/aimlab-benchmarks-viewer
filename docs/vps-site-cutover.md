@@ -25,6 +25,8 @@ Build the committed release on Node 24 with its recorded commit identity. The or
 
 Use an immutable release directory and atomically replace `runtime/current`. Keep a known-good complete-site release available for rollback. Restart the existing viewer and API only after the candidate passes isolated fixture tests and browser hydration. Do not restart collectors or trigger imports. Existing read-only API clients remain compatible.
 
+Before activation, copy prior hashed assets into the new release's `dist/assets` without replacing current files. Exclude source maps. Preserve assets from the active VPS release and the former Vercel production build. Open browser sessions load route chunks lazily and need those files after deployment. Check an old route chunk through both `/assets/` and `/api/site-assets/` after activation.
+
 Validate the candidate tunnel configuration without activating it:
 
 ```sh
@@ -39,6 +41,8 @@ Cloudflare's default static-file cache can honor immutable build assets. HTML ca
 ## Rollback
 
 For a VPS application problem after DNS cutover, switch to the previously tested complete-site release and restart the viewer/API. That rollback retains Cloudflare → VPS routing and avoids Vercel quotas. Before exposing the canonical hostname, test the original viewer build with a canonical Host header for HTML, files, robots and APIs; if its robots file disallows crawling, it needs the tested complete-site server handler before becoming a rollback target.
+
+Before rollback, copy the new release's hashed assets into the rollback release without replacing existing files. Exclude source maps. This preserves browser sessions opened after the deployment.
 
 For a tunnel problem, restore the saved ingress file and restart the connector. Restore the saved canonical Cloudflare DNS record only if returning to Vercel is acceptable; Vercel's already exhausted quotas can make that fallback unavailable. Never claim a guaranteed quota-safe rollback solely because the old Vercel deployment still exists. Keep both application releases and tunnel/DNS snapshots until the cutover is verified.
 
