@@ -25,6 +25,7 @@ Use existing Cloudflare account authorization. The installed `cloudflared tunnel
 ## Release and checks
 
 Build the committed VPS release on Node 24 with its recorded commit identity.
+Set `AIMLAB_ENV=production` and `AIMLAB_APP_RELEASE` to the committed release SHA for a production build.
 The VPS production build uploads source maps to PostHog through the existing private build environment, then removes them.
 Isolated verification builds omit credentials and generate no maps. Vercel skips application builds and needs no PostHog build credentials.
 Retain `dist`, `dist-ssr`, server/shared files and dependencies. Verify no source maps are present.
