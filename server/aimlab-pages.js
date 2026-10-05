@@ -43,39 +43,51 @@ export async function fetchLeaderboardPage(bench, offset, { provider = 'legacy',
   const configuration = providers[provider];
   for (let attempt = 0; attempt < 6; attempt++) {
     await pace();
-    const response = await fetch(configuration.endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "User-Agent": "AimlabBenchmarksViewer/1.0",
-      },
-      body: JSON.stringify({
-        query: queryFor(configuration),
-        variables: Object.fromEntries(
-          pageNames.map((name, index) => [
-            name,
-            {
-              clientId: "aimlab",
-              limit: pageSize,
-              offset: offset + index * pageSize,
-              taskId: bench.id,
-              taskMode: bench.mode ?? 0,
-              weaponId: bench.weapon,
-            },
-          ])
-        ),
-      }),
-      signal: AbortSignal.timeout(20000),
-    });
-
+    const signal = AbortSignal.timeout(20000);
+    let response;
     let body;
     try {
+      response = await fetch(configuration.endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "AimlabBenchmarksViewer/1.0",
+        },
+        body: JSON.stringify({
+          query: queryFor(configuration),
+          variables: Object.fromEntries(
+            pageNames.map((name, index) => [
+              name,
+              {
+                clientId: "aimlab",
+                limit: pageSize,
+                offset: offset + index * pageSize,
+                taskId: bench.id,
+                taskMode: bench.mode ?? 0,
+                weaponId: bench.weapon,
+              },
+            ])
+          ),
+        }),
+        signal,
+      });
+      if ([500, 502, 503, 504].includes(response.status)) {
+        await response.body?.cancel();
+        throw new Error(`Aimlab returned HTTP ${response.status} for ${bench.name}`);
+      }
       const result = await readBulkJson(response);
       body = result.body;
       onResponse?.({ provider, bytes: result.bytes, status: response.status });
       logTelemetry('collector_batch', { provider, bytes: result.bytes, status: response.status, offset, attempt: attempt + 1 });
     } catch (error) {
-      if (response.status !== 429) throw error;
+      const transient = [500, 502, 503, 504].includes(response?.status) || error.name === 'TimeoutError' || signal.reason?.name === 'TimeoutError';
+      if (transient && attempt < 5) {
+        const seconds = 2 ** attempt;
+        logTelemetry('collector_retry', { provider, offset, attempt: attempt + 1, status: response?.status, error_type: error.name, retry_after_seconds: seconds }, 'WARN');
+        await sleep(seconds * 1000);
+        continue;
+      }
+      if (response?.status !== 429) throw error;
       body = {};
     }
     const errors = body.errors?.map((error) => error.message) || [];

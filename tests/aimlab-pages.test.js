@@ -66,3 +66,51 @@ test('Aimlab rate limit errors retry without publishing partial pages', async ()
     assert.equal(calls, 2);
   } finally { globalThis.fetch = originalFetch; }
 });
+
+test('collector retries upstream failures and timeouts with the same batch', async t => {
+  const waits = [];
+  const requests = [];
+  const failedBodies = [];
+  t.mock.method(globalThis, 'setTimeout', (callback, ms) => {
+    waits.push(ms);
+    return setImmediate(callback);
+  });
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    requests.push(JSON.parse(options.body).variables);
+    if (requests.length === 1) throw new DOMException('Upstream timed out', 'TimeoutError');
+    if (requests.length < 4) {
+      const result = new Response('upstream failure', { status: requests.length === 2 ? 500 : 503 });
+      failedBodies.push(result.body);
+      return result;
+    }
+    return response({ data: { aimlab: fixture(135) } });
+  });
+  const result = await fetchLeaderboardPage(easyBench[0], 0);
+  assert.equal(result.data.length, 135);
+  assert.equal(requests.length, 4);
+  assert.ok(requests.every(request => JSON.stringify(request) === JSON.stringify(requests[0])));
+  assert.deepEqual(waits.filter(ms => ms >= 1000), [1000, 2000, 4000]);
+  for (const body of failedBodies) assert.equal((await body.getReader().read()).done, true);
+});
+
+test('collector bounds transient retries and does not retry explicit or invalid responses', async t => {
+  const waits = [];
+  let calls = 0;
+  t.mock.method(globalThis, 'setTimeout', (callback, ms) => {
+    waits.push(ms);
+    return setImmediate(callback);
+  });
+  t.mock.method(globalThis, 'fetch', async () => {
+    calls++;
+    return new Response('upstream failure', { status: 500 });
+  });
+  await assert.rejects(fetchLeaderboardPage(easyBench[0], 0), /HTTP 500/);
+  assert.equal(calls, 6);
+  assert.deepEqual(waits.filter(ms => ms >= 1000), [1000, 2000, 4000, 8000, 16000]);
+  for (const result of [new Response('{}', { status: 403 }), response({ data: { aimlab: fixture(135) }, errors: [{ message: 'Denied' }] }), response({ data: {} })]) {
+    calls = 0;
+    globalThis.fetch = async () => { calls++; return result; };
+    await assert.rejects(fetchLeaderboardPage(easyBench[0], 0));
+    assert.equal(calls, 1);
+  }
+});
