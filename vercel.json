@@ -1,5 +1,6 @@
 {
   "framework": null,
+  "ignoreCommand": "exit 1",
   "installCommand": "true",
   "buildCommand": "mkdir -p .vercel-static && cp public/googleb46c4e92b2751d24.html .vercel-static/",
   "outputDirectory": ".vercel-static",
