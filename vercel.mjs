@@ -7,7 +7,7 @@ if (origin.protocol !== 'https:' || origin.pathname !== '/' || origin.search || 
   throw new Error('AIMLAB_API_ORIGIN must be an HTTPS origin');
 }
 
-export default {
+export const config = {
   headers: [
     { source: '/((?!api(?:/|$)|assets(?:/|$)).*)', headers: [{ key: 'x-vercel-enable-rewrite-caching', value: '1' }] },
     { source: '/assets/:path*', headers: [{ key: 'x-vercel-enable-rewrite-caching', value: '1' }] },

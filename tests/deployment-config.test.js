@@ -7,7 +7,7 @@ async function configuration(environment, origin) {
   process.env.VERCEL_ENV = environment;
   if (origin === undefined) delete process.env.AIMLAB_API_ORIGIN;
   else process.env.AIMLAB_API_ORIGIN = origin;
-  try { return (await import(`../vercel.mjs?fixture=${revision++}`)).default; }
+  try { return (await import(`../vercel.mjs?fixture=${revision++}`)).config; }
   finally {
     if (previous.environment === undefined) delete process.env.VERCEL_ENV; else process.env.VERCEL_ENV = previous.environment;
     if (previous.origin === undefined) delete process.env.AIMLAB_API_ORIGIN; else process.env.AIMLAB_API_ORIGIN = previous.origin;
