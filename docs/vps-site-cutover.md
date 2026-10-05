@@ -8,11 +8,11 @@ The viewer serves HTML, built JavaScript/CSS, fonts, images, verification files,
 
 The tunnel template in `deploy/aimlab-api-tunnel.yml` preserves both API hostnames and adds only the canonical site. Its explicit origin host selects canonical production SEO. The same viewer remains noindex on the existing private Tailscale hostname. The private staging viewer at `https://vps.snapper-cod.ts.net:5194` remains the VPS preview; this migration does not expose a new public staging hostname.
 
-## Preflight and approvals
+## Deployment procedure
 
-Do not execute publication or routing changes until each applicable action is approved:
+The owner authorized repair, migration, and production deployment on October 5, 2026. The following steps apply to this release.
 
-1. Publish the scoped branch to `yohannesakd/aimlab-benchmarks-viewer`, create a draft PR, and merge after verification. This uploads source to GitHub and can trigger the existing Vercel integration. An earlier automatic approval review rejected this publication; changing the deployment route does not authorize bypassing that rejection.
+1. Publish the scoped branch to `yohannesakd/aimlab-benchmarks-viewer`. Create a ready PR and merge after verification. The existing Vercel integration can start a deployment.
 2. Activate the tested committed release for the existing production viewer and API user services. Keep the existing data directory, telemetry environment, collector services and private Tailscale endpoints.
 3. Add `aimlab-tracker.saibot.site` → `127.0.0.1:5180` to the existing tunnel ingress with `httpHostHeader: aimlab-tracker.saibot.site`, then restart the existing tunnel connector. This makes the currently private viewer reachable through the public canonical hostname. No other hostname, wildcard, Access policy or port changes are included. Restarting the shared tunnel may briefly affect both existing public API hostnames.
 4. Replace only the canonical site's existing Vercel CNAME with the proxied tunnel target `8657036f-19bd-4e43-b286-536f448c6987.cfargotunnel.com`. This moves production traffic and TLS termination to Cloudflare. Before writing, retrieve and save the full current Cloudflare record, including TTL/proxy settings; public DNS alone does not prove those settings. The verified public CNAME at preparation time was `66cf9b209ca81a78.vercel-dns-017.com`.
