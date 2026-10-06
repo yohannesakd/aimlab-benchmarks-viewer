@@ -170,3 +170,45 @@ test('task leaderboards keep alternate-mode scores and caches separate', async (
     assert.equal(calls.length, 3);
   } finally { globalThis.fetch = originalFetch; }
 });
+
+test('profile recovery preserves identity and timestamps without weakening lookup or search', async t => {
+  const { getProfile, getProfileLookup, getTaskSearch } = await import('../server/app-data.js');
+  let now = Date.now();
+  t.mock.method(Date, 'now', () => now);
+  let id = 'original-id';
+  let failStats = false;
+  let failAll = false;
+  let missing = false;
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    const { query, variables } = JSON.parse(options.body);
+    if (failAll || (failStats && !variables.username)) throw new DOMException('Timed out', 'TimeoutError');
+    if (variables.username && missing) return response({ aimlabProfile: null });
+    if (variables.username) return response({ aimlabProfile: { username: variables.username, user: { id } } });
+    if (query.includes('SearchTasks')) return response({ aimlab: { tasks: [] } });
+    return response({ aimlab: { plays_agg: [] } });
+  });
+  const original = await getProfile('RecoveryIdentity');
+  await getTaskSearch('RecoverySearch');
+  now += 60_000;
+  failStats = true;
+  assert.equal(await getProfile('RecoveryIdentity'), original);
+  assert.equal((await getProfile('RecoveryIdentity')).fetchedAt, original.fetchedAt);
+  now += 60_000;
+  failStats = false;
+  missing = true;
+  await assert.rejects(getProfileLookup('RecoveryIdentity'), { status: 404 });
+  missing = false;
+  failAll = true;
+  await assert.rejects(getProfile('RecoveryIdentity'), { name: 'TimeoutError' });
+  await assert.rejects(getProfileLookup('RecoveryIdentity'), { name: 'TimeoutError' });
+  await assert.rejects(getTaskSearch('RecoverySearch'), { name: 'TimeoutError' });
+  failAll = false;
+  failStats = false;
+  await getProfile('RecoveryIdentity');
+  now += 60_000;
+  id = 'replacement-id';
+  failStats = true;
+  await assert.rejects(getProfile('RecoveryIdentity'), { name: 'TimeoutError' });
+  failAll = true;
+  await assert.rejects(getProfile('RecoveryIdentity'), { name: 'TimeoutError' });
+});

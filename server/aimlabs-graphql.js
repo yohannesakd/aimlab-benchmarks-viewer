@@ -1,6 +1,7 @@
 import { logTelemetry, withTelemetrySpan } from './telemetry.js';
 
 const endpoint = "https://api.aimlabs.com/graphql";
+export const providerTimeoutMs = 10_000;
 const maxConcurrentRequests = 4;
 const maxResponseBytes = 1_000_000;
 
@@ -25,10 +26,13 @@ async function readBoundedJson(response) {
 }
 
 export function queryAimlabs(query, variables, missingDataMessage) {
+  const operation = query.match(/\bquery\s+([A-Za-z][A-Za-z0-9_]{0,63})\b/)?.[1] || 'unnamed';
   return withTelemetrySpan('aimlabs.query', async span => {
+    span?.setAttribute('graphql.operation.name', operation);
     try { return await executeQuery(query, variables, missingDataMessage, span); }
     catch (error) {
-      logTelemetry('aimlabs_failure', { error_type: error.name, provider_status: error.providerStatus, provider_codes: error.providerCodes, retry_after_seconds: error.retryAfter }, 'WARN');
+      if (error.name === 'TimeoutError') error.status = 503;
+      logTelemetry('aimlabs_failure', { operation, error_type: error.name, failure_kind: error.providerFailure, provider_status: error.providerStatus, provider_codes: error.providerCodes, retry_after_seconds: error.retryAfter }, 'WARN');
       throw error;
     }
   });
@@ -53,7 +57,7 @@ async function executeQuery(query, variables, missingDataMessage, span) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query, variables }),
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(providerTimeoutMs),
     });
     span?.setAttribute('http.response.status_code', response.status);
     if (response.status === 429) {
@@ -68,11 +72,13 @@ async function executeQuery(query, variables, missingDataMessage, span) {
     if (!response.ok) {
       const error = new Error('Aimlabs provider request failed');
       error.providerStatus = response.status;
+      if ([500, 502, 503, 504].includes(response.status)) error.status = 503;
       throw error;
     }
     const payload = await readBoundedJson(response);
     if (payload.errors?.length || !payload.data?.Trainer) {
       const error = new Error(missingDataMessage);
+      error.providerFailure = payload.errors?.length ? 'graphql_errors' : 'missing_data';
       error.providerCodes = [...new Set((payload.errors || []).map(item => item.extensions?.code)
         .filter(code => typeof code === 'string' && /^[A-Z][A-Z0-9_]{0,63}$/.test(code)))];
       throw error;

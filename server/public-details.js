@@ -60,6 +60,7 @@ async function requestDetails(key, query, variables, normalize) {
       error.status = 404;
       throw error;
     }
+    if (variables.username && (typeof result.username !== 'string' || result.username.toLowerCase() !== variables.username.toLowerCase())) throw new Error("Incomplete player identity");
     return result;
   });
 }

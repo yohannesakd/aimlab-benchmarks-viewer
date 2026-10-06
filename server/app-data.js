@@ -19,6 +19,7 @@ export function getProfileLookup(username) {
   return cached(`lookup:${username}`, async () => {
     const { aimlabProfile: profile } = await queryAimlabs(GET_USER_INFO, { username }, "Profile lookup failed");
     if (!profile) return notFound("Player not found");
+    if (typeof profile.username !== 'string' || profile.username.toLowerCase() !== username.toLowerCase() || !profile.user?.id) throw new Error("Incomplete player identity");
     return { username: profile.username, id: profile.user.id, rank: profile.ranking?.rank?.displayName || "Unranked", skill: profile.ranking?.skill ?? 0 };
   });
 }
@@ -35,14 +36,15 @@ export function calculateProfile(playerInfo, rows) {
 }
 
 export function getProfile(username) {
+  let playerInfo;
   return cached(`profile:${username}`, async () => {
-    const playerInfo = await getProfileLookup(username);
+    playerInfo = await getProfileLookup(username);
     const trainer = await queryAimlabs(GET_USER_PLAYS_AGG, { where: {
       is_practice: { _eq: false }, score: { _gt: 0 }, user_id: { _eq: playerInfo.id },
     } }, "Player statistics failed");
     if (!Array.isArray(trainer.aimlab?.plays_agg)) throw new Error("Incomplete player statistics");
     return calculateProfile(playerInfo, trainer.aimlab.plays_agg);
-  });
+  }, { staleIfErrorMs: 300_000, canUseStale: value => Boolean(playerInfo) && value.playerInfo.id === playerInfo.id });
 }
 
 export function getTask(taskId) {

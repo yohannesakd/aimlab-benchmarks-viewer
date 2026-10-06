@@ -1,12 +1,13 @@
 import { readFile } from 'node:fs/promises';
 import { parsePage, pageMetadata, metadataHtml, safeJson, SITE_ORIGIN } from '../shared/seo.js';
+import { providerTimeoutMs } from './aimlabs-graphql.js';
 
 let bundle;
 let template;
 let manifest;
 async function fetchApi(origin, path) {
   try {
-    const response = await fetch(new URL(path, origin), { signal: AbortSignal.timeout(6000), headers: { Accept: 'application/json' }, redirect: 'error' });
+    const response = await fetch(new URL(path, origin), { signal: AbortSignal.timeout(2 * providerTimeoutMs + 1000), headers: { Accept: 'application/json' }, redirect: 'error' });
     const reader = response.body.getReader();
     const chunks = []; let size = 0;
     try {
@@ -44,9 +45,7 @@ export async function loadPageData(page, apiOrigin, read = path => fetchApi(apiO
     }
   } else if (page.kind === 'player') {
     const path = `/api/profiles/${encodeURIComponent(page.username)}`;
-    await primary(path);
-    if (bootstrap.status !== 200) return bootstrap;
-    await Promise.all([load(`${path}/details`), ...(page.section === 'activity' ? [load(`${path}/activity`)] : [])]);
+    await Promise.all([primary(path), load(`${path}/details`), ...(page.section === 'activity' ? [load(`${path}/activity`)] : [])]);
   } else if (page.kind === 'task') {
     const path = `/api/tasks/${encodeURIComponent(page.taskId)}`;
     await primary(path);
