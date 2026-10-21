@@ -23,8 +23,8 @@
           </div>
         </div>
         <dl class="profile-stats">
-          <div><dt>Tasks played</dt><dd>{{ Number(tasksPlayed).toLocaleString('en-US') }}</dd></div>
-          <div><dt>Total plays</dt><dd>{{ Number(totalPlays).toLocaleString('en-US') }}</dd></div>
+          <div><dt>Tasks played</dt><dd>{{ tasksPlayed === null ? 'Unavailable' : tasksPlayed.toLocaleString('en-US') }}</dd></div>
+          <div><dt>Total plays</dt><dd>{{ totalPlays === null ? 'Unavailable' : totalPlays.toLocaleString('en-US') }}</dd></div>
           <template v-if="publicDetails">
             <div><dt>Account age</dt><dd>{{ daysLabel(publicDetails.accountAgeDays) }}</dd></div>
             <div><dt>Current streak</dt><dd>{{ daysLabel(publicDetails.currentStreakDays) }}</dd></div>
@@ -34,10 +34,12 @@
         </dl>
       </section>
       <p v-if="detailsError" class="result-meta profile-details-error" role="status">Aimlabs activity is unavailable right now.</p>
+      <p v-if="statisticsRestricted" class="panel status-panel" role="status">Aimlabs is not providing full score statistics. Public task summaries and activity remain available. Totals and benchmark results are unavailable.</p>
       <nav class="tab-list" aria-label="Profile sections">
         <router-link v-for="(tab, key) in tabs" :key="tab" class="tab-link" :to="{ name: tab }">{{ key }}</router-link>
       </nav>
-      <router-view class="profile-content panel" :isLoading="isLoading"></router-view>
+      <p v-if="statisticsRestricted && ['vt-benches', 'ra-benches'].includes($route.name)" class="panel status-panel">Benchmark results require full score statistics. You can still browse the <router-link class="text-link" to="/benchmarks">benchmark catalog</router-link> and <router-link class="text-link" to="/leaderboards">leaderboards</router-link>.</p>
+      <router-view v-else class="profile-content panel" :isLoading="isLoading"></router-view>
     </template>
   </main>
 </template>
@@ -99,7 +101,7 @@ export default {
   computed: {
     avatarUrl() { return `/api/profiles/${encodeURIComponent(this.username)}/avatar`; },
     savedProfile() { return savedProfile.value; },
-    ...mapState(usePlayerStore, ['currentPlayerInfo', 'tasksPlayed', 'totalPlays', 'profileFetchedAt']),
+    ...mapState(usePlayerStore, ['currentPlayerInfo', 'tasksPlayed', 'totalPlays', 'profileFetchedAt', 'statisticsRestricted']),
   },
   watch: {
     username: { immediate: true, handler(username) {
@@ -152,7 +154,7 @@ export default {
       this.loadError = "";
 
       try {
-        const data = await fetchData(`/api/profiles/${encodeURIComponent(username)}`, { signal: this.profileController.signal });
+        const data = await fetchData(`/api/profiles/${encodeURIComponent(username)}?publicSummary=1`, { signal: this.profileController.signal });
         if (version !== this.requestVersion) return;
         this.$setSeoStatus(200);
         this.setProfileSnapshot({ ...data, fetchedAt: data.fetchedAt || new Date().toISOString() });

@@ -33,9 +33,12 @@
 /**
  * @typedef {Object} ProfileSnapshot
  * @property {{username: string, id: string, rank: string, skill: number}} playerInfo
- * @property {TaskSummary[]} tasks
- * @property {{tasksPlayed: number, totalPlays: number}} totals
- * @property {BenchmarkSet[]} benchmarkSets
+ * @property {TaskSummary[]|null} tasks Null when Aimlabs restricts historical statistics.
+ * @property {{tasksPlayed: number, totalPlays: number}|null} totals Null is unavailable, not zero.
+ * @property {BenchmarkSet[]|null} benchmarkSets Null when the required score populations are unavailable.
+ * @property {'restricted'} [statisticsStatus] Explicit provider authentication restriction.
+ * @property {Object[]} [publicTaskSummaries] Bounded public task summaries, separate from aggregate populations.
+ * @property {number} [publicTaskSummaryLimit] Maximum requested summaries; does not establish full coverage.
  * @property {string} fetchedAt ISO timestamp of backend snapshot calculation, retained on cache hits.
  */
 

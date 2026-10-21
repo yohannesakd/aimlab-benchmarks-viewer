@@ -13,10 +13,10 @@ for (const status of [200, 400, 404, 502]) {
       return new Promise(done => resolve.set(path, done));
     });
     const path = '/api/profiles/Alice';
-    assert.deepEqual(started, [path, `${path}/details`, `${path}/activity`]);
+    assert.deepEqual(started, [`${path}?publicSummary=1`, `${path}/details`, `${path}/activity`]);
     resolve.get(`${path}/activity`)({ status: 200, body: { username: 'Alice' } });
     resolve.get(`${path}/details`)({ status: 503, body: { error: 'Unavailable' } });
-    resolve.get(path)({ status, body: { playerInfo: { username: 'Alice' } } });
+    resolve.get(`${path}?publicSummary=1`)({ status, body: { playerInfo: { username: 'Alice' } } });
     const bootstrap = await pending;
     assert.equal(bootstrap.status, status === 502 ? 503 : status);
     assert.equal(bootstrap.path, page.path);

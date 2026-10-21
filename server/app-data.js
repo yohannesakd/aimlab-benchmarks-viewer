@@ -1,5 +1,5 @@
 import { queryAimlabs } from "./aimlabs-graphql.js";
-import { GET_USER_INFO, GET_USER_PLAYS_AGG, GET_TASK_BY_ID, GET_TASKS_BY_NAME, GET_TASK_LEADERBOARD } from "./app-queries.js";
+import { GET_USER_INFO, GET_USER_PLAYS_AGG, GET_PUBLIC_TASK_SUMMARIES, publicTaskSummaryLimit, GET_TASK_BY_ID, GET_TASKS_BY_NAME, GET_TASK_LEADERBOARD } from "./app-queries.js";
 import { cleanUpUserTasks, cleanUpBenchmarkTasks, calculateRevosectBenchmarks } from "./benchmark-calculations.js";
 import { publicRun, runFields } from "./player-runs.js";
 
@@ -35,16 +35,47 @@ export function calculateProfile(playerInfo, rows) {
   return { fetchedAt: new Date().toISOString(), playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", community: "revosect", label: "Series 2", results: benchmarks }, ...voltaicSeasons.map(definition => calculateVoltaicSeason(definition, rows)), calculateRevosectSeason(rows)] };
 }
 
-export function getProfile(username) {
+export function getProfile(username, { publicSummary = false } = {}) {
   let playerInfo;
-  return cached(`profile:${username}`, async () => {
+  return cached(`profile:${publicSummary ? 'public:' : ''}${username}`, async () => {
     playerInfo = await getProfileLookup(username);
-    const trainer = await queryAimlabs(GET_USER_PLAYS_AGG, { where: {
-      is_practice: { _eq: false }, score: { _gt: 0 }, user_id: { _eq: playerInfo.id },
-    } }, "Player statistics failed");
+    let trainer;
+    try {
+      trainer = await queryAimlabs(GET_USER_PLAYS_AGG, { where: {
+        is_practice: { _eq: false }, score: { _gt: 0 }, user_id: { _eq: playerInfo.id },
+      } }, "Player statistics failed");
+    } catch (error) {
+      if (!publicSummary || !error.providerCodes?.includes('UNAUTHENTICATED')) throw error;
+      return getRestrictedProfile(playerInfo);
+    }
     if (!Array.isArray(trainer.aimlab?.plays_agg)) throw new Error("Incomplete player statistics");
     return calculateProfile(playerInfo, trainer.aimlab.plays_agg);
   }, { staleIfErrorMs: 300_000, canUseStale: value => Boolean(playerInfo) && value.playerInfo.id === playerInfo.id });
+}
+
+async function getRestrictedProfile(playerInfo) {
+  const trainer = await queryAimlabs(GET_PUBLIC_TASK_SUMMARIES,
+    { username: playerInfo.username, limit: publicTaskSummaryLimit }, 'Public task summaries unavailable');
+  const profile = trainer.aimlabProfile;
+  if (profile?.username?.toLowerCase() !== playerInfo.username.toLowerCase() || !Array.isArray(profile.taskStats)) {
+    throw new Error('Incomplete public profile');
+  }
+  const publicTaskSummaries = profile.taskStats.map(summary => {
+    const play = summary.play;
+    const taskId = summary.task?.id ?? play?.taskSlug;
+    const taskName = summary.task?.name || play?.manifest?.taskName || taskId;
+    if (typeof taskId !== 'string' || !taskId || typeof taskName !== 'string'
+      || !Number.isFinite(summary.topScore) || !Number.isInteger(summary.playCount) || summary.playCount < 0) {
+      throw new Error('Incomplete public task summary');
+    }
+    const matchingRun = play && play.id === summary.playId && play.taskSlug === taskId
+      && play.score === summary.topScore && Number.isInteger(play.convertedMode);
+    return { id: taskId, name: taskName, maxScore: summary.topScore, count: summary.playCount,
+      playId: matchingRun ? play.id : null, mode: matchingRun ? play.convertedMode : null,
+      weapon: matchingRun ? play.manifest?.weaponId ?? null : null };
+  });
+  return { playerInfo, statisticsStatus: 'restricted', tasks: null, totals: null, benchmarkSets: null,
+    publicTaskSummaries, publicTaskSummaryLimit, fetchedAt: new Date().toISOString() };
 }
 
 export function getTask(taskId) {
@@ -151,7 +182,7 @@ export async function handleAppDataRequest(request, response, pathname, params) 
     if (task && ["/leaderboard", "/run"].includes(task[2]) && (!Number.isInteger(mode) || mode < 0 || mode > 2147483647)) throw new URIError("Invalid task mode");
     if (catalog) {
       body = getBenchmarkCatalog(id);
-    } else if (profile) body = profile[2] ? await getProfileLookup(id) : await getProfile(id);
+    } else if (profile) body = profile[2] ? await getProfileLookup(id) : await getProfile(id, { publicSummary: params.get('publicSummary') === '1' });
     else if (id === "search" && !task[2]) {
       const name = params.get("name");
       if (invalid(name, 100)) throw new URIError("Invalid task search");

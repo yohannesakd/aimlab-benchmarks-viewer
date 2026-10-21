@@ -7,7 +7,7 @@ let template;
 let manifest;
 async function fetchApi(origin, path) {
   try {
-    const response = await fetch(new URL(path, origin), { signal: AbortSignal.timeout(2 * providerTimeoutMs + 1000), headers: { Accept: 'application/json' }, redirect: 'error' });
+    const response = await fetch(new URL(path, origin), { signal: AbortSignal.timeout(3 * providerTimeoutMs + 1000), headers: { Accept: 'application/json' }, redirect: 'error' });
     const reader = response.body.getReader();
     const chunks = []; let size = 0;
     try {
@@ -26,9 +26,9 @@ async function fetchApi(origin, path) {
 
 export async function loadPageData(page, apiOrigin, read = path => fetchApi(apiOrigin, path)) {
   const bootstrap = { path: page.path, url: page.path + (new URLSearchParams(page.query).size ? '?' + new URLSearchParams(page.query) : ''), status: page.status, responses: {} };
-  const load = async path => { const response = await read(path); bootstrap.responses[path] = response; return response; };
-  const primary = async path => {
-    const result = await load(path);
+  const load = async (path, key = path) => { const response = await read(path); bootstrap.responses[key] = response; return response; };
+  const primary = async (path, key = path) => {
+    const result = await load(path, key);
     if (result.status !== 200) bootstrap.status = result.status === 404 ? 404 : result.status === 400 ? 400 : 503;
     return result;
   };
@@ -45,7 +45,7 @@ export async function loadPageData(page, apiOrigin, read = path => fetchApi(apiO
     }
   } else if (page.kind === 'player') {
     const path = `/api/profiles/${encodeURIComponent(page.username)}`;
-    await Promise.all([primary(path), load(`${path}/details`), ...(page.section === 'activity' ? [load(`${path}/activity`)] : [])]);
+    await Promise.all([primary(`${path}?publicSummary=1`, path), load(`${path}/details`), ...(page.section === 'activity' ? [load(`${path}/activity`)] : [])]);
   } else if (page.kind === 'task') {
     const path = `/api/tasks/${encodeURIComponent(page.taskId)}`;
     await primary(path);

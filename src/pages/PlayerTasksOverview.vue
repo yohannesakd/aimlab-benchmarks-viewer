@@ -2,21 +2,22 @@
   <section v-if="isLoading" class="status-panel"><loading-spinner></loading-spinner></section>
   <section v-else class="profile-tasks">
     <div class="panel-header profile-tasks-header">
-      <div><h2 class="section-title">Played tasks</h2></div>
+      <div><h2 class="section-title">{{ playerStore.statisticsRestricted ? 'Public task summaries' : 'Played tasks' }}</h2><p v-if="playerStore.statisticsRestricted" class="result-meta">Aimlabs provides up to {{ playerStore.publicTaskSummaryLimit }} task summaries. This is not a complete play history.</p></div>
       <label class="task-filter"><span class="sr-only">Search played tasks</span><input class="text-field" type="search" placeholder="Search played tasks" v-model.trim="searchQuery" /></label>
     </div>
     <div v-if="paginatedTaskList.data.length" class="task-grid profile-task-grid">
       <div v-for="task in paginatedTaskList.data" :key="task.id" class="task-card player-task-card">
         <h3><router-link class="player-task-name" :to="'/tasks/' + encodeURIComponent(task.id) + '/leaderboard'">{{ task.name }}</router-link></h3>
-        <button type="button" class="player-task-run" @click="showRun(task)">
+        <button v-if="!playerStore.statisticsRestricted || task.playId" type="button" class="player-task-run" @click="showRun(task)">
           <span class="sr-only">Open {{ task.name }} run. </span>
           <span class="task-card-meta"><span>Best score: {{ task.maxScore }}</span><span>{{ task.count }} plays</span></span>
         </button>
+        <p v-else class="player-task-run task-card-meta"><span>Best score: {{ task.maxScore }}</span><span>{{ task.count }} plays</span></p>
       </div>
     </div>
-    <p v-else class="status-panel">No played tasks match this search.</p>
+    <p v-else class="status-panel">{{ playerStore.statisticsRestricted ? 'No public task summaries match this search.' : 'No played tasks match this search.' }}</p>
     <div v-if="paginatedTaskList.data.length" class="pagination">
-      <span>{{ currentPlayerTasks.length.toLocaleString('en-US') }} played tasks</span>
+      <span>{{ currentPlayerTasks.length.toLocaleString('en-US') }} {{ playerStore.statisticsRestricted ? 'public task summaries' : 'played tasks' }}</span>
       <div class="pagination-controls">
         <button type="button" class="page-button" :disabled="currentPage <= 0" aria-label="Previous page" @click="currentPage--"><chevron-icon direction="left" class="h-4 w-4"></chevron-icon></button>
         <button v-for="(page, index) in pageNumbers" :key="index" type="button" class="page-button page-number" :class="{ active: page === currentPage + 1 }" :disabled="page === '...'" @click="handlePageSelect($event)">{{ page }}</button>
@@ -54,7 +55,7 @@ export default {
     };
   },
   methods: {
-    showRun(task) { openRunDetails({ username: this.playerStore.currentPlayerInfo.username, taskId: task.id, taskName: task.name, weapon: task.weapon, mode: task.mode, score: task.maxScore }); },
+    showRun(task) { openRunDetails({ username: this.playerStore.currentPlayerInfo.username, taskId: task.id, taskName: task.name, weapon: task.weapon, mode: task.mode, score: task.maxScore, ...(task.playId ? { playId: task.playId } : {}) }); },
     handlePageSelect(event) {
       let value = parseInt(event.target.textContent);
       if (value) {
