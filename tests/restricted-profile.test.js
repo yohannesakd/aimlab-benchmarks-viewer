@@ -4,6 +4,43 @@ import { getProfile } from '../server/app-data.js';
 
 const response = trainer => new Response(JSON.stringify({ data: { Trainer: trainer } }));
 
+test('a public-summary timeout retries once and returns the validated profile', async t => {
+  let summaryCalls = 0;
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    const { query } = JSON.parse(options.body);
+    if (query.includes('GetProfile(')) return response({ aimlabProfile: { username: 'RetrySummary', user: { id: 'retry-id' } } });
+    if (query.includes('GetProfileAggregates')) return new Response(JSON.stringify({ errors: [{ extensions: { code: 'UNAUTHENTICATED' } }] }));
+    if (++summaryCalls === 1) throw new DOMException('Timed out', 'TimeoutError');
+    return response({ aimlabProfile: { username: 'RetrySummary', taskStats: [] } });
+  });
+  const profile = await getProfile('RetrySummary', { publicSummary: true });
+  assert.equal(profile.statisticsStatus, 'restricted');
+  assert.equal(profile.playerInfo.id, 'retry-id');
+  assert.deepEqual(profile.publicTaskSummaries, []);
+  assert.equal(summaryCalls, 2);
+});
+
+for (const [name, failure, attempts] of [
+  ['TimeoutAgain', () => { throw new DOMException('Timed out', 'TimeoutError'); }, 2],
+  ['DeniedSummary', () => new Response(JSON.stringify({ errors: [{ extensions: { code: 'UNAUTHENTICATED' } }] })), 1],
+  ['OfflineSummary', () => new Response('{}', { status: 502 }), 1],
+]) {
+  test(`public-summary recovery stays bounded for ${name}`, async t => {
+    let summaryCalls = 0;
+    t.mock.method(globalThis, 'fetch', async (_url, options) => {
+      const { query } = JSON.parse(options.body);
+      if (query.includes('GetProfile(')) return response({ aimlabProfile: { username: name, user: { id: name } } });
+      if (query.includes('GetProfileAggregates')) return new Response(JSON.stringify({ errors: [{ extensions: { code: 'UNAUTHENTICATED' } }] }));
+      summaryCalls++;
+      return failure();
+    });
+    await assert.rejects(getProfile(name, { publicSummary: true }), error => name === 'TimeoutAgain'
+      ? error.name === 'TimeoutError' && error.status === 503
+      : name === 'DeniedSummary' ? error.providerCodes?.includes('UNAUTHENTICATED') : error.providerStatus === 502);
+    assert.equal(summaryCalls, attempts);
+  });
+}
+
 test('restricted statistics retain the public profile without inventing totals or benchmark ranks', async t => {
   const calls = [];
   t.mock.method(globalThis, 'fetch', async (_url, options) => {

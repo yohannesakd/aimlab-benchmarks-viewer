@@ -7,7 +7,7 @@ let template;
 let manifest;
 async function fetchApi(origin, path) {
   try {
-    const response = await fetch(new URL(path, origin), { signal: AbortSignal.timeout(3 * providerTimeoutMs + 1000), headers: { Accept: 'application/json' }, redirect: 'error' });
+    const response = await fetch(new URL(path, origin), { signal: AbortSignal.timeout(4 * providerTimeoutMs + 1000), headers: { Accept: 'application/json' }, redirect: 'error' });
     const reader = response.body.getReader();
     const chunks = []; let size = 0;
     try {

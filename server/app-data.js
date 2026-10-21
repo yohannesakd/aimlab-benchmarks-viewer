@@ -54,8 +54,14 @@ export function getProfile(username, { publicSummary = false } = {}) {
 }
 
 async function getRestrictedProfile(playerInfo) {
-  const trainer = await queryAimlabs(GET_PUBLIC_TASK_SUMMARIES,
+  const read = () => queryAimlabs(GET_PUBLIC_TASK_SUMMARIES,
     { username: playerInfo.username, limit: publicTaskSummaryLimit }, 'Public task summaries unavailable');
+  let trainer;
+  try { trainer = await read(); }
+  catch (error) {
+    if (error.name !== 'TimeoutError') throw error;
+    trainer = await read();
+  }
   const profile = trainer.aimlabProfile;
   if (profile?.username?.toLowerCase() !== playerInfo.username.toLowerCase() || !Array.isArray(profile.taskStats)) {
     throw new Error('Incomplete public profile');
