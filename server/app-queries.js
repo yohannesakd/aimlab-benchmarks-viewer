@@ -30,7 +30,6 @@ export const GET_PUBLIC_TASK_SUMMARIES = `
         taskStats(app: AIMLAB, limit: $limit) {
           topScore playCount playId
           task { id name }
-          play { id score taskSlug convertedMode manifest { taskName weaponId } }
         }
       }
     }

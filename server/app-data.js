@@ -45,7 +45,7 @@ export function getProfile(username, { publicSummary = false } = {}) {
         is_practice: { _eq: false }, score: { _gt: 0 }, user_id: { _eq: playerInfo.id },
       } }, "Player statistics failed");
     } catch (error) {
-      if (!publicSummary || !error.providerCodes?.includes('UNAUTHENTICATED')) throw error;
+      if (!publicSummary || !error.providerCodes?.some(code => ['UNAUTHENTICATED', 'UNAUTHORIZED'].includes(code))) throw error;
       return getRestrictedProfile(playerInfo);
     }
     if (!Array.isArray(trainer.aimlab?.plays_agg)) throw new Error("Incomplete player statistics");
@@ -66,19 +66,18 @@ async function getRestrictedProfile(playerInfo) {
   if (profile?.username?.toLowerCase() !== playerInfo.username.toLowerCase() || !Array.isArray(profile.taskStats)) {
     throw new Error('Incomplete public profile');
   }
-  const publicTaskSummaries = profile.taskStats.map(summary => {
-    const play = summary.play;
-    const taskId = summary.task?.id ?? play?.taskSlug;
-    const taskName = summary.task?.name || play?.manifest?.taskName || taskId;
+  // Aimlabs no longer exposes the best play anonymously, so a summary without its task has no identity.
+  const publicTaskSummaries = profile.taskStats.filter(summary => summary.task !== null).map(summary => {
+    const taskId = summary.task?.id;
+    const taskName = summary.task?.name || taskId;
     if (typeof taskId !== 'string' || !taskId || typeof taskName !== 'string'
       || !Number.isFinite(summary.topScore) || !Number.isInteger(summary.playCount) || summary.playCount < 0) {
       throw new Error('Incomplete public task summary');
     }
-    const matchingRun = play && play.id === summary.playId && play.taskSlug === taskId
-      && play.score === summary.topScore && Number.isInteger(play.convertedMode);
+    // The run endpoint verifies this play against the player, task and score before showing it.
+    const playId = typeof summary.playId === 'string' && summary.playId ? summary.playId : null;
     return { id: taskId, name: taskName, maxScore: summary.topScore, count: summary.playCount,
-      playId: matchingRun ? play.id : null, mode: matchingRun ? play.convertedMode : null,
-      weapon: matchingRun ? play.manifest?.weaponId ?? null : null };
+      playId, mode: null, weapon: null };
   });
   return { playerInfo, statisticsStatus: 'restricted', tasks: null, totals: null, benchmarkSets: null,
     publicTaskSummaries, publicTaskSummaryLimit, fetchedAt: new Date().toISOString() };
@@ -141,10 +140,17 @@ export function getRunDetails(taskId, username, playId, weapon, score, mode = pl
       if (!row || (score !== null && row.score !== score)) return notFound("Aimlabs no longer lists this score.");
       playId = row.play_id;
     }
-    const trainer = await queryAimlabs(`query RunDetails($playId: ID!) { Trainer { publishedReplay(replayId: $playId) {
-      publisher { username } play { taskSlug ${runFields} }
-    } } }`, { playId }, "Run details failed");
-    const replay = trainer.publishedReplay;
+    let replay;
+    try {
+      const trainer = await queryAimlabs(`query RunDetails($playId: ID!) { Trainer { publishedReplay(replayId: $playId) {
+        publisher { username } play { taskSlug ${runFields} }
+      } } }`, { playId }, "Run details failed");
+      replay = trainer.publishedReplay;
+    } catch (error) {
+      // Aimlabs fails to resolve some replay publishers; the leaderboard row below still verifies the run.
+      if (!error.providerCodes?.includes('INTERNAL_SERVER_ERROR')) throw error;
+      replay = null;
+    }
     if (replay) {
       if (replay.publisher.username !== username || replay.play.taskSlug !== taskId || replay.play.id !== playId || (mode !== null && replay.play.convertedMode !== mode) || (weapon && replay.play.manifest.weaponId !== weapon) || (score !== null && replay.play.score !== score)) return notFound("This run does not match the selected score or player.");
       return { ...publicRun(replay.play), detailsSource: "replay" };

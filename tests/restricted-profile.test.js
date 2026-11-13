@@ -51,12 +51,9 @@ test('restricted statistics retain the public profile without inventing totals o
     assert.equal(variables.limit, 100);
     assert.equal(variables.username, 'Restricted');
     return response({ aimlabProfile: { username: 'Restricted', taskStats: [
-      { task: { id: 'sixshot', name: 'Sixshot' }, topScore: 123, playCount: 10, playId: 'best',
-        play: { id: 'best', taskSlug: 'sixshot', score: 123, convertedMode: 0, manifest: { weaponId: '9mm' } } },
-      { task: { id: 'gridshot', name: 'Gridshot' }, topScore: 456, playCount: 5, playId: 'different',
-        play: { id: 'wrong-run', taskSlug: 'gridshot', score: 999, convertedMode: 0 } },
-      { task: null, topScore: 12, playCount: 1, playId: 'old-run',
-        play: { id: 'old-run', taskSlug: 'old-task', score: 12, convertedMode: 0, manifest: { taskName: 'Old task', weaponId: '9mm' } } },
+      { task: { id: 'sixshot', name: 'Sixshot' }, topScore: 123, playCount: 10, playId: 'best' },
+      { task: { id: 'gridshot', name: 'Gridshot' }, topScore: 456, playCount: 5, playId: null },
+      { task: null, topScore: 12, playCount: 1, playId: 'old-run' },
     ] } });
   });
   const profile = await getProfile('Restricted', { publicSummary: true });
@@ -65,12 +62,10 @@ test('restricted statistics retain the public profile without inventing totals o
   assert.equal(profile.totals, null);
   assert.equal(profile.tasks, null);
   assert.equal(profile.benchmarkSets, null);
-  assert.equal(profile.publicTaskSummaries[0].playId, 'best');
-  assert.equal(profile.publicTaskSummaries[1].playId, null);
-  assert.equal(profile.publicTaskSummaries[1].maxScore, 456);
-  assert.equal(profile.publicTaskSummaries[2].id, 'old-task');
-  assert.equal(profile.publicTaskSummaries[2].name, 'Old task');
-  assert.equal(profile.publicTaskSummaries[2].playId, 'old-run');
+  assert.deepEqual(profile.publicTaskSummaries, [
+    { id: 'sixshot', name: 'Sixshot', maxScore: 123, count: 10, playId: 'best', mode: null, weapon: null },
+    { id: 'gridshot', name: 'Gridshot', maxScore: 456, count: 5, playId: null, mode: null, weapon: null },
+  ]);
   assert.equal(await getProfile('Restricted', { publicSummary: true }), profile);
   assert.equal(calls.length, 3);
   await assert.rejects(getProfile('Restricted'), error => error.providerCodes?.includes('UNAUTHENTICATED'));
@@ -97,4 +92,18 @@ test('public summaries from another identity cannot replace the requested player
     return response({ aimlabProfile: { username: 'SomeoneElse', taskStats: [] } });
   });
   await assert.rejects(getProfile('IdentityCheck', { publicSummary: true }), /Incomplete public profile/);
+});
+
+test('an UNAUTHORIZED aggregate denial also returns the public summaries', async t => {
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    const { query } = JSON.parse(options.body);
+    if (query.includes('GetProfile(')) return response({ aimlabProfile: { username: 'Unauthorized', user: { id: 'unauthorized-id' } } });
+    if (query.includes('GetProfileAggregates')) return new Response(JSON.stringify({ errors: [{ extensions: { code: 'UNAUTHORIZED' } }] }));
+    assert.equal(query.includes('play {'), false);
+    return response({ aimlabProfile: { username: 'Unauthorized', taskStats: [{ task: { id: 'sixshot', name: 'Sixshot' }, topScore: 1, playCount: 1, playId: 'run' }] } });
+  });
+  const profile = await getProfile('Unauthorized', { publicSummary: true });
+  assert.equal(profile.statisticsStatus, 'restricted');
+  assert.equal(profile.publicTaskSummaries.length, 1);
+  await assert.rejects(getProfile('Unauthorized'), error => error.providerCodes?.includes('UNAUTHORIZED'));
 });
