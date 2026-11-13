@@ -21,6 +21,21 @@ export const GET_USER_PLAYS_AGG = `
   }
 `;
 
+export const publicTaskSummaryLimit = 100;
+export const GET_PUBLIC_TASK_SUMMARIES = `
+  query GetPublicTaskSummaries($username: String, $limit: Int!) {
+    Trainer {
+      aimlabProfile(username: $username) {
+        username
+        taskStats(app: AIMLAB, limit: $limit) {
+          topScore playCount playId
+          task { id name }
+        }
+      }
+    }
+  }
+`;
+
 export const GET_TASK_BY_ID = `
   query GetTask($slug: String!) {
     Trainer {

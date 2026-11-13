@@ -13,7 +13,7 @@ Contract changes that affect callers include `PlayFilterInput.mode` changing fro
 | Path | What the current SDL specifies | Current public evidence |
 | --- | --- | --- |
 | `Trainer_AimlabProfile.achievementMetrics(slugs)` | Computed `{slug,value}` entries; `null` means the metric does not apply, distinct from zero. | Anonymous sample returned three entries, including account age, subscription age `null`, and streak days `0`. |
-| `AimlabProfile.taskStats.play` / `playId` | A task summary can link its score to the actual `Play`. | One public sample returned matching score and play ID. |
+| `AimlabProfile.taskStats.play` / `playId` | A task summary can link its score to the actual `Play`. | One public sample returned matching score and play ID. On 2026-11-13, anonymous `play` requests returned `UNAUTHENTICATED`; `playId` stays public. |
 | `AimlabProfile.latestPlay(filter)` | `Trainer_PlayFilterInput` adds `taskIds` and `isMultiplayer`; `isMultiplayer:true` selects session plays, `false` solo, omitted both. | A bounded public `taskIds` plus solo query returned a matching run and total count. Weapon and task-version filters remain absent. |
 | `AimlabProfile.recommendedTasks(app,engine,max)` | Task, mode, app, version and optional playlist ID; engine enum has `DAILY_PLAYLIST` and `RANDOM_DAILY_PLAYLIST`. | `DAILY_PLAYLIST,max:1` returned an RA Headswitch task for one public profile. Whether this is personalized or generic requires comparison. |
 | `AimlabProfile.taskAdaptiveDifficulty` / `taskAdaptiveDifficulties` | Per-task difficulty state has overall average/maximum, dimension values, play count and update time. | Anonymous task-specific query returned `UNAUTHENTICATED`; array path remains unverified. |

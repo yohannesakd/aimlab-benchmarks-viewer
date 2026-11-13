@@ -88,3 +88,24 @@ test('staging render origin stays noindex even with the public visibility path',
     assert.match(response.headers.get('x-robots-tag'), /noindex/);
   });
 });
+
+test('restricted profile SSR keeps public navigation and separates the legacy API contract', { timeout: 15000 }, async () => {
+  await withServer('production', async origin => {
+    const page = await fetch(origin + '/api/pages/public/profile/Restricted/overview');
+    assert.equal(page.status, 200);
+    const html = await page.text();
+    assert.match(html, /Public task summaries/);
+    assert.match(html, /Fixture task/);
+    assert.match(html, /<dd\b[^>]*>Unavailable<\/dd>/);
+    const bootstrap = JSON.parse(html.match(/<script id="page-data" type="application\/json">(.*?)<\/script>/s)[1]);
+    assert.equal(bootstrap.responses['/api/profiles/Restricted'].body.statisticsStatus, 'restricted');
+    assert.equal(bootstrap.responses['/api/profiles/Restricted'].body.totals, null);
+    const benchmark = await fetch(origin + '/api/pages/public/profile/Restricted/voltaic');
+    assert.equal(benchmark.status, 200);
+    const benchmarkHtml = await benchmark.text();
+    assert.match(benchmarkHtml, /Benchmark results require full score statistics/);
+    assert.ok(!benchmarkHtml.includes('Overall rank'));
+    assert.equal((await fetch(origin + '/api/profiles/Restricted')).status, 502);
+    assert.equal((await fetch(origin + '/api/profiles/Restricted?publicSummary=1')).status, 200);
+  });
+});

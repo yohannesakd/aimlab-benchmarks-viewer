@@ -26,7 +26,7 @@ test('SPA events and replay exclude query strings and input text', async ({ page
     const request = route.request();
     const url = new URL(request.url());
 
-    if (/umami|aimlab-analytics|vercel\/insights/.test(url.href) || url.hostname.endsWith('posthog.com')) legacyRequests.push(url.href);
+    if (/vercel\/insights/.test(url.href) || url.hostname.endsWith('posthog.com')) legacyRequests.push(url.href);
     if (url.hostname === 'edge.saibot.site' || url.hostname.endsWith('posthog.com')) {
       if (url.pathname.endsWith('/logs.js')) {
         const body = await readFile(new URL('../../node_modules/posthog-js/dist/logs.js', import.meta.url));

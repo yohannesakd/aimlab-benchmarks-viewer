@@ -170,3 +170,70 @@ test('task leaderboards keep alternate-mode scores and caches separate', async (
     assert.equal(calls.length, 3);
   } finally { globalThis.fetch = originalFetch; }
 });
+
+test('profile recovery preserves identity and timestamps without weakening lookup or search', async t => {
+  const { getProfile, getProfileLookup, getTaskSearch } = await import('../server/app-data.js');
+  let now = Date.now();
+  t.mock.method(Date, 'now', () => now);
+  let id = 'original-id';
+  let failStats = false;
+  let failAll = false;
+  let missing = false;
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    const { query, variables } = JSON.parse(options.body);
+    if (failAll || (failStats && !variables.username)) throw new DOMException('Timed out', 'TimeoutError');
+    if (variables.username && missing) return response({ aimlabProfile: null });
+    if (variables.username) return response({ aimlabProfile: { username: variables.username, user: { id } } });
+    if (query.includes('SearchTasks')) return response({ aimlab: { tasks: [] } });
+    return response({ aimlab: { plays_agg: [] } });
+  });
+  const original = await getProfile('RecoveryIdentity');
+  await getTaskSearch('RecoverySearch');
+  now += 60_000;
+  failStats = true;
+  assert.equal(await getProfile('RecoveryIdentity'), original);
+  assert.equal((await getProfile('RecoveryIdentity')).fetchedAt, original.fetchedAt);
+  now += 60_000;
+  failStats = false;
+  missing = true;
+  await assert.rejects(getProfileLookup('RecoveryIdentity'), { status: 404 });
+  missing = false;
+  failAll = true;
+  await assert.rejects(getProfile('RecoveryIdentity'), { name: 'TimeoutError' });
+  await assert.rejects(getProfileLookup('RecoveryIdentity'), { name: 'TimeoutError' });
+  await assert.rejects(getTaskSearch('RecoverySearch'), { name: 'TimeoutError' });
+  failAll = false;
+  failStats = false;
+  await getProfile('RecoveryIdentity');
+  now += 60_000;
+  id = 'replacement-id';
+  failStats = true;
+  await assert.rejects(getProfile('RecoveryIdentity'), { name: 'TimeoutError' });
+  failAll = true;
+  await assert.rejects(getProfile('RecoveryIdentity'), { name: 'TimeoutError' });
+});
+
+test("a replay that Aimlabs cannot resolve falls back to the verified leaderboard row", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_url, options) => {
+    const { query, variables } = JSON.parse(options.body);
+    if (query.includes("publishedReplay")) return new Response(JSON.stringify({ data: { Trainer: { publishedReplay: null } }, errors: [{ path: ["publishedReplay", "publisher"], extensions: { code: "INTERNAL_SERVER_ERROR" } }] }));
+    if (variables.leaderboardInput.playId === "broken-publisher") return response({ aimlab: { leaderboard: { metadata: {}, data: [{ task_id: "fixture-broken-task", username: "FixturePlayer", score: 70, play_id: "broken-publisher", accuracy: 90 }] } } });
+    return response({ aimlab: { leaderboard: { metadata: {}, data: [] } } });
+  };
+  try {
+    const run = await getRunDetails("fixture-broken-task", "FixturePlayer", "broken-publisher", null, 70);
+    assert.equal(run.detailsSource, "leaderboard");
+    assert.equal(run.metrics.accTotal, 90);
+    await assert.rejects(getRunDetails("fixture-broken-task", "OtherPlayer", "broken-publisher", null, 70), error => error.status === 404);
+    await assert.rejects(getRunDetails("fixture-broken-task", "FixturePlayer", "unlisted-run", null, 70), error => error.status === 404);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test("other run detail provider errors still fail as unavailable", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({ errors: [{ extensions: { code: "UNAUTHENTICATED" } }] }));
+  try {
+    await assert.rejects(getRunDetails("fixture-denied-task", "FixturePlayer", "denied-run", null, 70), error => error.providerCodes?.includes("UNAUTHENTICATED"));
+  } finally { globalThis.fetch = originalFetch; }
+});

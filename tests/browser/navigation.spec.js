@@ -32,6 +32,35 @@ async function fixtures(page, overrides = {}) {
   });
 }
 
+test('restricted profiles show public summaries and activity without fabricated benchmark results', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await fixtures(page, {
+    '/api/profiles/Restricted': route => route.fulfill({ json: {
+      playerInfo: { username: 'Restricted', id: 'restricted', rank: 'Gold', skill: 400 },
+      statisticsStatus: 'restricted', tasks: null, totals: null, benchmarkSets: null,
+      publicTaskSummaryLimit: 100, fetchedAt: new Date().toISOString(),
+      publicTaskSummaries: [{ id: 'sixshot', name: 'Sixshot', maxScore: 200, count: 3, playId: run.id, mode: 0, weapon: '9mm' }],
+    } }),
+    '/api/profiles/Restricted/activity': route => route.fulfill({ json: { activeDays: 12, recentActiveDays: 3, years: [{ year: 2026, activeDays: 3 }], learning: { stars: null, completedPlans: null }, fetchedAt: new Date().toISOString() } }),
+  });
+  await page.goto('/profile/Restricted/overview');
+  await expect(page.locator('.profile-username')).toHaveText('Restricted');
+  await expect(page.locator('.profile-stats')).toContainText('Unavailable');
+  await expect(page.getByRole('heading', { name: 'Public task summaries' })).toBeVisible();
+  await expect(page.locator('.profile-task-grid')).toContainText('200');
+  await page.getByRole('link', { name: 'Voltaic', exact: true }).click();
+  await expect(page.locator('.bench-medal')).toHaveCount(0);
+  await expect(page.getByText('Benchmark results require full score statistics.')).toBeVisible();
+  await page.getByRole('link', { name: 'Revosect', exact: true }).click();
+  await expect(page.locator('.bench-medal')).toHaveCount(0);
+  await page.getByRole('link', { name: 'Overview', exact: true }).click();
+  await expect(page.locator('.profile-task-grid')).toContainText('Sixshot');
+  await page.getByRole('link', { name: 'Activity', exact: true }).click();
+  await expect(page.locator('.activity-summary')).toContainText('12');
+  expect(errors).toEqual([]);
+});
+
 test('run modal closes, restores focus, reopens and preserves identity in navigation', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));

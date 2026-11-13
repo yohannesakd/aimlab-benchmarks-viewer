@@ -84,3 +84,31 @@ test("public activity counts unique active days across a month boundary", async 
     globalThis.fetch = originalFetch;
   }
 });
+
+test('supplementary profile data does not recover without stable identity', async t => {
+  let now = Date.now();
+  t.mock.method(Date, 'now', () => now);
+  let failing = false;
+  let wrongIdentity = false;
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    if (failing) throw new DOMException('Timed out', 'TimeoutError');
+    const { variables } = JSON.parse(options.body);
+    return new Response(JSON.stringify({ data: { Trainer: variables.username
+      ? { aimlabProfile: { username: wrongIdentity ? 'OtherPlayer' : variables.username } }
+      : { aimlab: { task: { id: variables.taskId } } } } }));
+  });
+  const details = await getPublicProfileDetails('RecoveryDetails');
+  const activity = await getPublicActivity('RecoveryDetails');
+  await getPublicTaskDetails('RecoveryTask');
+  now += 60_000;
+  failing = true;
+  await assert.rejects(getPublicProfileDetails('RecoveryDetails'), { name: 'TimeoutError' });
+  await assert.rejects(getPublicActivity('RecoveryDetails'), { name: 'TimeoutError' });
+  await assert.rejects(getPublicTaskDetails('RecoveryTask'));
+  now += 300_000;
+  await assert.rejects(getPublicProfileDetails('RecoveryDetails'));
+  failing = false;
+  wrongIdentity = true;
+  await assert.rejects(getPublicProfileDetails('WrongDetails'));
+  await assert.rejects(getPublicActivity('WrongDetails'));
+});
