@@ -46,7 +46,7 @@ export function parsePage(address) {
 export function pageMetadata(page, data = {}) {
   const params = new URLSearchParams();
   let label = SITE_NAME;
-  let description = 'Track Aimlabs player stats, scores and run history. Explore Voltaic and Revosect benchmark ranks, score requirements and leaderboards.';
+  let description = 'Track Aimlabs player stats and scores. Explore Voltaic and Revosect benchmark ranks, score requirements and leaderboards.';
   const community = communities[page.community];
   const season = page.benchmark === 'legacy' ? 'Series 2' : page.benchmark === 'revosect_s4' ? 'Series 4' : `Season ${page.benchmark?.slice(-1)}`;
   const selection = community ? `${community} ${season} ${titleCase(page.level)}` : '';
@@ -54,7 +54,7 @@ export function pageMetadata(page, data = {}) {
   switch (page.kind) {
     case 'home': label = 'Aimlabs Stats, Benchmarks & Leaderboards'; break;
     case 'about': label = 'About'; description = 'About Aimlab Tracker, its Aimlabs player statistics, Voltaic and Revosect benchmarks, data sources and privacy.'; break;
-    case 'profile': label = 'Find an Aimlabs Player'; description = 'Search Aimlabs players and explore their scores, personal bests, training activity, run history and benchmark ranks.'; break;
+    case 'profile': label = 'Find an Aimlabs Player'; description = 'Search Aimlabs players and explore their scores, personal bests, training activity and benchmark ranks.'; break;
     case 'tasks': label = 'Find an Aimlabs Task'; description = 'Search Aimlabs tasks and scenarios to view score leaderboards and individual run statistics.'; break;
     case 'catalog': label = `${selection} Benchmarks`; description = `${selection} Aimlabs scenarios and rank score requirements. Compare thresholds and open each task leaderboard.`; break;
     case 'standings': {
@@ -66,10 +66,10 @@ export function pageMetadata(page, data = {}) {
     }
     case 'player': {
       label = `${page.username} · ${community ? selection : page.section === 'activity' ? 'Training Activity' : 'Aimlabs Stats'}`;
-      description = `${page.username}'s ${community ? `${selection} benchmark scores and ranks` : 'Aimlabs scores, personal bests, training activity and run history'}.`;
+      description = `${page.username}'s ${community ? `${selection} benchmark scores and ranks` : 'Aimlabs scores, personal bests and training activity'}.`;
       break;
     }
-    case 'runs': label = `${page.username} · ${data.history?.taskName || 'Aimlabs'} Run History`; description = `View ${page.username}'s ${data.history?.taskName || 'Aimlabs scenario'} runs, scores, accuracy, shots and dates.`; break;
+    case 'runs': label = `${page.username} · Run History`; description = 'Aimlabs no longer provides public run history.'; break;
     case 'task': {
       const name = data.task?.name || 'Aimlabs Task';
       label = `${name} Leaderboard`;

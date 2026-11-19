@@ -54,9 +54,6 @@ export async function loadPageData(page, apiOrigin, read = path => fetchApi(apiO
     if (page.query.weapon) params.set('weapon', page.query.weapon);
     if (page.query.mode !== undefined) params.set('mode', page.query.mode);
     await load(`${path}/leaderboard?${params}`);
-  } else if (page.kind === 'runs') {
-    const path = `/api/profiles/${encodeURIComponent(page.username)}/tasks/${encodeURIComponent(page.taskId)}/runs`;
-    await primary(path + (page.query.after ? `?after=${encodeURIComponent(page.query.after)}` : ''));
   }
   return bootstrap;
 }
@@ -66,8 +63,7 @@ export async function renderPage(address, { apiOrigin, indexable = false, read }
   if (page.redirect) return { status: 308, headers: { Location: page.redirect, 'Cache-Control': 'public, max-age=3600' }, body: '' };
   const bootstrap = await loadPageData(page, apiOrigin, read);
   const task = bootstrap.responses[`/api/tasks/${encodeURIComponent(page.taskId)}`]?.body;
-  const history = Object.entries(bootstrap.responses).find(([path]) => path.includes('/runs'))?.[1].body;
-  const metadata = pageMetadata(page, { task, history, status: bootstrap.status });
+  const metadata = pageMetadata(page, { task, status: bootstrap.status });
   template ||= readFile(new URL('../dist/index.html', import.meta.url), 'utf8');
   bundle ||= import('../dist-ssr/entry-server.js');
   manifest ||= readFile(new URL('../dist-ssr/client-manifest.json', import.meta.url), 'utf8').then(JSON.parse);

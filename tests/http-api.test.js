@@ -24,12 +24,15 @@ test('public API serves bounded namespaces and distinguishes invalid sorts, coll
   });
   try {
     const origin = await listening;
-    for (const path of ['/api/profiles/Fixture', '/api/tasks/fixture-task', '/api/tasks/fixture-task/leaderboard', '/api/benchmarks/voltaic', '/api/profiles/Fixture/tasks/fixture-task/runs', '/api/tasks/fixture-task/run?username=Fixture&playId=fixture-run&weapon=9mm&score=200&mode=0']) {
+    for (const path of ['/api/profiles/Fixture', '/api/tasks/fixture-task', '/api/tasks/fixture-task/leaderboard', '/api/benchmarks/voltaic', '/api/tasks/fixture-task/run?username=Fixture&playId=fixture-run&weapon=9mm&score=200&mode=0']) {
       const response = await fetch(origin + path);
       assert.equal(response.status, 200, path);
       assert.match(response.headers.get('content-type'), /application\/json/);
       assert.ok(await response.json());
     }
+    const runs = await fetch(origin + '/api/profiles/Fixture/tasks/fixture-task/runs');
+    assert.equal(runs.status, 410);
+    assert.deepEqual(await runs.json(), { error: 'Aimlabs no longer provides public run history.' });
     const invalid = await fetch(origin + '/api/leaderboards/vt/aimlabs_s3/advanced/page?sort=constructor');
     const avatar = await fetch(origin + '/api/profiles/Fixture/avatar');
     assert.equal(avatar.status, 200);

@@ -54,7 +54,6 @@
             </div>
             <div class="bench-actions">
               <button type="button" @click="handlePlayScenario(bench)"><play-icon class="h-4 w-4"></play-icon>Play</button>
-              <router-link :to="historyLink(bench.id)">View runs</router-link>
               <router-link :to="{ path: '/tasks/' + encodeURIComponent(bench.id) + '/leaderboard', query: { weapon: bench.weapon } }">View leaderboard</router-link>
             </div>
           </div>
@@ -126,7 +125,6 @@ export default {
         getImagePath(rank, option) { return rankImage('voltaic', rank, option); },
         selectSet(id) { this.$router.push({ query: { benchmark: id, level: this.currentTab.value } }); },
         selectLevel(level) { this.$router.push({ query: { benchmark: this.selectedSet.id, level } }); },
-        historyLink(taskId) { return `/profile/${encodeURIComponent(this.currentPlayerInfo.username)}/tasks/${encodeURIComponent(taskId)}/runs`; },
         showBestRun(bench) { openRunDetails({ username: this.currentPlayerInfo.username, taskId: bench.id, taskName: bench.name, weapon: bench.weapon, score: bench.maxScore }); },
         toggleBenchDetails(bench) {
             this.expandedTasks[bench.id] = !this.expandedTasks[bench.id];
