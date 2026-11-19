@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
-import test from 'node:test';
+import test, { beforeEach } from 'node:test';
 import { getProfile } from '../server/app-data.js';
+
+// An aggregate denial pauses aggregate reads for every player, so each test starts after any earlier pause ends.
+const realNow = Date.now;
+let clockOffset = 0;
+Date.now = () => realNow() + clockOffset;
+beforeEach(() => { clockOffset += 10 * 60_000; });
 
 const response = data => new Response(JSON.stringify({ data }));
 
@@ -106,4 +112,20 @@ test('an UNAUTHORIZED aggregate denial also returns the public summaries', async
   assert.equal(profile.statisticsStatus, 'restricted');
   assert.equal(profile.publicTaskSummaries.length, 1);
   await assert.rejects(getProfile('Unauthorized'), error => error.providerCodes?.includes('UNAUTHORIZED'));
+});
+
+test('an aggregate denial skips aggregate reads for every player until the cooldown ends', async t => {
+  let aggregateCalls = 0;
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    const { query, variables } = JSON.parse(options.body);
+    if (query.includes('GetProfile(')) return response({ aimlabProfile: { username: variables.username, user: { id: variables.username } } });
+    if (query.includes('GetProfileAggregates')) { aggregateCalls++; return new Response(JSON.stringify({ errors: [{ extensions: { code: 'UNAUTHORIZED' } }] }), { status: 403 }); }
+    return response({ aimlabProfile: { username: variables.username, taskStats: [] } });
+  });
+  assert.equal((await getProfile('CooldownFirst', { publicSummary: true })).statisticsStatus, 'restricted');
+  assert.equal((await getProfile('CooldownSecond', { publicSummary: true })).statisticsStatus, 'restricted');
+  assert.equal(aggregateCalls, 1);
+  clockOffset += 5 * 60_000 + 1;
+  assert.equal((await getProfile('CooldownThird', { publicSummary: true })).statisticsStatus, 'restricted');
+  assert.equal(aggregateCalls, 2);
 });

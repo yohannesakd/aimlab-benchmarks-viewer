@@ -35,17 +35,24 @@ export function calculateProfile(playerInfo, rows) {
   return { fetchedAt: new Date().toISOString(), playerInfo, tasks, totals: { tasksPlayed: tasks.length, totalPlays: tasks.reduce((sum, task) => sum + task.count, 0) }, benchmarkSets: [{ id: "legacy", community: "revosect", label: "Series 2", results: benchmarks }, ...voltaicSeasons.map(definition => calculateVoltaicSeason(definition, rows)), calculateRevosectSeason(rows)] };
 }
 
+// Aimlabs denies anonymous aggregates for every player, so after a denial public summaries skip the read for a while.
+const aggregateDenialCooldownMs = 5 * 60_000;
+let aggregatesDeniedUntil = 0;
+
 export function getProfile(username, { publicSummary = false } = {}) {
   let playerInfo;
   return cached(`profile:${publicSummary ? 'public:' : ''}${username}`, async () => {
     playerInfo = await getProfileLookup(username);
+    if (publicSummary && Date.now() < aggregatesDeniedUntil) return getRestrictedProfile(playerInfo);
     let trainer;
     try {
       trainer = await queryAimlabs(GET_USER_PLAYS_AGG, { where: {
         is_practice: { _eq: false }, score: { _gt: 0 }, user_id: { _eq: playerInfo.id },
       } }, "Player statistics failed");
     } catch (error) {
-      if (!publicSummary || !error.providerCodes?.some(code => ['UNAUTHENTICATED', 'UNAUTHORIZED'].includes(code))) throw error;
+      const denied = error.providerCodes?.some(code => ['UNAUTHENTICATED', 'UNAUTHORIZED'].includes(code));
+      if (denied) aggregatesDeniedUntil = Date.now() + aggregateDenialCooldownMs;
+      if (!publicSummary || !denied) throw error;
       return getRestrictedProfile(playerInfo);
     }
     if (!Array.isArray(trainer.aimlab?.plays_agg)) throw new Error("Incomplete player statistics");
