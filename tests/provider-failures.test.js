@@ -41,7 +41,7 @@ test('a provider schema change is permanent, logged by class, and pauses only th
     && error.providerErrorClass === 'schema' && !error.providerCooldown);
   await assert.rejects(queryAimlabs(query, {}, 'Unavailable'), error => error.permanent && error.providerCooldown);
   assert.equal(calls, 1);
-  assert.deepEqual(providerHealth(now).unavailableOperations, ['legacy:SchemaProbe']);
+  assert.deepEqual(providerHealth(now).unavailableOperations, ['SchemaProbe']);
   assert.equal(providerHealth(now).state, 'unavailable');
   await assert.rejects(queryAimlabs('query OtherProbe { Trainer { x } }', {}, 'Unavailable'));
   assert.equal(calls, 2);

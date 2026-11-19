@@ -4,7 +4,7 @@
       <div class="relative flex flex-col gap-4">
         <h1 class="section-title">About Aimlab Tracker</h1>
         <p>
-          Browse player scores, run history and scenario leaderboards. Compare
+          Browse player scores and scenario leaderboards. Compare
           Voltaic and Revosect benchmark results across seasons and difficulties,
           and open individual runs to see their statistics.
         </p>

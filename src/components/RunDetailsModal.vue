@@ -22,9 +22,8 @@
       </section>
       <a v-if="run.replayAvailable !== false" :href="replayLink" target="_blank" rel="noopener noreferrer" class="text-link" @click="captureEvent('replay_opened', { run_id: run.id, task_id: selection.taskId })">Open run in Aimlabs ↗</a>
     </div>
-    <div v-if="selection" class="modal-footer">
-      <router-link v-if="$route.path !== historyLink" class="text-link" :to="historyLink" @click="close">Player’s run history →</router-link>
-      <router-link v-if="!$route.path.startsWith('/tasks/')" class="text-link" :to="{ path: `/tasks/${encodeURIComponent(selection.taskId)}/leaderboard`, query: { weapon: run?.weaponId ?? selection.weapon, mode: run?.convertedMode ?? selection.mode } }" @click="close">Task leaderboard →</router-link>
+    <div v-if="selection && !$route.path.startsWith('/tasks/')" class="modal-footer">
+      <router-link class="text-link" :to="{ path: `/tasks/${encodeURIComponent(selection.taskId)}/leaderboard`, query: { weapon: run?.weaponId ?? selection.weapon, mode: run?.convertedMode ?? selection.mode } }" @click="close">Task leaderboard →</router-link>
     </div>
   </dialog>
 </template>
@@ -39,7 +38,6 @@ export default {
   data() { return { run: null, loading: false, error: "", controller: null, previousOverflow: null }; },
   computed: {
     selection() { return selectedRun.value; },
-    historyLink() { return `/profile/${encodeURIComponent(this.selection.username)}/tasks/${encodeURIComponent(this.selection.taskId)}/runs`; },
     dateLabel() { const value = this.run?.endedAt || this.run?.startedAt; return value ? new Date(value).toLocaleString('en-US') : "Date unavailable"; },
     replayLink() { return replayDeepLink(this.run.id); },
     metadata() {

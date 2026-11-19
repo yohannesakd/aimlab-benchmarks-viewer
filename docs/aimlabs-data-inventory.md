@@ -2,13 +2,15 @@
 
 Checked **2026-09-29** against the public `https://api.aimlab.gg/graphql` endpoint. This is a field and behavior inventory for future product work, not a claim that Aimlabs supports these calls as a stable, unauthenticated integration contract. The archived SDL at `/home/sai/code/aimlab/references/schemas/latest-schema.graphql` is a historical reference; live validation takes precedence. [The archived schema map](aimlabs-archived-schema-map.md) and [full field index](aimlabs-archived-schema-fields.tsv) cover its declared paths, including fields not checked live. Probes used small result limits and public profiles or tasks. No private account token was used.
 
+**2026-11-19 change:** `api.aimlabs.com` removed the anonymous `Trainer` root, and `api.aimlab.gg` has no anonymous `latestPlay`. On `api.aimlab.gg`, `AimlabProfile.latestPlays(app)` has no task filter or paging, and `AimlabProfile.plays` returns HTTP 401. Per-task run history therefore has no anonymous source. Older notes below about `latestPlay` describe the earlier API.
+
 ## What the viewer currently uses
 
 | Surface | Current source | Additional useful data |
 | --- | --- | --- |
 | Player profile | Existing profile/aggregate queries plus public details and yearly activity counts in [`server/public-details.js`](../server/public-details.js) | Comparable score trends, best/worst tasks, session timing |
 | Task page | VPS task/leaderboard reads; optional `/details` metadata is available in the API but not shown on the page | Verified scoring configuration, asset contents, leaderboard schema |
-| Task run page | Bounded cursor pages from [`server/player-runs.js`](../server/player-runs.js), with score identity and allowlisted run metrics | Replay telemetry, comparable-run trends, populated insights if access permits |
+| Task run page | None. The page shows that Aimlabs no longer provides public run history | Authenticated `AimlabProfile.plays` if access permits |
 | Task search | Name search through `aimlab.tasks` | Creator Studio tasks, asset types, playlists and published versions |
 | Leaderboards | Public paged VPS API backed by versioned SQLite publications | Measured collection freshness and verified population reconciliation |
 

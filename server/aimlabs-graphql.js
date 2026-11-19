@@ -1,6 +1,6 @@
 import { logTelemetry, withTelemetrySpan } from './telemetry.js';
 
-const endpoints = { legacy: 'https://api.aimlab.gg/graphql', trainer: 'https://api.aimlabs.com/graphql' };
+const endpoint = 'https://api.aimlab.gg/graphql';
 export const providerTimeoutMs = 10_000;
 const maxConcurrentRequests = 4;
 const maxResponseBytes = 1_000_000;
@@ -9,7 +9,7 @@ const schemaCooldownMs = 5 * 60_000;
 export const providerChangedMessage = "Aimlabs no longer provides this data.";
 
 let activeRequests = 0;
-const retryAfter = new Map();
+let retryUntil = 0;
 // Provider operations whose query was last rejected as invalid, with the time until they are tried again.
 const schemaFailures = new Map();
 const outcomes = { lastSuccessAt: null, lastFailure: null };
@@ -62,13 +62,12 @@ async function readBoundedJson(response) {
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
 
-/** Legacy queries return the root data; Trainer queries return the contents of `Trainer`. */
-export function queryAimlabs(query, variables, missingDataMessage, { provider = 'legacy' } = {}) {
-  const operation = `${provider}:${query.match(/\bquery\s+([A-Za-z][A-Za-z0-9_]{0,63})\b/)?.[1] || 'unnamed'}`;
+export function queryAimlabs(query, variables, missingDataMessage) {
+  const operation = query.match(/\bquery\s+([A-Za-z][A-Za-z0-9_]{0,63})\b/)?.[1] || 'unnamed';
   return withTelemetrySpan('aimlabs.query', async span => {
     span?.setAttribute('graphql.operation.name', operation);
     try {
-      const result = await executeQuery(provider, operation, query, variables, missingDataMessage, span);
+      const result = await executeQuery(operation, query, variables, missingDataMessage, span);
       schemaFailures.delete(operation);
       outcomes.lastSuccessAt = new Date().toISOString();
       return result;
@@ -92,14 +91,14 @@ function providerChangedError(missingDataMessage, details) {
   return error;
 }
 
-async function executeQuery(provider, operation, query, variables, missingDataMessage, span) {
+async function executeQuery(operation, query, variables, missingDataMessage, span) {
   if (Date.now() < (schemaFailures.get(operation) || 0)) {
     throw providerChangedError(missingDataMessage, { providerCooldown: true });
   }
-  if (Date.now() < (retryAfter.get(provider) || 0)) {
+  if (Date.now() < retryUntil) {
     const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
     error.status = 503;
-    error.retryAfter = Math.ceil((retryAfter.get(provider) - Date.now()) / 1000);
+    error.retryAfter = Math.ceil((retryUntil - Date.now()) / 1000);
     throw error;
   }
   if (activeRequests >= maxConcurrentRequests) {
@@ -110,9 +109,9 @@ async function executeQuery(provider, operation, query, variables, missingDataMe
 
   activeRequests++;
   try {
-    const response = await fetch(endpoints[provider], {
+    const response = await fetch(endpoint, {
       method: "POST",
-      // The legacy provider rejects requests without an application User-Agent; the collector sends the same one.
+      // The provider rejects requests without an application User-Agent; the collector sends the same one.
       headers: { "Content-Type": "application/json", "User-Agent": "AimlabBenchmarksViewer/1.0" },
       body: JSON.stringify({ query, variables }),
       signal: AbortSignal.timeout(providerTimeoutMs),
@@ -120,7 +119,7 @@ async function executeQuery(provider, operation, query, variables, missingDataMe
     span?.setAttribute('http.response.status_code', response.status);
     if (response.status === 429) {
       const seconds = retryDelaySeconds(response.headers.get("Retry-After"));
-      retryAfter.set(provider, Math.max(retryAfter.get(provider) || 0, Date.now() + seconds * 1000));
+      retryUntil = Math.max(retryUntil, Date.now() + seconds * 1000);
       const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
       error.status = 503;
       error.providerStatus = 429;
@@ -128,7 +127,7 @@ async function executeQuery(provider, operation, query, variables, missingDataMe
       throw error;
     }
     const serverFailure = [500, 502, 503, 504].includes(response.status);
-    // The legacy provider reports GraphQL errors, including denials, with 4xx statuses.
+    // The provider reports GraphQL errors, including denials, with 4xx statuses.
     // An unreadable 4xx body is still a provider failure; read errors on a 2xx body keep their identity.
     const payload = serverFailure ? null : response.ok ? await readBoundedJson(response) : await readBoundedJson(response).catch(() => null);
     if (!payload || (!response.ok && !payload.errors?.length)) {
@@ -137,7 +136,7 @@ async function executeQuery(provider, operation, query, variables, missingDataMe
       if (serverFailure) error.status = 503;
       throw error;
     }
-    const data = provider === 'trainer' ? payload.data?.Trainer : payload.data;
+    const data = payload.data;
     if (payload.errors?.length || !data) {
       const { codes, errorClass, missingField } = classifyErrors(payload.errors || []);
       if (errorClass === 'schema') {

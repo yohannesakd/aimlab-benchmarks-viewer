@@ -1,30 +1,25 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { getPublicProfileDetails } from '../server/public-details.js';
-import { getPlayerTaskRuns } from '../server/player-runs.js';
 import { queryAimlabs } from '../server/aimlabs-graphql.js';
 
-const response = (data, query) => new Response(JSON.stringify({ data: query.includes('PlayerTaskRuns') ? { Trainer: data } : data }));
+const response = data => new Response(JSON.stringify({ data }));
 
-test('identical public details and history share provider reads while distinct identities stay separate', async () => {
+test('identical public details share provider reads while distinct identities stay separate', async () => {
   const originalFetch = globalThis.fetch;
   let calls = 0;
   globalThis.fetch = async (_url, options) => {
     calls++;
-    const { query, variables } = JSON.parse(options.body);
+    const { variables } = JSON.parse(options.body);
     await new Promise(resolve => setTimeout(resolve, 10));
-    return response({ aimlabProfile: { username: variables.username,
-      ...(query.includes('latestPlay') ? { latestPlay: { totalCount: 0, edges: [], pageInfo: { endCursor: null, hasNextPage: false } } } : {}),
-    } }, query);
+    return response({ aimlabProfile: { username: variables.username } });
   };
   try {
     const details = await Promise.all(Array.from({ length: 5 }, () => getPublicProfileDetails('SharingFixture')));
     assert.equal(calls, 1);
     assert.ok(details.every(value => value === details[0]));
-    await Promise.all(Array.from({ length: 5 }, () => getPlayerTaskRuns('SharingFixture', 'task')));
+    await getPublicProfileDetails('OtherPlayer');
     assert.equal(calls, 2);
-    await Promise.all([getPlayerTaskRuns('OtherPlayer', 'task'), getPlayerTaskRuns('SharingFixture', 'other'), getPlayerTaskRuns('SharingFixture', 'task', 'cursor')]);
-    assert.equal(calls, 5);
   } finally { globalThis.fetch = originalFetch; }
 });
 
@@ -34,7 +29,7 @@ test('failed shared reads clear pending work, preserve safe provider codes, and 
   globalThis.fetch = async () => {
     calls++;
     if (calls === 1) return new Response(JSON.stringify({ errors: [{ message: 'private payload', extensions: { code: 'UNAUTHORIZED' } }, { extensions: { code: 'private unsafe text' } }] }));
-    return response({ aimlabProfile: { username: 'RetryFixture' } }, 'PublicPlayerDetails');
+    return response({ aimlabProfile: { username: 'RetryFixture' } });
   };
   try {
     const results = await Promise.allSettled(Array.from({ length: 5 }, () => getPublicProfileDetails('RetryFixture')));

@@ -20,7 +20,6 @@ async function fixtures(page, overrides = {}) {
     if (custom) return custom(route, url);
     let body;
     if (url.pathname === '/api/telemetry/config') body = { enabled: false };
-    else if (url.pathname.endsWith('/runs')) body = { taskName: 'Sixshot', totalCount: 1, pageInfo: { hasNextPage: false }, runs: [run] };
     else if (url.pathname.endsWith('/details')) body = {};
     else if (url.pathname.endsWith('/lookup')) body = { username: url.pathname.split('/')[3] };
     else if (url.pathname.startsWith('/api/profiles/')) body = snapshot(url.pathname.split('/')[3]);
@@ -61,16 +60,23 @@ test('restricted profiles show public summaries and activity without fabricated 
   expect(errors).toEqual([]);
 });
 
-test('run modal closes, restores focus, reopens and preserves identity in navigation', async ({ page }) => {
+test('run history shows its notice, and the run modal restores focus and preserves identity in navigation', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await fixtures(page);
   await page.goto('/profile/Fixture/tasks/sixshot/runs');
-  const open = page.getByRole('button', { name: 'View details →' });
-  await open.click();
+  await expect(page.locator('.status-panel')).toHaveText('Aimlabs no longer provides public run history.');
+  await page.goto('/profile/Fixture/overview');
+  await page.locator('button.player-task-run').first().click();
   await expect(page.locator('dialog[open] .run-summary')).toContainText('200 points');
   await expect(page.locator('dialog[open] .run-summary')).toContainText('Fixture');
+  await page.getByRole('link', { name: 'Task leaderboard →', exact: true }).click();
+  await expect(page).toHaveURL(/\/tasks\/sixshot\/leaderboard\?weapon=9mm&mode=0/);
+  await expect(page.locator('dialog')).not.toHaveAttribute('open');
+  const open = page.getByRole('button', { name: 'View run →' });
+  await open.click();
+  await expect(page.locator('dialog[open] .run-summary')).toContainText('200 points');
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await expect(page.locator('dialog')).not.toHaveAttribute('open');
   await expect(open).toBeFocused();
@@ -78,12 +84,6 @@ test('run modal closes, restores focus, reopens and preserves identity in naviga
   await open.click();
   await page.keyboard.press('Escape');
   await expect(page.locator('dialog')).not.toHaveAttribute('open');
-  await open.click();
-  await page.getByRole('link', { name: 'Task leaderboard →', exact: true }).click();
-  await expect(page).toHaveURL(/\/tasks\/sixshot\/leaderboard\?weapon=9mm&mode=0/);
-  await expect(page.locator('dialog')).not.toHaveAttribute('open');
-  await page.getByRole('button', { name: 'View run →' }).click();
-  await expect(page.locator('dialog[open] .run-summary')).toContainText('200 points');
   expect(errors).toEqual([]);
 });
 
