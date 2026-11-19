@@ -3,12 +3,16 @@ import { logTelemetry, withTelemetrySpan } from './telemetry.js';
 const endpoint = 'https://api.aimlab.gg/graphql';
 export const providerTimeoutMs = 10_000;
 const maxConcurrentRequests = 4;
+// Requests that find every slot in use wait in order, briefly, instead of failing at once.
+const maxWaitingRequests = 32;
+const maxSlotWaitMs = 2_000;
 const maxResponseBytes = 1_000_000;
 
 const schemaCooldownMs = 5 * 60_000;
 export const providerChangedMessage = "Aimlabs no longer provides this data.";
 
 let activeRequests = 0;
+const waitingRequests = [];
 let retryUntil = 0;
 // Provider operations whose query was last rejected as invalid, with the time until they are tried again.
 const schemaFailures = new Map();
@@ -95,20 +99,11 @@ async function executeQuery(operation, query, variables, missingDataMessage, spa
   if (Date.now() < (schemaFailures.get(operation) || 0)) {
     throw providerChangedError(missingDataMessage, { providerCooldown: true });
   }
-  if (Date.now() < retryUntil) {
-    const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
-    error.status = 503;
-    error.retryAfter = Math.ceil((retryUntil - Date.now()) / 1000);
-    throw error;
-  }
-  if (activeRequests >= maxConcurrentRequests) {
-    const error = new Error("Aimlabs data is busy. Try again shortly.");
-    error.status = 503;
-    throw error;
-  }
-
-  activeRequests++;
+  rejectDuringRateLimit();
+  await acquireSlot();
   try {
+    // A rate limit can start while this request waits for a slot.
+    rejectDuringRateLimit();
     const response = await fetch(endpoint, {
       method: "POST",
       // The provider rejects requests without an application User-Agent; the collector sends the same one.
@@ -152,6 +147,47 @@ async function executeQuery(operation, query, variables, missingDataMessage, spa
     }
     return data;
   } finally {
-    activeRequests--;
+    releaseSlot();
   }
+}
+
+function rejectDuringRateLimit() {
+  if (Date.now() < retryUntil) {
+    const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
+    error.status = 503;
+    error.retryAfter = Math.ceil((retryUntil - Date.now()) / 1000);
+    throw error;
+  }
+}
+
+function busyError() {
+  const error = new Error("Aimlabs data is busy. Try again shortly.");
+  error.status = 503;
+  return error;
+}
+
+function acquireSlot() {
+  if (activeRequests < maxConcurrentRequests) {
+    activeRequests++;
+    return Promise.resolve();
+  }
+  if (waitingRequests.length >= maxWaitingRequests) return Promise.reject(busyError());
+  return new Promise((resolve, reject) => {
+    const waiter = { resolve, timer: setTimeout(() => {
+      waitingRequests.splice(waitingRequests.indexOf(waiter), 1);
+      reject(busyError());
+    }, maxSlotWaitMs) };
+    waitingRequests.push(waiter);
+  });
+}
+
+// A finished request hands its slot to the oldest waiting request.
+function releaseSlot() {
+  const next = waitingRequests.shift();
+  if (!next) {
+    activeRequests--;
+    return;
+  }
+  clearTimeout(next.timer);
+  next.resolve();
 }
