@@ -63,7 +63,7 @@ test('SPA events and replay exclude query strings and input text', async ({ page
   await expect.poll(() => events.filter(event => event.event === '$pageview').length).toBe(1);
   await page.waitForFunction(() => Boolean(window.__PosthogExtensions__?.rrweb?.record));
   await page.getByRole('link', { name: 'Profile', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Aimlab username · case sensitive' }).fill('never-capture-me');
+  await page.getByRole('textbox', { name: 'Aimlab username', exact: true }).fill('never-capture-me');
   await page.evaluate(async () => {
     const moduleUrl = performance.getEntriesByType('resource').find(entry => /assets\/module-/.test(entry.name)).name;
     const posthog = (await import(moduleUrl)).default;

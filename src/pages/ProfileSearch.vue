@@ -5,13 +5,13 @@
         <h1 class="page-title">Find a profile</h1>
       </div>
       <div class="panel panel-body">
-        <label class="field-label" for="username">Aimlab username · case sensitive</label>
+        <label class="field-label" for="username">Aimlab username</label>
         <input id="username" class="text-field" type="text" autocomplete="off" placeholder="Enter a username" v-model.trim="usernameInput" @input="debouncedSearch" />
       </div>
       <div v-if="usernameInput" class="panel search-result">
         <p v-if="isLoading" class="status-panel">Searching…</p>
         <p v-else-if="searchError" class="status-panel" role="alert">Search is unavailable. Try again.</p>
-        <p v-else-if="!playerInfo.username" class="status-panel">User not found.</p>
+        <p v-else-if="!playerInfo.username" class="status-panel">User not found. Check the spelling and letter case.</p>
         <div v-else class="result-row">
           <div>
             <h2 class="result-title">{{ playerInfo.username }}</h2>
@@ -70,7 +70,7 @@ export default {
         captureEvent('profile_search', { result: 'found' });
       } catch (error) {
         if (version === this.requestVersion) {
-          console.error(error);
+          if (error.status !== 404) console.error(error);
           this.searchError = error.status !== 404;
           captureEvent('profile_search', { result: error.status === 404 ? 'missing' : 'error' });
         }

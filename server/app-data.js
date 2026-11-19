@@ -6,6 +6,7 @@ import { publicRun, runFields } from "./player-runs.js";
 import { voltaicSeasons, calculateVoltaicSeason, calculateRevosectSeason } from './benchmark-seasons.js';
 import { sortColumnsFor } from './benchmark-registry.js';
 
+import { getPlayerLeaderboardScores, findCollectedUsername } from './leaderboard-db.js';
 import { createRequestCache } from './request-cache.js';
 const cached = createRequestCache({ ttlMs: 60_000, maxEntries: 120, name: 'app-data' });
 
@@ -22,6 +23,18 @@ export function getProfileLookup(username) {
     if (typeof profile.username !== 'string' || profile.username.toLowerCase() !== username.toLowerCase() || !profile.user?.id) throw new Error("Incomplete player identity");
     return { username: profile.username, id: profile.user.id, rank: profile.ranking?.rank?.displayName || "Unranked", skill: profile.ranking?.skill ?? 0 };
   });
+}
+
+// Profile search: Aimlabs matches the exact letter case, so a collected spelling of the same name gets one more lookup.
+// Profile pages keep exact lookups, because the page identity is the spelling in its URL.
+export async function searchProfile(username) {
+  try { return await getProfileLookup(username); }
+  catch (error) {
+    if (error.status !== 404) throw error;
+    const spelled = await findCollectedUsername(username);
+    if (!spelled || spelled === username) throw error;
+    return getProfileLookup(spelled);
+  }
 }
 
 /** @returns {import('./api-contracts.js').ProfileSnapshot} */
@@ -86,8 +99,23 @@ async function getRestrictedProfile(playerInfo) {
     return { id: taskId, name: taskName, maxScore: summary.topScore, count: summary.playCount,
       playId, mode: null, weapon: null };
   });
-  return { playerInfo, statisticsStatus: 'restricted', tasks: null, totals: null, benchmarkSets: null,
+  const { benchmarkSets, benchmarkScoresCollectedAt } = await leaderboardBenchmarkSets(playerInfo);
+  return { playerInfo, statisticsStatus: 'restricted', tasks: null, totals: null, benchmarkSets, benchmarkScoresCollectedAt,
     publicTaskSummaries, publicTaskSummaryLimit, fetchedAt: new Date().toISOString() };
+}
+
+// Without aggregates, benchmark results come from the collected leaderboards. They hold best scores only,
+// so play counts, averages and accuracy are unknown. Sets without a collected leaderboard are left out.
+async function leaderboardBenchmarkSets(playerInfo) {
+  const { collectedAt, scores } = await getPlayerLeaderboardScores(playerInfo.id);
+  if (!collectedAt) return { benchmarkSets: null, benchmarkScoresCollectedAt: null };
+  const rows = scores.map(({ id, name, weapon, score }) => ({ group_by: { task_id: id, task_name: name, weapon_id: weapon, task_mode_mod: 0 },
+    aggregate: { count: 1, max: { score, accuracy: 0 }, avg: { score, accuracy: 0 } } }));
+  const benchmarkSets = calculateProfile(playerInfo, rows).benchmarkSets
+    .filter(set => Object.values(set.results).every(result => result.rankingAvailable !== false))
+    .map(set => ({ ...set, results: Object.fromEntries(Object.entries(set.results).map(([key, result]) => [key, { ...result,
+      benchmarks: result.benchmarks.map(bench => ({ ...bench, count: null, avgScore: null, avgAcc: null, maxAcc: null })) }])) }));
+  return { benchmarkSets, benchmarkScoresCollectedAt: collectedAt };
 }
 
 export function getTask(taskId) {
@@ -201,7 +229,7 @@ export async function handleAppDataRequest(request, response, pathname, params) 
     if (task && ["/leaderboard", "/run"].includes(task[2]) && (!Number.isInteger(mode) || mode < 0 || mode > 2147483647)) throw new URIError("Invalid task mode");
     if (catalog) {
       body = getBenchmarkCatalog(id);
-    } else if (profile) body = profile[2] ? await getProfileLookup(id) : await getProfile(id, { publicSummary: params.get('publicSummary') === '1' });
+    } else if (profile) body = profile[2] ? await searchProfile(id) : await getProfile(id, { publicSummary: params.get('publicSummary') === '1' });
     else if (id === "search" && !task[2]) {
       const name = params.get("name");
       if (invalid(name, 100)) throw new URIError("Invalid task search");

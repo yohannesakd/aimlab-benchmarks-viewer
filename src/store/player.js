@@ -10,6 +10,7 @@ export const usePlayerStore = defineStore('player', {
     statisticsRestricted: state => state.snapshot?.statisticsStatus === 'restricted',
     publicTaskSummaryLimit: state => state.snapshot?.publicTaskSummaryLimit ?? null,
     benchmarkSets: state => state.snapshot?.benchmarkSets || [],
+    benchmarkScoresCollectedAt: state => state.snapshot?.benchmarkScoresCollectedAt || null,
     profileFetchedAt: state => state.snapshot?.fetchedAt || null,
   },
   actions: {

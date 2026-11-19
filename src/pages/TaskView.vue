@@ -14,9 +14,9 @@
         </div>
       </div>
 
-      <div v-if="isLoading" class="panel status-panel mt-4"><loading-spinner></loading-spinner></div>
+      <div v-if="isLoading && loadedIdentity !== leaderboardIdentity" class="panel status-panel mt-4"><loading-spinner></loading-spinner></div>
       <div v-else-if="leaderboardError" class="panel status-panel mt-4" role="alert">{{ leaderboardError }}</div>
-      <section v-else class="panel task-leaderboard mt-4">
+      <section v-else class="panel task-leaderboard mt-4" :class="{ 'is-updating': isLoading }" :aria-busy="isLoading">
         <h2 class="leaderboard-heading">Task scores</h2>
         <div class="task-score-row task-score-head" aria-hidden="true"><span>Rank</span><span>Player</span><span>Score</span><span>Hits</span><span>Accuracy</span><span>Run</span></div>
         <div v-for="(task, index) in currentTaskLeaderboard.data" :key="index" class="task-score-row">
@@ -31,9 +31,9 @@
         <div v-if="currentTaskLeaderboard.data?.length" class="pagination">
           <span>Page {{ currentPage + 1 }} of {{ pageCount + 1 }}</span>
           <div class="pagination-controls">
-            <button type="button" class="page-button" :disabled="currentPage <= 0" aria-label="Previous page" @click="currentPage--"><chevron-icon direction="left" class="h-4 w-4"></chevron-icon></button>
+            <button type="button" class="page-button" :disabled="currentPage <= 0" aria-label="Previous page" @click="setPage(currentPage - 1)"><chevron-icon direction="left" class="h-4 w-4"></chevron-icon></button>
             <button v-for="(page, index) in pageNumbers" :key="index" type="button" class="page-button page-number" :class="{ active: page === currentPage + 1 }" :disabled="page === '...'" @click="handlePageSelect($event)">{{ page }}</button>
-            <button type="button" class="page-button" :disabled="currentPage >= pageCount" aria-label="Next page" @click="currentPage++"><chevron-icon direction="right" class="h-4 w-4"></chevron-icon></button>
+            <button type="button" class="page-button" :disabled="currentPage >= pageCount" aria-label="Next page" @click="setPage(currentPage + 1)"><chevron-icon direction="right" class="h-4 w-4"></chevron-icon></button>
             <span class="page-status">Page {{ currentPage + 1 }} / {{ pageCount + 1 }}</span>
             <input class="page-input" type="number" min="1" :max="pageCount + 1" aria-label="Go to page" v-model.number="goToPageInput" @keydown.enter="goToPage" />
             <button type="button" class="page-button" @click="goToPage">Go</button>
@@ -50,6 +50,7 @@
 .task-summary .btn-primary { flex: 0 0 auto; }
 .task-score-row { display: grid; grid-template-columns: 70px minmax(0, 1.5fr) 95px 80px 95px 100px; align-items: center; gap: 12px; min-height: 50px; padding: 9px 20px; border-bottom: 1px solid var(--line); font-size: .88rem; }
 .task-score-head { min-height: 40px; color: var(--muted); font-size: .78rem; }
+.task-leaderboard.is-updating .task-score-row:not(.task-score-head) { opacity: .5; transition: opacity .15s; }
 .task-score-value { font-weight: 600; font-variant-numeric: tabular-nums; }
 .task-run { display: inline-flex; align-items: center; gap: 5px; }
 .task-score-row .player-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -81,7 +82,7 @@ export default {
       headLoading: false,
       taskError: "",
       leaderboardError: "",
-      currentPage: 0,
+      loadedIdentity: null,
       goToPageInput: null,
       taskRequestVersion: 0,
       leaderboardRequestVersion: 0,
@@ -93,6 +94,11 @@ export default {
       "currentTaskLeaderboard",
     ]),
     leaderboardIdentity() { return JSON.stringify([this.taskId, this.$route.query.weapon, this.$route.query.mode]); },
+    // The URL page is 1-based, like the benchmark standings, so refresh, Back and shared links keep it.
+    currentPage() {
+      const page = Number(this.$route.query.page);
+      return Number.isSafeInteger(page) && page > 1 ? page - 1 : 0;
+    },
     taskLink() {
       return taskDeepLink(this.currentTask.workshop_id);
     },
@@ -136,9 +142,7 @@ export default {
     captureEvent,
     handlePageSelect(event) {
       let value = parseInt(event.target.textContent);
-      if (value) {
-        this.currentPage = value - 1;
-      }
+      if (value) this.setPage(value - 1);
     },
     showRun(task) {
       openRunDetails({ username: task.username, taskId: this.taskId, taskName: this.currentTask.name, weapon: this.currentTaskLeaderboard.weaponId, mode: this.currentTaskLeaderboard.mode, playId: task.playId, score: task.score });
@@ -146,13 +150,11 @@ export default {
     handleSwitchTask() {
       this.$router.push("/tasks");
     },
+    setPage(page) {
+      this.$router.push({ query: { ...this.$route.query, page: page > 0 ? String(page + 1) : undefined } });
+    },
     goToPage() {
-      if (Number.isInteger(this.goToPageInput)) {
-        this.currentPage = Math.min(
-          Math.max(this.goToPageInput - 1, 0),
-          this.pageCount
-        );
-      }
+      if (Number.isInteger(this.goToPageInput)) this.setPage(Math.min(Math.max(this.goToPageInput - 1, 0), this.pageCount));
       this.goToPageInput = null;
     },
     async loadTask(taskId) {
@@ -165,7 +167,6 @@ export default {
       this.isLoading = true;
       this.taskError = "";
       this.leaderboardError = "";
-      this.currentPage = 0;
 
       try {
         const response = await fetchData(`/api/tasks/${encodeURIComponent(taskId)}`);
@@ -197,7 +198,11 @@ export default {
       if (this.$route.query.weapon) initialParams.set('weapon', this.$route.query.weapon);
       if (this.$route.query.mode !== undefined) initialParams.set('mode', this.$route.query.mode);
       const initial = takeInitialResponse(this, `/api/tasks/${encodeURIComponent(task.id)}/leaderboard?${initialParams}`);
-      if (initial) { this.leaderboardError = initial.status === 200 ? '' : 'Could not load the leaderboard. Try again.'; return; }
+      if (initial) {
+        this.leaderboardError = initial.status === 200 ? '' : 'Could not load the leaderboard. Try again.';
+        if (initial.status === 200) this.loadedIdentity = this.leaderboardIdentity;
+        return;
+      }
       if (import.meta.env.SSR) return;
       const version = ++this.leaderboardRequestVersion;
       this.isLoading = true;
@@ -209,6 +214,7 @@ export default {
         const response = await fetchData(`/api/tasks/${encodeURIComponent(task.id)}/leaderboard?${params}`);
         if (version !== this.leaderboardRequestVersion || task.id !== this.taskId) return;
         this.setCurrentTaskLeaderboard(response);
+        this.loadedIdentity = this.leaderboardIdentity;
       } catch (error) {
         if (version === this.leaderboardRequestVersion) {
           console.error(error);

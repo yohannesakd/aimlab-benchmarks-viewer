@@ -1,7 +1,7 @@
 <template>
   <header class="site-header">
     <div class="site-header-inner">
-      <router-link to="/home" class="site-brand" aria-label="Aimlab Tracker home">
+      <router-link to="/home" class="site-brand" aria-label="Aimlab Tracker home" @click="menuOpen = false">
         <img src="/aimlab-logo.svg" alt="" class="site-brand-icon" />
         <span>Aimlab <span class="brand-accent">Tracker</span></span>
       </router-link>
@@ -9,7 +9,7 @@
         <span></span><span></span><span></span>
       </button>
       <nav id="site-nav" class="site-nav" :class="{ 'site-nav-open': menuOpen }" aria-label="Main navigation">
-        <router-link v-for="link in navLinks" :key="link.label" :to="link.to" class="site-nav-link" :class="{ 'is-current': $route.path.startsWith(link.activePath || link.to) }">{{ link.label }}</router-link>
+        <router-link v-for="link in navLinks" :key="link.label" :to="link.to" class="site-nav-link" :class="{ 'is-current': $route.path.startsWith(link.activePath || link.to) }" @click="menuOpen = false">{{ link.label }}</router-link>
       </nav>
     </div>
   </header>
@@ -29,6 +29,7 @@ export default {
       ],
     };
   },
+  // Back and Forward also change the page while the menu is open.
   watch: { $route() { this.menuOpen = false; } },
 };
 </script>

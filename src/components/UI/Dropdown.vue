@@ -51,8 +51,9 @@ export default {
       else this.activeIndex = (this.activeIndex + (event.key === 'ArrowDown' ? 1 : -1) + this.options.length) % this.options.length;
       this.focusOption();
     },
-    onClickAway(event) { if (!this.$refs.wrapper.contains(event.target)) this.close(); },
-    onFocusOut(event) { if (!this.$refs.wrapper.contains(event.relatedTarget)) this.close(); },
+    onClickAway(event) { if (this.$refs.wrapper && !this.$refs.wrapper.contains(event.target)) this.close(); },
+    // Focus also leaves when the page removes the dropdown, after its element is gone.
+    onFocusOut(event) { if (this.$refs.wrapper && !this.$refs.wrapper.contains(event.relatedTarget)) this.close(); },
   },
 };
 </script>

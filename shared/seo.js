@@ -82,7 +82,7 @@ export function pageMetadata(page, data = {}) {
   const status = data.status || page.status;
   if (status >= 400) { label = status === 404 ? 'Page Not Found' : 'Data Temporarily Unavailable'; description = status === 404 ? 'This page could not be found.' : 'Aimlabs data is temporarily unavailable. Please try again later.'; }
   const canonical = SITE_ORIGIN + page.path + (params.size ? `?${params}` : '');
-  const indexable = status === 200 && page.kind !== 'runs' && !page.query.after && !page.query.run
+  const indexable = status === 200 && page.kind !== 'runs' && !page.query.after && !page.query.run && !page.query.q
     && !(Number(page.query.page) > 1) && (!page.query.sort || page.query.sort === 'overall');
   const title = `${label} | ${SITE_NAME}`;
   const breadcrumbs = [{ '@type': 'ListItem', position: 1, name: SITE_NAME, item: SITE_ORIGIN + '/home' }];

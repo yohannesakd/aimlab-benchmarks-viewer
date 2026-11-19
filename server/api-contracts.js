@@ -36,6 +36,7 @@
  * @property {TaskSummary[]|null} tasks Null when Aimlabs restricts historical statistics.
  * @property {{tasksPlayed: number, totalPlays: number}|null} totals Null is unavailable, not zero.
  * @property {BenchmarkSet[]|null} benchmarkSets Null when the required score populations are unavailable.
+ * @property {string|null} [benchmarkScoresCollectedAt] Restricted profiles: oldest collection time of the leaderboards that supplied benchmark scores. Those benchmarks have null play counts, averages and accuracy.
  * @property {'restricted'} [statisticsStatus] Explicit provider authentication restriction.
  * @property {Object[]} [publicTaskSummaries] Bounded public task summaries, separate from aggregate populations.
  * @property {number} [publicTaskSummaryLimit] Maximum requested summaries; does not establish full coverage.

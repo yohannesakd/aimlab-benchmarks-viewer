@@ -5,7 +5,7 @@
         <h1 class="page-title">Find a task</h1>
       </div>
       <div class="panel panel-body">
-        <form class="search-form" @submit.prevent="searchTask">
+        <form class="search-form" @submit.prevent="submitSearch">
           <label class="sr-only" for="taskname">Task or scenario name</label>
           <input id="taskname" class="text-field" type="text" autocomplete="off" placeholder="Enter a task or scenario name" v-model.trim="taskNameInput" />
           <button class="btn-primary" type="submit">Search</button>
@@ -14,6 +14,7 @@
       <div v-if="searchStatus" class="panel search-result status-panel" role="status">{{ searchStatus }}</div>
       <div v-if="taskList.length" class="panel search-result">
         <div class="panel-header"><h2 class="section-title">Matching tasks</h2><span class="result-meta">{{ taskList.length }} results</span></div>
+        <p v-if="taskList.length >= providerResultLimit" class="result-meta search-limit">Aimlabs returns only the first {{ providerResultLimit }} matches. Type more of the name to find other tasks.</p>
         <router-link v-for="task in taskList" :key="task.id" class="result-row" :to="taskLeaderboardLink(task.id)">
           <div>
             <h3 class="result-title">{{ task.name }}</h3>
@@ -29,6 +30,7 @@
   </main>
 </template>
 <style scoped>
+.search-limit { padding: 10px 20px; border-bottom: 1px solid var(--line); }
 .result-action { display: flex; align-items: center; gap: 14px; color: var(--accent); }
 .task-thumbnail { width: 44px; height: 44px; object-fit: cover; border: 1px solid var(--line); }
 </style>
@@ -43,15 +45,31 @@ export default {
       taskList: [],
       searchStatus: "",
       requestVersion: 0,
+      providerResultLimit: 10,
     };
   },
+  computed: { urlQuery() { return typeof this.$route.query.q === 'string' ? this.$route.query.q.trim() : ''; } },
+  // The search text is in the URL, so Back from a task returns to the same results.
+  // The first search starts after mounting, so the server HTML and the hydrated page match.
+  watch: { urlQuery: 'applyQuery' },
+  created() { this.taskNameInput = this.urlQuery; },
+  mounted() { if (this.urlQuery) this.searchTask(this.urlQuery); },
   beforeUnmount() {
     this.requestVersion++;
   },
   methods: {
-    async searchTask() {
+    applyQuery(name) {
+      this.taskNameInput = name;
+      if (name) this.searchTask(name);
+      else { this.requestVersion++; this.taskList = []; this.searchStatus = ''; }
+    },
+    submitSearch() {
       const name = this.taskNameInput;
       if (!name) return;
+      if (name === this.urlQuery) this.searchTask(name);
+      else this.$router.push({ query: { q: name } });
+    },
+    async searchTask(name) {
       const version = ++this.requestVersion;
       this.taskList = [];
       this.searchStatus = "Searching...";

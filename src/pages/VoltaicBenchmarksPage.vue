@@ -30,7 +30,7 @@
       <div v-for="(bench, index) in VTBenchmarks.benchmarks" :key="index" class="bench-row">
         <div class="bench-main">
           <span class="bench-name">{{ bench.name }}</span>
-          <button v-if="bench.count" type="button" class="bench-score text-link" :aria-label="`Open run for ${bench.name}: ${bench.maxScore} points`" @click="showBestRun(bench)">{{ bench.maxScore.toLocaleString('en-US') }}</button><span v-else class="bench-score">—</span>
+          <button v-if="bench.maxScore" type="button" class="bench-score text-link" :aria-label="`Open run for ${bench.name}: ${bench.maxScore} points`" @click="showBestRun(bench)">{{ bench.maxScore.toLocaleString('en-US') }}</button><span v-else class="bench-score">—</span>
           <span class="bench-rank" :class="colorLookup[bench.rank]"><img :src="getImagePath(bench.rank, 'badge')" alt="" />{{ bench.rank }}</span>
           <span class="bench-points"><span class="bench-point-value">{{ bench.energy }}</span><progress-bar class="progress-bar" :value="bench.energyProgress.value" :max="bench.energyProgress.max" color="bg-mainCyan"></progress-bar></span>
           <button type="button" class="bench-expand" :aria-expanded="!!expandedTasks[bench.id]" :aria-label="'Details for ' + bench.name" @click="toggleBenchDetails(bench)">
@@ -47,7 +47,7 @@
           </div>
           <div class="bench-extra">
             <div class="bench-stats">
-              <span>Total plays: {{ bench.count }}</span>
+              <span v-if="bench.count !== null">Total plays: {{ bench.count }}</span>
               <span v-if="bench.count">Best accuracy: {{ Math.floor(bench.maxAcc) }}%</span>
               <span v-if="bench.count">Average score: {{ Math.floor(bench.avgScore) }}</span>
               <span v-if="bench.count">Average accuracy: {{ Math.floor(bench.avgAcc) }}%</span>

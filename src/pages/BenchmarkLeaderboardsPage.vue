@@ -5,7 +5,7 @@
       <div class="standings-view"><span class="field-label">View</span><dropdown label="View" :options="viewOptions" :model-value="view" @update:model-value="selectView" /></div>
       <div v-if="view === 'overall'" class="standings-ranking"><span class="field-label">Ranking</span><dropdown label="Ranking" :options="selectedSet.rankingOptions" :model-value="sort" @update:model-value="selectSort" /></div>
     </div>
-    <div v-if="catalogLoading || loading" class="panel status-panel" aria-live="polite"><loading-spinner /></div>
+    <div v-if="catalogLoading || (loading && loadedKey !== standingsKey)" class="panel status-panel" aria-live="polite"><loading-spinner /></div>
     <div v-else-if="error" class="panel status-panel" role="alert">{{ error }}</div>
     <template v-else-if="selectedSet">
       <section v-if="view === 'scenarios'" class="panel scenario-standings">
@@ -15,15 +15,15 @@
           <router-link v-for="bench in group.benchmarks" :key="bench.id" class="scenario-link" :to="{ path: '/tasks/' + encodeURIComponent(bench.id) + '/leaderboard', query: { weapon: bench.weapon } }"><strong>{{ bench.name }}</strong><span class="text-link">Leaderboard →</span></router-link>
         </div>
       </section>
-      <section v-else class="panel leaderboard-panel">
+      <section v-else class="panel leaderboard-panel" :class="{ 'is-updating': loading }" :aria-busy="loading">
         <div class="standings-heading"><h2>{{ selectedSet.label }} · {{ levelLabel }}</h2><time v-if="pageData.generatedAt" :datetime="pageData.generatedAt">Updated {{ formatDate(pageData.generatedAt) }}</time></div>
         <div class="leaderboard-row leaderboard-row--head" aria-hidden="true"><span>Rank</span><span>Player</span><span>{{ community === 'voltaic' ? 'Energy' : 'Points' }}</span><span>Overall rank</span></div>
-        <router-link v-for="(player, index) in pageData.players" :key="player.username" class="leaderboard-row leaderboard-row--player" :aria-label="`${(page - 1) * 25 + index + 1}. ${player.username}: ${player.selectedPoints} ${community === 'voltaic' ? 'energy' : 'points'}, overall rank ${player.overallRank}`" :to="{ path: '/profile/' + encodeURIComponent(player.username) + '/' + community, query: { benchmark: selectedSet.id, level } }">
-          <span>{{ (page - 1) * 25 + index + 1 }}</span><span class="player-name">{{ player.username }}</span><span class="points">{{ player.selectedPoints.toLocaleString('en-US') }}</span><span class="rank-badge"><img :src="rankImage(player.overallRank)" alt="" /><span>{{ player.overallRank }}</span></span>
+        <router-link v-for="(player, index) in pageData.players" :key="player.username" class="leaderboard-row leaderboard-row--player" :aria-label="`${(pageData.page - 1) * 25 + index + 1}. ${player.username}: ${player.selectedPoints} ${community === 'voltaic' ? 'energy' : 'points'}, overall rank ${player.overallRank}`" :to="{ path: '/profile/' + encodeURIComponent(player.username) + '/' + community, query: { benchmark: selectedSet.id, level } }">
+          <span>{{ (pageData.page - 1) * 25 + index + 1 }}</span><span class="player-name">{{ player.username }}</span><span class="points">{{ player.selectedPoints.toLocaleString('en-US') }}</span><span class="rank-badge"><img :src="rankImage(player.overallRank)" alt="" /><span>{{ player.overallRank }}</span></span>
         </router-link>
         <p v-if="!pageData.total" class="status-panel">No standings yet.</p>
         <div v-else class="pagination">
-          <span>{{ (page - 1) * 25 + 1 }}–{{ Math.min(page * 25, pageData.total) }} of {{ pageData.total.toLocaleString('en-US') }}</span>
+          <span>{{ (pageData.page - 1) * 25 + 1 }}–{{ Math.min(pageData.page * 25, pageData.total) }} of {{ pageData.total.toLocaleString('en-US') }}</span>
           <div class="pagination-controls">
             <button type="button" class="page-button" :disabled="page <= 1" aria-label="Previous page" @click="changePage(page - 1)"><chevron-icon direction="left" class="h-4 w-4" /></button><span class="page-button active">{{ page }} / {{ pageData.pageCount }}</span><button type="button" class="page-button" :disabled="page >= pageData.pageCount" aria-label="Next page" @click="changePage(page + 1)"><chevron-icon direction="right" class="h-4 w-4" /></button>
             <input v-model.number="goToPageInput" class="page-input" type="number" min="1" :max="pageData.pageCount" aria-label="Go to page" @keydown.enter="goToPage" /><button type="button" class="page-button" @click="goToPage">Go</button>
@@ -41,7 +41,7 @@ import { takeInitialResponse } from '../helpers/initialData.js';
 export default {
   components: { BenchmarkControls },
   props: { community: String },
-  data() { return { sets: [], catalogLoading: false, loading: false, error: '', pageData: { players: [], total: 0, pageCount: 0 }, goToPageInput: null, requestVersion: 0, catalogVersion: 0 }; },
+  data() { return { sets: [], catalogLoading: false, loading: false, error: '', pageData: { players: [], total: 0, pageCount: 0, page: 1 }, loadedKey: '', goToPageInput: null, requestVersion: 0, catalogVersion: 0 }; },
   computed: {
     levels() { return this.community === 'voltaic' ? ['Novice', 'Intermediate', 'Advanced'] : ['Easy', 'Medium', 'Hard']; },
     levelLabel() { return this.levels.find(label => label.toLowerCase() === this.$route.query.level) || this.levels[0]; },
@@ -55,6 +55,8 @@ export default {
     view() { return this.result?.rankingAvailable === false || this.$route.query.view === 'scenarios' ? 'scenarios' : 'overall'; },
     sort() { return this.selectedSet?.rankingOptions?.some(option => option.value === this.$route.query.sort) ? this.$route.query.sort : 'overall'; },
     page() { const value = Number(this.$route.query.page || 1); return Number.isSafeInteger(value) && value > 0 ? value : 1; },
+    // A page change keeps the current rows on screen, dimmed, until the next page arrives.
+    standingsKey() { return this.selectedSet ? `${this.community}:${this.selectedSet.id}:${this.level}:${this.view}:${this.sort}` : ''; },
     selectionKey() { return this.selectedSet ? `${this.community}:${this.selectedSet.id}:${this.level}:${this.view}:${this.sort}:${this.page}` : ''; },
     scenarioGroups() {
       const groups = [];
@@ -94,7 +96,7 @@ export default {
       if (!this.selectedSet || this.view !== 'overall') return;
       const initial = takeInitialResponse(this, `/api/leaderboards/${this.community === 'voltaic' ? 'vt' : 'ra'}/${this.selectedSet.id}/${this.level}/page?page=${this.page}&sort=${this.sort}`);
       if (initial) {
-        if (initial.status === 200) this.pageData = initial.body;
+        if (initial.status === 200) { this.pageData = initial.body; this.loadedKey = this.standingsKey; }
         else this.error = initial.status === 503 ? 'Standings are being collected.' : 'Could not load standings. Try again later.';
         return;
       }
@@ -106,7 +108,7 @@ export default {
       try {
         const result = await fetchData(`/api/leaderboards/${prefix}/${set}/${this.level}/page?page=${this.page}&sort=${this.sort}`);
         if (result.mode !== mode || result.benchmarkSet !== set || !Array.isArray(result.players)) throw new Error('Invalid leaderboard response');
-        if (version === this.requestVersion) this.pageData = result;
+        if (version === this.requestVersion) { this.pageData = result; this.loadedKey = this.standingsKey; }
       } catch (error) {
         if (version === this.requestVersion) this.error = error.status === 503 ? 'Standings are being collected.' : 'Could not load standings. Try again later.';
       } finally { if (version === this.requestVersion) this.loading = false; }
@@ -124,6 +126,7 @@ export default {
 .standings-controls :deep(.level-control) { flex: 1 1 150px; }
 .standings-view { flex: 1 1 190px; }
 .standings-ranking { flex: 1 1 160px; }
+.leaderboard-panel.is-updating .leaderboard-row--player { opacity: .5; transition: opacity .15s; }
 .standings-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
 .standings-heading h2 { font-size: 1.05rem; font-weight: 600; }
 .standings-heading time { color: var(--muted); font-size: .75rem; }

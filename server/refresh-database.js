@@ -160,6 +160,8 @@ function scorePlayers(db, mode, benchmarks, onProgress) {
     throw error;
   }
   for (const [name, column] of Object.entries(sortColumnsFor(mode))) db.exec(`CREATE INDEX IF NOT EXISTS players_${name} ON players (${column} DESC, username)`);
+  // Profile lookups use this to correct the letter case of a typed username.
+  db.exec('CREATE INDEX IF NOT EXISTS players_username_nocase ON players (username COLLATE NOCASE)');
   db.prepare("INSERT OR REPLACE INTO metadata VALUES ('generatedAt', ?)").run(new Date().toISOString());
   db.prepare("INSERT OR REPLACE INTO metadata VALUES ('mode', ?)").run(mode);
   db.prepare("INSERT OR REPLACE INTO metadata VALUES ('categories', ?)").run(JSON.stringify(season ? season.subcategories.map(category => category.name) : mode.startsWith("ra-") ? raCategories : vtCategories));
