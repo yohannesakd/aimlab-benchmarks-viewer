@@ -10,7 +10,9 @@
         </p>
         <p>
           Player data comes from Aimlabs. Benchmark definitions and rank
-          requirements come from Voltaic and Revosect.
+          requirements come from Voltaic and Revosect. When Aimlabs does not
+          provide full statistics, profile benchmark results use the best scores
+          from the leaderboards that this site collects each day.
         </p>
         <p>
           PostHog collects usage, performance, errors, and session recordings.

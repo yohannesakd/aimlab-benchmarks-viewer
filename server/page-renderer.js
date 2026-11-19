@@ -50,7 +50,8 @@ export async function loadPageData(page, apiOrigin, read = path => fetchApi(apiO
     const path = `/api/tasks/${encodeURIComponent(page.taskId)}`;
     await primary(path);
     if (bootstrap.status !== 200) return bootstrap;
-    const params = new URLSearchParams({ page: 0 });
+    const number = Number(page.query.page);
+    const params = new URLSearchParams({ page: Number.isSafeInteger(number) && number > 1 ? number - 1 : 0 });
     if (page.query.weapon) params.set('weapon', page.query.weapon);
     if (page.query.mode !== undefined) params.set('mode', page.query.mode);
     await load(`${path}/leaderboard?${params}`);

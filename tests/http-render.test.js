@@ -103,7 +103,7 @@ test('restricted profile SSR keeps public navigation and separates the legacy AP
     const benchmark = await fetch(origin + '/api/pages/public/profile/Restricted/voltaic');
     assert.equal(benchmark.status, 200);
     const benchmarkHtml = await benchmark.text();
-    assert.match(benchmarkHtml, /Benchmark results require full score statistics/);
+    assert.match(benchmarkHtml, /Benchmark results are unavailable right now/);
     assert.ok(!benchmarkHtml.includes('Overall rank'));
     assert.equal((await fetch(origin + '/api/profiles/Restricted')).status, 502);
     assert.equal((await fetch(origin + '/api/profiles/Restricted?publicSummary=1')).status, 200);

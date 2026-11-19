@@ -50,7 +50,7 @@ test('restricted profiles show public summaries and activity without fabricated 
   await expect(page.locator('.profile-task-grid')).toContainText('200');
   await page.getByRole('link', { name: 'Voltaic', exact: true }).click();
   await expect(page.locator('.bench-medal')).toHaveCount(0);
-  await expect(page.getByText('Benchmark results require full score statistics.')).toBeVisible();
+  await expect(page.getByText('Benchmark results are unavailable right now.')).toBeVisible();
   await page.getByRole('link', { name: 'Revosect', exact: true }).click();
   await expect(page.locator('.bench-medal')).toHaveCount(0);
   await page.getByRole('link', { name: 'Overview', exact: true }).click();
@@ -97,12 +97,12 @@ test('profile reentry refreshes the snapshot and a failed refresh retains dated 
   await expect(page.locator('.profile-task-grid')).toContainText('1 plays');
   await page.getByRole('link', { name: 'Home', exact: true }).click();
   await page.getByRole('link', { name: 'Profile', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Aimlab username · case sensitive' }).fill('Fixture');
+  await page.getByRole('textbox', { name: 'Aimlab username' }).fill('Fixture');
   await page.getByRole('link', { name: 'View profile' }).click();
   await expect(page.locator('.profile-task-grid')).toContainText('2 plays');
   await page.getByRole('link', { name: 'Home', exact: true }).click();
   await page.getByRole('link', { name: 'Profile', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Aimlab username · case sensitive' }).fill('Fixture');
+  await page.getByRole('textbox', { name: 'Aimlab username' }).fill('Fixture');
   await page.getByRole('link', { name: 'View profile' }).click();
   await expect(page.getByRole('alert')).toContainText('Could not refresh. Showing the profile fetched at');
   await expect(page.locator('.profile-task-grid')).toContainText('2 plays');
@@ -123,7 +123,7 @@ test('a late profile response cannot overwrite a newer player', async ({ page })
   await received;
   await page.getByRole('link', { name: 'Home', exact: true }).click();
   await page.getByRole('link', { name: 'Profile', exact: true }).click();
-  await page.getByRole('textbox', { name: 'Aimlab username · case sensitive' }).fill('Fixture');
+  await page.getByRole('textbox', { name: 'Aimlab username' }).fill('Fixture');
   await page.getByRole('link', { name: 'View profile' }).click();
   await expect(page.locator('.profile-username')).toHaveText('Fixture');
   release();

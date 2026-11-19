@@ -24,6 +24,9 @@ async function databaseFor(mode) {
         total: database.prepare('SELECT count(*) AS total FROM players').get().total,
         generatedAt: metadata.generatedAt,
         categories: JSON.parse(metadata.categories),
+        // Databases built before this index existed are skipped by name lookups, because a full scan blocks the server.
+        nameLookup: database.prepare("SELECT 1 FROM pragma_index_list('players') WHERE name = 'players_username_nocase'").get()
+          ? database.prepare('SELECT username FROM players WHERE username = ? COLLATE NOCASE LIMIT 1') : null,
       };
     } catch (error) { database.close(); throw error; }
     cached?.database.close();
@@ -93,4 +96,34 @@ export async function handleLeaderboardRequest(request, response, pathname, sear
     response.end(JSON.stringify({ error: status === 503 ? "Leaderboard is being prepared" : status === 400 ? error.message : "Leaderboard request failed" }));
   }
   return true;
+}
+
+// Best collected leaderboard score for each benchmark task, across every published database, for one player.
+export async function getPlayerLeaderboardScores(userId) {
+  const best = new Map();
+  let collectedAt = null;
+  for (const mode of Object.keys(benchmarkSets)) {
+    let opened;
+    try { opened = await databaseFor(mode); }
+    catch (error) { if (error.code === 'ENOENT') continue; throw error; }
+    if (!collectedAt || opened.generatedAt < collectedAt) collectedAt = opened.generatedAt;
+    for (const row of opened.database.prepare('SELECT scenario, score FROM scores WHERE user_id = ?').all(userId)) {
+      const bench = benchmarkSets[mode][row.scenario];
+      const key = `${bench.id}\0${bench.weapon}`;
+      if (!(best.get(key)?.score >= row.score)) best.set(key, { id: bench.id, name: bench.name, weapon: bench.weapon, score: row.score });
+    }
+  }
+  return { collectedAt, scores: [...best.values()] };
+}
+
+// The collected spelling of a username, ignoring letter case, or null when no indexed database lists it.
+export async function findCollectedUsername(name) {
+  for (const mode of Object.keys(benchmarkSets)) {
+    let opened;
+    try { opened = await databaseFor(mode); }
+    catch (error) { if (error.code === 'ENOENT') continue; throw error; }
+    const row = opened.nameLookup?.get(name);
+    if (row) return row.username;
+  }
+  return null;
 }

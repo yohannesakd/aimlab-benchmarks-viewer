@@ -32,6 +32,7 @@
 <style scoped>
 .profile-tasks-header { flex-wrap: wrap; }
 .task-filter { width: min(100%, 290px); }
+@media (max-width: 620px) { .task-filter { width: 100%; } }
 .profile-task-grid { padding: 18px; }
 .player-task-card { display: flex; flex-direction: column; padding: 0; }
 .player-task-name { display: flex; align-items: center; min-height: 44px; padding: 14px 16px 0; }

@@ -34,12 +34,15 @@
         </dl>
       </section>
       <p v-if="detailsError" class="result-meta profile-details-error" role="status">Aimlabs activity is unavailable right now.</p>
-      <p v-if="statisticsRestricted" class="panel status-panel" role="status">Aimlabs is not providing full score statistics. Public task summaries and activity remain available. Totals and benchmark results are unavailable.</p>
-      <nav class="tab-list" aria-label="Profile sections">
+      <p v-if="statisticsRestricted" class="panel status-panel" role="status">Aimlabs is not providing full score statistics. Public task summaries and activity remain available. Totals are unavailable.</p>
+      <nav class="tab-list profile-tabs" aria-label="Profile sections">
         <router-link v-for="(tab, key) in tabs" :key="tab" class="tab-link" :to="{ name: tab }">{{ key }}</router-link>
       </nav>
-      <p v-if="statisticsRestricted && ['vt-benches', 'ra-benches'].includes($route.name)" class="panel status-panel">Benchmark results require full score statistics. You can still browse the <router-link class="text-link" to="/benchmarks">benchmark catalog</router-link> and <router-link class="text-link" to="/leaderboards">leaderboards</router-link>.</p>
-      <router-view v-else class="profile-content panel" :isLoading="isLoading"></router-view>
+      <template v-if="statisticsRestricted && ['vt-benches', 'ra-benches'].includes($route.name)">
+        <p v-if="!benchmarkSets.length" class="panel status-panel">Benchmark results are unavailable right now. You can still browse the <router-link class="text-link" to="/benchmarks">benchmark catalog</router-link> and <router-link class="text-link" to="/leaderboards">leaderboards</router-link>.</p>
+        <p v-else class="result-meta benchmark-source">Best scores from Aimlabs leaderboards collected {{ new Date(benchmarkScoresCollectedAt).toLocaleDateString('en-US', { dateStyle: 'medium' }) }}. Play counts and averages are unavailable.</p>
+      </template>
+      <router-view v-if="!statisticsRestricted || benchmarkSets.length || !['vt-benches', 'ra-benches'].includes($route.name)" class="profile-content panel" :isLoading="isLoading"></router-view>
     </template>
   </main>
 </template>
@@ -59,13 +62,14 @@
 .profile-stats dd { margin: 6px 0 0; font-size: .94rem; font-weight: 600; line-height: 1.3; }
 .profile-stats small { display: block; margin-top: 3px; font-size: .68rem; font-weight: 400; }
 .profile-details-error { margin: -6px 0 16px; }
+.benchmark-source { margin: -4px 0 12px; }
 @media (max-width: 1050px) {
   .profile-summary { grid-template-columns: 1fr; }
   .profile-identity { border-right: 0; border-bottom: 1px solid var(--line); }
 }
-@media (max-width: 800px) { .profile-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } .profile-stats > div:nth-child(-n+3) { border-bottom: 1px solid var(--line); } }
-@media (max-width: 620px) { .profile-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-stats > div { padding: 12px 14px; border-bottom: 1px solid var(--line); } .profile-stats > div:nth-last-child(-n+2) { border-bottom: 0; } }
-@media (max-width: 620px) { .profile-heading { align-items: start; flex-direction: column; } }
+@media (max-width: 800px) { .profile-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } .profile-stats > div:nth-child(-n+3) { border-bottom: 1px solid var(--line); } .profile-stats > div:nth-child(3n) { border-right: 0; } }
+@media (max-width: 620px) { .profile-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .profile-stats > div { padding: 12px 14px; border-bottom: 1px solid var(--line); } .profile-stats > div:nth-last-child(-n+2) { border-bottom: 0; } .profile-stats > div:nth-child(3n) { border-right: 1px solid var(--line); } .profile-stats > div:nth-child(2n) { border-right: 0; } }
+@media (max-width: 620px) { .profile-heading { align-items: start; flex-direction: column; } .profile-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; } .profile-tabs .tab-link { justify-content: center; padding-inline: 4px; } }
 </style>
 
 <script>
@@ -101,7 +105,7 @@ export default {
   computed: {
     avatarUrl() { return `/api/profiles/${encodeURIComponent(this.username)}/avatar`; },
     savedProfile() { return savedProfile.value; },
-    ...mapState(usePlayerStore, ['currentPlayerInfo', 'tasksPlayed', 'totalPlays', 'profileFetchedAt', 'statisticsRestricted']),
+    ...mapState(usePlayerStore, ['currentPlayerInfo', 'tasksPlayed', 'totalPlays', 'profileFetchedAt', 'statisticsRestricted', 'benchmarkSets', 'benchmarkScoresCollectedAt']),
   },
   watch: {
     username: { immediate: true, handler(username) {
