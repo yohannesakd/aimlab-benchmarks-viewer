@@ -30,6 +30,7 @@ test("a task with no default weapon still has a current-API leaderboard", async 
   const calls = [];
   globalThis.fetch = async (url, options) => {
     assert.equal(url, "https://api.aimlab.gg/graphql");
+    assert.equal(options.headers["User-Agent"], "AimlabBenchmarksViewer/1.0");
     const body = JSON.parse(options.body);
     calls.push(body);
     if (body.query.includes("GetTask(")) return response({ aimlab: { task: { id: "fixture-no-weapon", weapon_id: null } } });

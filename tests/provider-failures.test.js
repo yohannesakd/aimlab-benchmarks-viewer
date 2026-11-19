@@ -84,3 +84,11 @@ test('legacy GraphQL errors sent with 4xx statuses keep their codes and classes'
   await assert.rejects(queryAimlabs('query RemovedProbe { aimlabProfile { latestPlay } }', {}, 'Unavailable'),
     error => error.permanent && error.providerMissingField === 'AimlabProfile.latestPlay');
 });
+
+test('a timeout while reading a 200 body stays a retryable timeout', async t => {
+  t.mock.method(globalThis, 'fetch', async () => new Response(new ReadableStream({
+    pull() { throw new DOMException('Timed out', 'TimeoutError'); },
+  })));
+  await assert.rejects(queryAimlabs('query SlowBody { aimlabProfile { username } }', {}, 'Unavailable'),
+    error => error.name === 'TimeoutError' && error.status === 503);
+});

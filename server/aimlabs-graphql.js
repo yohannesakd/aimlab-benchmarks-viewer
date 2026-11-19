@@ -129,7 +129,8 @@ async function executeQuery(provider, operation, query, variables, missingDataMe
     }
     const serverFailure = [500, 502, 503, 504].includes(response.status);
     // The legacy provider reports GraphQL errors, including denials, with 4xx statuses.
-    const payload = serverFailure ? null : await readBoundedJson(response).catch(() => null);
+    // An unreadable 4xx body is still a provider failure; read errors on a 2xx body keep their identity.
+    const payload = serverFailure ? null : response.ok ? await readBoundedJson(response) : await readBoundedJson(response).catch(() => null);
     if (!payload || (!response.ok && !payload.errors?.length)) {
       const error = new Error('Aimlabs provider request failed');
       error.providerStatus = response.status;
