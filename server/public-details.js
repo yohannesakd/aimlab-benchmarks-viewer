@@ -197,8 +197,8 @@ export async function handlePublicDetailsRequest(request, response, pathname) {
     send(response, 200, result, { "Cache-Control": "public, max-age=60" });
   } catch (error) {
     const status = error.status || 502;
-    if (status === 502) console.error("Public details provider failure", error);
-    send(response, status, { error: status === 502 ? "Details are unavailable. Try again." : error.message },
+    if (status === 502 && !error.providerCooldown) console.error("Public details provider failure", error);
+    send(response, status, { error: status === 502 ? error.publicMessage || "Details are unavailable. Try again." : error.message },
       error.retryAfter ? { "Retry-After": String(error.retryAfter) } : {});
   }
   return true;

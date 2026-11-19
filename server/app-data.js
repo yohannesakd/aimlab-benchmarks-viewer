@@ -216,8 +216,8 @@ export async function handleAppDataRequest(request, response, pathname, params) 
     headers["Cache-Control"] = "public, max-age=30";
   } catch (error) {
     status = error instanceof URIError ? 400 : error.status || 502;
-    if (status === 502) console.error("App data provider failure", error);
-    body = { error: status === 502 ? "Aimlabs data is unavailable. Try again shortly." : error.message };
+    if (status === 502 && !error.providerCooldown) console.error("App data provider failure", error);
+    body = { error: status === 502 ? error.publicMessage || "Aimlabs data is unavailable. Try again shortly." : error.message };
     if (error.retryAfter) headers["Retry-After"] = String(error.retryAfter);
   }
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8", ...headers });

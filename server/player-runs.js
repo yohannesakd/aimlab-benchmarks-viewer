@@ -130,8 +130,8 @@ export async function handlePlayerRunsRequest(request, response, pathname, searc
     send(response, 200, result, { "Cache-Control": "public, max-age=30" });
   } catch (error) {
     const status = error.status || 502;
-    if (status === 502) console.error("Run history provider failure", error);
-    send(response, status, { error: status === 502 ? "Run history is unavailable. Try again." : error.message },
+    if (status === 502 && !error.providerCooldown) console.error("Run history provider failure", error);
+    send(response, status, { error: status === 502 ? error.publicMessage || "Run history is unavailable. Try again." : error.message },
       error.retryAfter ? { "Retry-After": String(error.retryAfter) } : {});
   }
   return true;
