@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { calculateProfile, getTaskLeaderboard, getRunDetails } from "../server/app-data.js";
 
-function response(trainer) {
-  return new Response(JSON.stringify({ data: { Trainer: trainer } }));
+function response(data) {
+  return new Response(JSON.stringify({ data }));
 }
 
 test("the backend returns weighted profile totals and isolated benchmark results", () => {
@@ -29,7 +29,8 @@ test("a task with no default weapon still has a current-API leaderboard", async 
   const originalFetch = globalThis.fetch;
   const calls = [];
   globalThis.fetch = async (url, options) => {
-    assert.equal(url, "https://api.aimlabs.com/graphql");
+    assert.equal(url, "https://api.aimlab.gg/graphql");
+    assert.equal(options.headers["User-Agent"], "AimlabBenchmarksViewer/1.0");
     const body = JSON.parse(options.body);
     calls.push(body);
     if (body.query.includes("GetTask(")) return response({ aimlab: { task: { id: "fixture-no-weapon", weapon_id: null } } });
@@ -217,7 +218,7 @@ test("a replay that Aimlabs cannot resolve falls back to the verified leaderboar
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (_url, options) => {
     const { query, variables } = JSON.parse(options.body);
-    if (query.includes("publishedReplay")) return new Response(JSON.stringify({ data: { Trainer: { publishedReplay: null } }, errors: [{ path: ["publishedReplay", "publisher"], extensions: { code: "INTERNAL_SERVER_ERROR" } }] }));
+    if (query.includes("publishedReplay")) return new Response(JSON.stringify({ data: { publishedReplay: null }, errors: [{ path: ["publishedReplay", "publisher"], extensions: { code: "INTERNAL_SERVER_ERROR" } }] }));
     if (variables.leaderboardInput.playId === "broken-publisher") return response({ aimlab: { leaderboard: { metadata: {}, data: [{ task_id: "fixture-broken-task", username: "FixturePlayer", score: 70, play_id: "broken-publisher", accuracy: 90 }] } } });
     return response({ aimlab: { leaderboard: { metadata: {}, data: [] } } });
   };

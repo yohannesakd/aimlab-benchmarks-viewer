@@ -142,9 +142,9 @@ export function getRunDetails(taskId, username, playId, weapon, score, mode = pl
     }
     let replay;
     try {
-      const trainer = await queryAimlabs(`query RunDetails($playId: ID!) { Trainer { publishedReplay(replayId: $playId) {
+      const trainer = await queryAimlabs(`query RunDetails($playId: ID!) { publishedReplay(replayId: $playId) {
         publisher { username } play { taskSlug ${runFields} }
-      } } }`, { playId }, "Run details failed");
+      } }`, { playId }, "Run details failed");
       replay = trainer.publishedReplay;
     } catch (error) {
       // Aimlabs fails to resolve some replay publishers; the leaderboard row below still verifies the run.
@@ -216,8 +216,8 @@ export async function handleAppDataRequest(request, response, pathname, params) 
     headers["Cache-Control"] = "public, max-age=30";
   } catch (error) {
     status = error instanceof URIError ? 400 : error.status || 502;
-    if (status === 502) console.error("App data provider failure", error);
-    body = { error: status === 502 ? "Aimlabs data is unavailable. Try again shortly." : error.message };
+    if (status === 502 && !error.providerCooldown) console.error("App data provider failure", error);
+    body = { error: status === 502 ? error.publicMessage || "Aimlabs data is unavailable. Try again shortly." : error.message };
     if (error.retryAfter) headers["Retry-After"] = String(error.retryAfter);
   }
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8", ...headers });

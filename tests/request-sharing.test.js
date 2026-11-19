@@ -4,7 +4,7 @@ import { getPublicProfileDetails } from '../server/public-details.js';
 import { getPlayerTaskRuns } from '../server/player-runs.js';
 import { queryAimlabs } from '../server/aimlabs-graphql.js';
 
-const response = trainer => new Response(JSON.stringify({ data: { Trainer: trainer } }));
+const response = (data, query) => new Response(JSON.stringify({ data: query.includes('PlayerTaskRuns') ? { Trainer: data } : data }));
 
 test('identical public details and history share provider reads while distinct identities stay separate', async () => {
   const originalFetch = globalThis.fetch;
@@ -15,7 +15,7 @@ test('identical public details and history share provider reads while distinct i
     await new Promise(resolve => setTimeout(resolve, 10));
     return response({ aimlabProfile: { username: variables.username,
       ...(query.includes('latestPlay') ? { latestPlay: { totalCount: 0, edges: [], pageInfo: { endCursor: null, hasNextPage: false } } } : {}),
-    } });
+    } }, query);
   };
   try {
     const details = await Promise.all(Array.from({ length: 5 }, () => getPublicProfileDetails('SharingFixture')));
@@ -34,7 +34,7 @@ test('failed shared reads clear pending work, preserve safe provider codes, and 
   globalThis.fetch = async () => {
     calls++;
     if (calls === 1) return new Response(JSON.stringify({ errors: [{ message: 'private payload', extensions: { code: 'UNAUTHORIZED' } }, { extensions: { code: 'private unsafe text' } }] }));
-    return response({ aimlabProfile: { username: 'RetryFixture' } });
+    return response({ aimlabProfile: { username: 'RetryFixture' } }, 'PublicPlayerDetails');
   };
   try {
     const results = await Promise.allSettled(Array.from({ length: 5 }, () => getPublicProfileDetails('RetryFixture')));

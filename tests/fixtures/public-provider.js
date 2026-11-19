@@ -7,8 +7,9 @@ globalThis.fetch = async (url, options) => {
   if (String(url) === 'https://marketplace-api-public-prod.s3.amazonaws.com/avatar_asset/profile_image/fixture.png') {
     return new Response(avatar, { headers: { 'Content-Type': 'application/octet-stream' } });
   }
-  if (url !== 'https://api.aimlabs.com/graphql') throw new Error('Unexpected fixture provider');
   const { query, variables } = JSON.parse(options.body);
+  const runHistory = query.includes('PlayerTaskRuns');
+  if (url !== (runHistory ? 'https://api.aimlabs.com/graphql' : 'https://api.aimlab.gg/graphql')) throw new Error('Unexpected fixture provider');
   let trainer;
   if (query.includes('GetProfileAggregates') && variables.where.user_id._eq === 'restricted-player') {
     return new Response(JSON.stringify({ errors: [{ extensions: { code: 'UNAUTHENTICATED' } }] }));
@@ -22,5 +23,5 @@ globalThis.fetch = async (url, options) => {
   else if (query.includes('publishedReplay')) trainer = { publishedReplay: { publisher: { username: 'Fixture' }, play: { id: variables.playId, taskSlug: 'fixture-task', score: 200, convertedMode: 0, manifest: { weaponId: '9mm', performanceData: {} } } } };
   else if (query.includes('PlayerTaskRuns')) trainer = { aimlabProfile: { username: variables.username, latestPlay: { totalCount: 0, edges: [], pageInfo: { endCursor: null, hasNextPage: false } } } };
   else throw new Error('Unexpected fixture query');
-  return new Response(JSON.stringify({ data: { Trainer: trainer } }));
+  return new Response(JSON.stringify({ data: runHistory ? { Trainer: trainer } : trainer }));
 };

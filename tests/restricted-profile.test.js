@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { getProfile } from '../server/app-data.js';
 
-const response = trainer => new Response(JSON.stringify({ data: { Trainer: trainer } }));
+const response = data => new Response(JSON.stringify({ data }));
 
 test('a public-summary timeout retries once and returns the validated profile', async t => {
   let summaryCalls = 0;

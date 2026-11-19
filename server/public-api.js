@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { handleLeaderboardRequest } from "./leaderboard-db.js";
 import { handlePlayerRunsRequest } from "./player-runs.js";
 import { handleAppDataRequest } from "./app-data.js";
+import { providerHealth } from "./aimlabs-graphql.js";
 import { handlePublicDetailsRequest } from "./public-details.js";
 import { handlePlayerAvatarRequest } from './player-avatar.js';
 import { handleTelemetryConfig, instrumentRequest, installTelemetryShutdown } from './telemetry.js';
@@ -18,6 +19,12 @@ const server = createServer(instrumentRequest(async (request, response) => {
     url = new URL(request.url, "http://localhost");
   } catch {
     response.writeHead(400).end();
+    return;
+  }
+  if (url.pathname === "/healthz/provider") {
+    const health = providerHealth();
+    response.writeHead(health.state === 'unavailable' ? 503 : 200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" })
+      .end(JSON.stringify(health));
     return;
   }
   if (request.method === "GET" && url.pathname === "/healthz") {

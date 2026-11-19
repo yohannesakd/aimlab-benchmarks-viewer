@@ -6,7 +6,6 @@ const maxCacheEntries = 100;
 
 const profileQuery = `
   query PublicPlayerDetails($username: String!) {
-    Trainer {
       aimlabProfile(username: $username) {
         username imageUrl
         achievementMetrics(slugs: ["days-since-account-creation", "streak-days"]) { slug value }
@@ -15,32 +14,27 @@ const profileQuery = `
           highestStreak { streakCount }
         }
       }
-    }
   }
 `;
 
 const taskQuery = `
   query PublicTaskDetails($taskId: String!) {
-    Trainer {
       aimlab {
         task(slug: $taskId) {
           id style duration version weapon_id created_at updated_at
           asset { id currentVersion }
         }
       }
-    }
   }
 `;
 
 const activityQuery = `
   query PublicPlayerActivity($username: String!) {
-    Trainer {
       aimlabProfile(username: $username) {
         username
         activity(interval: DAILY) { ranges { startDate endDate } }
         learningStats { stars completedPlans }
       }
-    }
   }
 `;
 
@@ -197,8 +191,8 @@ export async function handlePublicDetailsRequest(request, response, pathname) {
     send(response, 200, result, { "Cache-Control": "public, max-age=60" });
   } catch (error) {
     const status = error.status || 502;
-    if (status === 502) console.error("Public details provider failure", error);
-    send(response, status, { error: status === 502 ? "Details are unavailable. Try again." : error.message },
+    if (status === 502 && !error.providerCooldown) console.error("Public details provider failure", error);
+    send(response, status, { error: status === 502 ? error.publicMessage || "Details are unavailable. Try again." : error.message },
       error.retryAfter ? { "Retry-After": String(error.retryAfter) } : {});
   }
   return true;
