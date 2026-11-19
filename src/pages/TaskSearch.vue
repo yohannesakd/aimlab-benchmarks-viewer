@@ -48,25 +48,28 @@ export default {
       providerResultLimit: 10,
     };
   },
+  computed: { urlQuery() { return typeof this.$route.query.q === 'string' ? this.$route.query.q.trim() : ''; } },
   // The search text is in the URL, so Back from a task returns to the same results.
-  watch: { '$route.query.q': { immediate: true, handler(query) {
-    const name = typeof query === 'string' ? query.trim() : '';
-    this.taskNameInput = name;
-    if (name) this.searchTask(name);
-    else { this.requestVersion++; this.taskList = []; this.searchStatus = ''; }
-  } } },
+  // The first search starts after mounting, so the server HTML and the hydrated page match.
+  watch: { urlQuery: 'applyQuery' },
+  created() { this.taskNameInput = this.urlQuery; },
+  mounted() { if (this.urlQuery) this.searchTask(this.urlQuery); },
   beforeUnmount() {
     this.requestVersion++;
   },
   methods: {
+    applyQuery(name) {
+      this.taskNameInput = name;
+      if (name) this.searchTask(name);
+      else { this.requestVersion++; this.taskList = []; this.searchStatus = ''; }
+    },
     submitSearch() {
       const name = this.taskNameInput;
       if (!name) return;
-      if (name === this.$route.query.q) this.searchTask(name);
+      if (name === this.urlQuery) this.searchTask(name);
       else this.$router.push({ query: { q: name } });
     },
     async searchTask(name) {
-      if (import.meta.env.SSR) return;
       const version = ++this.requestVersion;
       this.taskList = [];
       this.searchStatus = "Searching...";

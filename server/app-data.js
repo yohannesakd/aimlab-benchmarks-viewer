@@ -19,14 +19,22 @@ function notFound(message) {
 export function getProfileLookup(username) {
   return cached(`lookup:${username}`, async () => {
     const { aimlabProfile: profile } = await queryAimlabs(GET_USER_INFO, { username }, "Profile lookup failed");
-    if (!profile) {
-      // Aimlabs matches the exact letter case, so a collected spelling of the same name gets one more lookup.
-      const spelled = await findCollectedUsername(username);
-      return spelled && spelled !== username ? getProfileLookup(spelled) : notFound("Player not found");
-    }
+    if (!profile) return notFound("Player not found");
     if (typeof profile.username !== 'string' || profile.username.toLowerCase() !== username.toLowerCase() || !profile.user?.id) throw new Error("Incomplete player identity");
     return { username: profile.username, id: profile.user.id, rank: profile.ranking?.rank?.displayName || "Unranked", skill: profile.ranking?.skill ?? 0 };
   });
+}
+
+// Profile search: Aimlabs matches the exact letter case, so a collected spelling of the same name gets one more lookup.
+// Profile pages keep exact lookups, because the page identity is the spelling in its URL.
+export async function searchProfile(username) {
+  try { return await getProfileLookup(username); }
+  catch (error) {
+    if (error.status !== 404) throw error;
+    const spelled = await findCollectedUsername(username);
+    if (!spelled || spelled === username) throw error;
+    return getProfileLookup(spelled);
+  }
 }
 
 /** @returns {import('./api-contracts.js').ProfileSnapshot} */
@@ -221,7 +229,7 @@ export async function handleAppDataRequest(request, response, pathname, params) 
     if (task && ["/leaderboard", "/run"].includes(task[2]) && (!Number.isInteger(mode) || mode < 0 || mode > 2147483647)) throw new URIError("Invalid task mode");
     if (catalog) {
       body = getBenchmarkCatalog(id);
-    } else if (profile) body = profile[2] ? await getProfileLookup(id) : await getProfile(id, { publicSummary: params.get('publicSummary') === '1' });
+    } else if (profile) body = profile[2] ? await searchProfile(id) : await getProfile(id, { publicSummary: params.get('publicSummary') === '1' });
     else if (id === "search" && !task[2]) {
       const name = params.get("name");
       if (invalid(name, 100)) throw new URIError("Invalid task search");

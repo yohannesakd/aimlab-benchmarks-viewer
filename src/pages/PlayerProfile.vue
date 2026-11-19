@@ -40,7 +40,7 @@
       </nav>
       <template v-if="statisticsRestricted && ['vt-benches', 'ra-benches'].includes($route.name)">
         <p v-if="!benchmarkSets.length" class="panel status-panel">Benchmark results are unavailable right now. You can still browse the <router-link class="text-link" to="/benchmarks">benchmark catalog</router-link> and <router-link class="text-link" to="/leaderboards">leaderboards</router-link>.</p>
-        <p v-else class="result-meta benchmark-source">Best scores from Aimlabs leaderboards collected {{ new Date(benchmarkScoresCollectedAt).toLocaleDateString('en-US', { dateStyle: 'medium' }) }}. Play counts and averages are unavailable.</p>
+        <p v-else class="result-meta benchmark-source">Best scores from Aimlabs leaderboards collected {{ $formatDate(benchmarkScoresCollectedAt, { month: 'short', day: 'numeric', year: 'numeric' }) }}. Play counts and averages are unavailable.</p>
       </template>
       <router-view v-if="!statisticsRestricted || benchmarkSets.length || !['vt-benches', 'ra-benches'].includes($route.name)" class="profile-content panel" :isLoading="isLoading"></router-view>
     </template>
