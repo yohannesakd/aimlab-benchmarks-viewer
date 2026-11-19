@@ -80,7 +80,7 @@ export async function getPlayerTaskRuns(username, taskId, after = null) {
   const key = JSON.stringify([username, taskId, after]);
   return cached(key, async () => {
   const trainer = await queryAimlabs(query, { username, taskId, after, first: pageSize },
-    "Aimlabs did not return run history");
+    "Aimlabs did not return run history", { provider: 'trainer' });
   const profile = trainer.aimlabProfile;
   if (!profile) {
     const error = new Error("Player not found");

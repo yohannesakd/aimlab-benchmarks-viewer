@@ -1,6 +1,6 @@
 import { logTelemetry, withTelemetrySpan } from './telemetry.js';
 
-const endpoint = "https://api.aimlabs.com/graphql";
+const endpoints = { legacy: 'https://api.aimlab.gg/graphql', trainer: 'https://api.aimlabs.com/graphql' };
 export const providerTimeoutMs = 10_000;
 const maxConcurrentRequests = 4;
 const maxResponseBytes = 1_000_000;
@@ -9,30 +9,35 @@ const schemaCooldownMs = 5 * 60_000;
 export const providerChangedMessage = "Aimlabs no longer provides this data.";
 
 let activeRequests = 0;
-let retryAfter = 0;
-// Operations whose query the provider rejected as invalid; skipped until the time stored here.
-const unavailableUntil = new Map();
+const retryAfter = new Map();
+// Provider operations whose query was last rejected as invalid, with the time until they are tried again.
+const schemaFailures = new Map();
 const outcomes = { lastSuccessAt: null, lastFailure: null };
 
-export function providerHealth(now = Date.now()) {
-  const unavailable = [...unavailableUntil].filter(([, until]) => until > now).map(([operation]) => operation);
+export function providerHealth() {
+  const unavailable = [...schemaFailures.keys()];
   const { lastSuccessAt, lastFailure } = outcomes;
   const state = unavailable.length ? 'unavailable' : !lastSuccessAt && !lastFailure ? 'unknown'
     : lastFailure && (!lastSuccessAt || lastFailure.at > lastSuccessAt) ? 'degraded' : 'ok';
   return { state, unavailableOperations: unavailable, lastSuccessAt, lastFailure };
 }
 
+const identifier = '([A-Za-z_][A-Za-z0-9_]{0,63})';
+const missingFieldPatterns = [
+  new RegExp(`field '${identifier}' not found in type: '${identifier}'`),
+  new RegExp(`Cannot query field "${identifier}" on type "${identifier}"`),
+];
 const safeCode = code => typeof code === 'string' && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(code);
 const deniedCodes = ['UNAUTHORIZED', 'UNAUTHENTICATED', 'FORBIDDEN', 'access-denied', 'permission-error'];
 
 // Reduces provider errors to fixed classes and schema identifiers, so logs never carry free text.
 function classifyErrors(errors) {
   const codes = [...new Set(errors.map(item => item.extensions?.code).filter(safeCode))];
-  const missing = errors.map(item => String(item.message || '').match(/field '([A-Za-z_][A-Za-z0-9_]{0,63})' not found in type: '([A-Za-z_][A-Za-z0-9_]{0,63})'/))
-    .find(Boolean);
-  // Only query-shape errors count; variable errors come from user input and must not block an operation.
-  const schema = missing || errors.some(item => item.extensions?.code === 'validation-failed'
-    && String(item.extensions?.path || '').startsWith('$.selectionSet'));
+  const missing = errors.flatMap(item => missingFieldPatterns.map(pattern => String(item.message || '').match(pattern))).find(Boolean);
+  // Variable errors come from user input and must not block an operation.
+  // Query text is fixed in code, so a document validation error means the provider schema changed.
+  const schema = missing || errors.some(item => item.extensions?.code === 'GRAPHQL_VALIDATION_FAILED'
+    || (item.extensions?.code === 'validation-failed' && String(item.extensions?.path || '').startsWith('$.selectionSet')));
   return {
     codes,
     errorClass: schema ? 'schema' : codes.some(code => deniedCodes.includes(code)) ? 'denied' : 'other',
@@ -57,12 +62,14 @@ async function readBoundedJson(response) {
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
 
-export function queryAimlabs(query, variables, missingDataMessage) {
-  const operation = query.match(/\bquery\s+([A-Za-z][A-Za-z0-9_]{0,63})\b/)?.[1] || 'unnamed';
+/** Legacy queries return the root data; Trainer queries return the contents of `Trainer`. */
+export function queryAimlabs(query, variables, missingDataMessage, { provider = 'legacy' } = {}) {
+  const operation = `${provider}:${query.match(/\bquery\s+([A-Za-z][A-Za-z0-9_]{0,63})\b/)?.[1] || 'unnamed'}`;
   return withTelemetrySpan('aimlabs.query', async span => {
     span?.setAttribute('graphql.operation.name', operation);
     try {
-      const result = await executeQuery(operation, query, variables, missingDataMessage, span);
+      const result = await executeQuery(provider, operation, query, variables, missingDataMessage, span);
+      schemaFailures.delete(operation);
       outcomes.lastSuccessAt = new Date().toISOString();
       return result;
     } catch (error) {
@@ -85,14 +92,14 @@ function providerChangedError(missingDataMessage, details) {
   return error;
 }
 
-async function executeQuery(operation, query, variables, missingDataMessage, span) {
-  if (Date.now() < (unavailableUntil.get(operation) || 0)) {
+async function executeQuery(provider, operation, query, variables, missingDataMessage, span) {
+  if (Date.now() < (schemaFailures.get(operation) || 0)) {
     throw providerChangedError(missingDataMessage, { providerCooldown: true });
   }
-  if (Date.now() < retryAfter) {
+  if (Date.now() < (retryAfter.get(provider) || 0)) {
     const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
     error.status = 503;
-    error.retryAfter = Math.ceil((retryAfter - Date.now()) / 1000);
+    error.retryAfter = Math.ceil((retryAfter.get(provider) - Date.now()) / 1000);
     throw error;
   }
   if (activeRequests >= maxConcurrentRequests) {
@@ -103,42 +110,47 @@ async function executeQuery(operation, query, variables, missingDataMessage, spa
 
   activeRequests++;
   try {
-    const response = await fetch(endpoint, {
+    const response = await fetch(endpoints[provider], {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      // The legacy provider rejects requests without an application User-Agent; the collector sends the same one.
+      headers: { "Content-Type": "application/json", "User-Agent": "AimlabBenchmarksViewer/1.0" },
       body: JSON.stringify({ query, variables }),
       signal: AbortSignal.timeout(providerTimeoutMs),
     });
     span?.setAttribute('http.response.status_code', response.status);
     if (response.status === 429) {
       const seconds = retryDelaySeconds(response.headers.get("Retry-After"));
-      retryAfter = Math.max(retryAfter, Date.now() + seconds * 1000);
+      retryAfter.set(provider, Math.max(retryAfter.get(provider) || 0, Date.now() + seconds * 1000));
       const error = new Error("Aimlabs is rate limiting requests. Try again shortly.");
       error.status = 503;
       error.providerStatus = 429;
       error.retryAfter = seconds;
       throw error;
     }
-    if (!response.ok) {
+    const serverFailure = [500, 502, 503, 504].includes(response.status);
+    // The legacy provider reports GraphQL errors, including denials, with 4xx statuses.
+    const payload = serverFailure ? null : await readBoundedJson(response).catch(() => null);
+    if (!payload || (!response.ok && !payload.errors?.length)) {
       const error = new Error('Aimlabs provider request failed');
       error.providerStatus = response.status;
-      if ([500, 502, 503, 504].includes(response.status)) error.status = 503;
+      if (serverFailure) error.status = 503;
       throw error;
     }
-    const payload = await readBoundedJson(response);
-    if (payload.errors?.length || !payload.data?.Trainer) {
+    const data = provider === 'trainer' ? payload.data?.Trainer : payload.data;
+    if (payload.errors?.length || !data) {
       const { codes, errorClass, missingField } = classifyErrors(payload.errors || []);
       if (errorClass === 'schema') {
-        unavailableUntil.set(operation, Date.now() + schemaCooldownMs);
-        throw providerChangedError(missingDataMessage, { providerCodes: codes, providerMissingField: missingField });
+        schemaFailures.set(operation, Date.now() + schemaCooldownMs);
+        throw providerChangedError(missingDataMessage, { providerCodes: codes, providerMissingField: missingField, providerStatus: response.status });
       }
       const error = new Error(missingDataMessage);
       error.providerFailure = payload.errors?.length ? 'graphql_errors' : 'missing_data';
+      error.providerStatus = response.status;
       error.providerCodes = codes;
       error.providerErrorClass = payload.errors?.length ? errorClass : undefined;
       throw error;
     }
-    return payload.data.Trainer;
+    return data;
   } finally {
     activeRequests--;
   }

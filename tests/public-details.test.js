@@ -7,7 +7,7 @@ test("public profile details preserve zero and absence", async () => {
   globalThis.fetch = async (_url, options) => {
     const request = JSON.parse(options.body);
     assert.equal(request.variables.username, "FixtureProfileDetails");
-    return new Response(JSON.stringify({ data: { Trainer: { aimlabProfile: {
+    return new Response(JSON.stringify({ data: { ...{ aimlabProfile: {
       username: "FixtureProfileDetails", imageUrl: "https://example.com/avatar.png",
       privateToken: "secret",
       achievementMetrics: [
@@ -37,7 +37,7 @@ test("public scenario details keep task and asset versions distinct", async () =
   globalThis.fetch = async (_url, options) => {
     const request = JSON.parse(options.body);
     assert.equal(request.variables.taskId, "FixtureTaskDetails");
-    return new Response(JSON.stringify({ data: { Trainer: { aimlab: { task: {
+    return new Response(JSON.stringify({ data: { ...{ aimlab: { task: {
       id: "FixtureTaskDetails", name: "Fixture task", style: "Standard",
       duration: null, version: 3, weapon_id: "Fixture_Weapon", created_at: "2025-01-01T00:00:00Z",
       updated_at: "2026-01-01T00:00:00Z", asset: { id: "asset", currentVersion: "0.02" },
@@ -63,7 +63,7 @@ test("public activity counts unique active days across a month boundary", async 
   const lastMonthDay = new Date(firstThisMonth.getTime() - 86_400_000).toISOString().slice(0, 10);
   const firstDay = firstThisMonth.toISOString().slice(0, 10);
   const olderDay = new Date(Date.UTC(now.getUTCFullYear() - 2, now.getUTCMonth(), now.getUTCDate())).toISOString().slice(0, 10);
-  globalThis.fetch = async () => new Response(JSON.stringify({ data: { Trainer: {
+  globalThis.fetch = async () => new Response(JSON.stringify({ data: { ...{
     aimlabProfile: {
       username: "FixtureActivity",
       activity: { ranges: [
@@ -93,7 +93,7 @@ test('supplementary profile data does not recover without stable identity', asyn
   t.mock.method(globalThis, 'fetch', async (_url, options) => {
     if (failing) throw new DOMException('Timed out', 'TimeoutError');
     const { variables } = JSON.parse(options.body);
-    return new Response(JSON.stringify({ data: { Trainer: variables.username
+    return new Response(JSON.stringify({ data: { ...variables.username
       ? { aimlabProfile: { username: wrongIdentity ? 'OtherPlayer' : variables.username } }
       : { aimlab: { task: { id: variables.taskId } } } } }));
   });

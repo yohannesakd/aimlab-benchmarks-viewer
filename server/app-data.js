@@ -142,9 +142,9 @@ export function getRunDetails(taskId, username, playId, weapon, score, mode = pl
     }
     let replay;
     try {
-      const trainer = await queryAimlabs(`query RunDetails($playId: ID!) { Trainer { publishedReplay(replayId: $playId) {
+      const trainer = await queryAimlabs(`query RunDetails($playId: ID!) { publishedReplay(replayId: $playId) {
         publisher { username } play { taskSlug ${runFields} }
-      } } }`, { playId }, "Run details failed");
+      } }`, { playId }, "Run details failed");
       replay = trainer.publishedReplay;
     } catch (error) {
       // Aimlabs fails to resolve some replay publishers; the leaderboard row below still verifies the run.

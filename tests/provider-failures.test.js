@@ -41,7 +41,7 @@ test('a provider schema change is permanent, logged by class, and pauses only th
     && error.providerErrorClass === 'schema' && !error.providerCooldown);
   await assert.rejects(queryAimlabs(query, {}, 'Unavailable'), error => error.permanent && error.providerCooldown);
   assert.equal(calls, 1);
-  assert.deepEqual(providerHealth(now).unavailableOperations, ['SchemaProbe']);
+  assert.deepEqual(providerHealth(now).unavailableOperations, ['legacy:SchemaProbe']);
   assert.equal(providerHealth(now).state, 'unavailable');
   await assert.rejects(queryAimlabs('query OtherProbe { Trainer { x } }', {}, 'Unavailable'));
   assert.equal(calls, 2);
@@ -72,4 +72,15 @@ test('profile API reports a provider change without asking users to retry', asyn
   await handleAppDataRequest({ method: 'GET' }, response, '/api/profiles/SchemaUser/lookup', new URLSearchParams());
   assert.equal(result.status, 502);
   assert.equal(result.body.error, providerChangedMessage);
+});
+
+test('legacy GraphQL errors sent with 4xx statuses keep their codes and classes', async t => {
+  t.mock.method(globalThis, 'fetch', async (_url, options) => JSON.parse(options.body).query.includes('Denied')
+    ? new Response(JSON.stringify({ errors: [{ message: 'Client is not authorized', extensions: { code: 'UNAUTHORIZED' } }] }), { status: 403 })
+    : new Response(JSON.stringify({ errors: [{ message: 'Cannot query field "latestPlay" on type "AimlabProfile".', extensions: { code: 'GRAPHQL_VALIDATION_FAILED' } }] }), { status: 400 }));
+  await assert.rejects(queryAimlabs('query DeniedProbe { aimlab { plays_agg { count } } }', {}, 'Unavailable'),
+    error => !error.permanent && error.status === undefined && error.providerStatus === 403
+      && error.providerCodes[0] === 'UNAUTHORIZED' && error.providerErrorClass === 'denied');
+  await assert.rejects(queryAimlabs('query RemovedProbe { aimlabProfile { latestPlay } }', {}, 'Unavailable'),
+    error => error.permanent && error.providerMissingField === 'AimlabProfile.latestPlay');
 });
