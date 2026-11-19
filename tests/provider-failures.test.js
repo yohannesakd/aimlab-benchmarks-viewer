@@ -92,3 +92,35 @@ test('a timeout while reading a 200 body stays a retryable timeout', async t => 
   await assert.rejects(queryAimlabs('query SlowBody { aimlabProfile { username } }', {}, 'Unavailable'),
     error => error.name === 'TimeoutError' && error.status === 503);
 });
+
+test('requests beyond the concurrency limit wait in order for a slot, and only a full or expired wait fails', async t => {
+  const pending = [];
+  const started = [];
+  t.mock.method(globalThis, 'fetch', (url, options) => {
+    started.push(JSON.parse(options.body).variables.n);
+    return new Promise(resolve => pending.push(() => resolve(new Response(JSON.stringify({ data: { ok: true } })))));
+  });
+  const query = 'query SlotProbe($n: Int) { ok }';
+  const run = n => queryAimlabs(query, { n }, 'Unavailable');
+  const settle = () => new Promise(resolve => setImmediate(resolve));
+  const requests = Array.from({ length: 4 + 32 }, (_, n) => run(n));
+  await settle();
+  assert.deepEqual(started, [0, 1, 2, 3]);
+  await assert.rejects(run(99), error => error.status === 503 && /busy/.test(error.message));
+  pending.shift()();
+  await requests[0];
+  await settle();
+  assert.deepEqual(started, [0, 1, 2, 3, 4]);
+  while (pending.length) { pending.shift()(); await settle(); }
+  assert.equal((await Promise.all(requests)).length, 36);
+  assert.deepEqual(started, Array.from({ length: 36 }, (_, n) => n));
+
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const held = Array.from({ length: 4 }, (_, n) => run(n));
+  await settle();
+  const waiting = run(4);
+  t.mock.timers.tick(2_000);
+  await assert.rejects(waiting, error => error.status === 503 && /busy/.test(error.message));
+  while (pending.length) { pending.shift()(); await settle(); }
+  await Promise.all(held);
+});
