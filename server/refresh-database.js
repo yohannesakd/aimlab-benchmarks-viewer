@@ -14,6 +14,9 @@ import { benchmarkSets, seasonModes, sortColumnsFor } from './benchmark-registry
 import { collectionIdentityFor, legacyIdentityFor, publicationFor } from './benchmark-publication.js';
 
 const dataDir = resolve(process.env.AIMLAB_DATA_DIR || "data");
+// Aimlabs names about 0.5% of players "Unknown". During the Nov 20 2026 provider incident, it named 85-100% of players "Unknown".
+const UNKNOWN_NAME = "Unknown";
+const MAX_UNKNOWN_SHARE = 0.05;
 
 function openStaging(path, mode, benchmarks, provider) {
   const db = new DatabaseSync(path);
@@ -150,7 +153,7 @@ function scorePlayers(db, mode, benchmarks, onProgress) {
         currentId = row.user_id;
         username = row.username;
         tasks = [];
-      }
+      } else if (username === UNKNOWN_NAME) username = row.username;
       tasks.push({ id: benchmarks[row.scenario].id, weapon: benchmarks[row.scenario].weapon, maxScore: row.score, count: 1 });
     }
     flush();
@@ -189,7 +192,14 @@ export async function refreshDatabase(mode, options = {}) {
     await collectAll(db, benchmarks, options.getPage || ((bench, offset) => fetchLeaderboardPage(bench, offset, { provider })), options.onProgress);
     db.prepare("INSERT OR REPLACE INTO metadata VALUES ('collectionFinishedAt', ?)").run(new Date().toISOString());
     count = scorePlayers(db, mode, benchmarks, options.onProgress);
-  } finally { db.close(); }
+    const unknown = db.prepare("SELECT count(*) AS total FROM players WHERE username = ?").get(UNKNOWN_NAME).total;
+    if (unknown > count * MAX_UNKNOWN_SHARE) {
+      db.close();
+      // Collect again from the start next time: the retained pages hold the bad names.
+      for (const path of [staging, `${staging}-wal`, `${staging}-shm`]) await rm(path, { force: true });
+      throw new Error(`Aimlabs named ${unknown} of ${count} players "${UNKNOWN_NAME}"; kept the published leaderboard`);
+    }
+  } finally { if (db.isOpen) db.close(); }
   await rm(`${staging}-wal`, { force: true });
   await rm(`${staging}-shm`, { force: true });
   await rename(staging, destination);
