@@ -18,6 +18,9 @@ test('SEO preserves benchmark identities, removes tracking/modal queries and rej
   assert.equal(parsePage('/profile/' + 'a'.repeat(65) + '/overview').status, 400);
   assert.equal(parsePage('/benchmarks/voltaic?level=novice&level=advanced').status, 400);
   assert.match(pageMetadata(parsePage('/profile/Fixture/voltaic')).title, /Season 3 Advanced/);
+  const restricted = [{ id: 'legacy', community: 'revosect' }, { id: 'aimlabs_s3', community: 'voltaic' }];
+  assert.match(pageMetadata(parsePage('/profile/Fixture/revosect'), { benchmarkSets: restricted }).title, /Revosect Series 2 Hard/);
+  assert.match(pageMetadata(parsePage('/profile/Fixture/revosect'), { benchmarkSets: [{ id: 'revosect_s4', community: 'revosect' }, ...restricted] }).title, /Revosect Series 4 Hard/);
   assert.ok(!safeJson({ username: '</script><script>alert(1)</script>' }).includes('<'));
 });
 
