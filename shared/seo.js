@@ -48,9 +48,13 @@ export function pageMetadata(page, data = {}) {
   let label = SITE_NAME;
   let description = 'Track Aimlabs player stats and scores. Explore Voltaic and Revosect benchmark ranks, score requirements and leaderboards.';
   const community = communities[page.community];
-  const season = page.benchmark === 'legacy' ? 'Series 2' : page.benchmark === 'revosect_s4' ? 'Series 4' : `Season ${page.benchmark?.slice(-1)}`;
+  // A profile shows the requested set, else the default set, else its first set; restricted profiles have no Revosect Series 4.
+  const available = page.kind === 'player' && data.benchmarkSets?.filter(set => set.community === page.community).map(set => set.id);
+  const benchmark = !available?.length || available.includes(page.benchmark) ? page.benchmark
+    : available.includes(sets[page.community][0]) ? sets[page.community][0] : available[0];
+  const season = benchmark === 'legacy' ? 'Series 2' : benchmark === 'revosect_s4' ? 'Series 4' : `Season ${benchmark?.slice(-1)}`;
   const selection = community ? `${community} ${season} ${titleCase(page.level)}` : '';
-  if (community) { params.set('benchmark', page.benchmark); params.set('level', page.level); }
+  if (community) { params.set('benchmark', benchmark); params.set('level', page.level); }
   switch (page.kind) {
     case 'home': label = 'Aimlabs Stats, Benchmarks & Leaderboards'; break;
     case 'about': label = 'About'; description = 'About Aimlab Tracker, its Aimlabs player statistics, Voltaic and Revosect benchmarks, data sources and privacy.'; break;

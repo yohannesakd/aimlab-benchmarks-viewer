@@ -1,12 +1,14 @@
 import { watch, ref } from 'vue';
 import { parsePage, pageMetadata, SITE_ORIGIN, safeJson } from '../../shared/seo.js';
 
-export function initSeo(router, taskStore, app) {
+export function initSeo(router, taskStore, playerStore, app) {
   const status = ref(app.config.globalProperties.$bootstrap?.status || 200);
   app.config.globalProperties.$setSeoStatus = value => { status.value = value; };
   const update = () => {
     const page = parsePage(router.currentRoute.value.fullPath);
-    const metadata = pageMetadata(page, { task: taskStore.currentTask.id === page.taskId ? taskStore.currentTask : null, status: status.value === 200 ? page.status : status.value });
+    const player = playerStore.currentPlayerInfo.username;
+    const benchmarkSets = player && player.toLowerCase() === page.username?.toLowerCase() ? playerStore.benchmarkSets : null;
+    const metadata = pageMetadata(page, { task: taskStore.currentTask.id === page.taskId ? taskStore.currentTask : null, benchmarkSets, status: status.value === 200 ? page.status : status.value });
     document.title = metadata.title;
     const set = (selector, attributes) => {
       let element = document.head.querySelector(selector);
@@ -24,6 +26,6 @@ export function initSeo(router, taskStore, app) {
   };
   let firstNavigation = true;
   router.afterEach((to, from, failure) => { if (!failure) { if (!firstNavigation) status.value = 200; firstNavigation = false; update(); } });
-  watch([router.currentRoute, () => taskStore.currentTask, status], update);
+  watch([router.currentRoute, () => taskStore.currentTask, () => playerStore.benchmarkSets, status], update);
   void router.isReady().then(update);
 }

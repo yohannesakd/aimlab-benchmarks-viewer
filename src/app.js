@@ -34,7 +34,7 @@ export function createApplication(bootstrap = null) {
     .component('progress-bar', ProgressBar).component('dropdown', Dropdown)
     .component('chevron-icon', ChevronIcon).component('play-icon', PlayIcon)
     .use(router);
-  return { app, router, taskStore, displayZone, clearInitialData() {
+  return { app, router, playerStore, taskStore, displayZone, clearInitialData() {
     bootstrap = null;
     app.config.globalProperties.$bootstrap = null;
   } };
