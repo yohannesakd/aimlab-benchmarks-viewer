@@ -147,3 +147,30 @@ test('season API pages and filters cannot mix six- and nine-group standings', as
     await rm(dataDir, { recursive: true, force: true });
   }
 });
+
+test("a refresh keeps the published leaderboard when Aimlabs sends mostly unknown names", async () => {
+  const dataDir = await mkdtemp(join(tmpdir(), "aimlab-unknown-names-"));
+  const players = Array.from({ length: 20 }, (_, index) => `player-${index}`);
+  const pageWith = name => async bench => ({ metadata: { totalRows: players.length },
+    data: players.map(id => ({ user_id: id, username: name(id, bench), score: bench.scores.at(-1) })) });
+  const usernames = () => {
+    const db = new DatabaseSync(join(dataDir, "ra-hard.sqlite"), { readOnly: true });
+    try { return db.prepare("SELECT username FROM players ORDER BY user_id").all().map(row => row.username); }
+    finally { db.close(); }
+  };
+  try {
+    // Only the first scenario names player-0; the other scenarios send "Unknown".
+    const first = benchmarkSets["ra-hard"][0].id;
+    await refreshDatabase("ra-hard", { dataDir, getPage: pageWith((id, bench) => id === "player-0" && bench.id !== first ? "Unknown" : id) });
+    const published = usernames();
+    assert.equal(published.includes("Unknown"), false);
+
+    await assert.rejects(refreshDatabase("ra-hard", { dataDir, getPage: pageWith(() => "Unknown") }), /named 20 of 20 players "Unknown"/);
+    assert.deepEqual(usernames(), published);
+    // The bad pages are not resumed: the next refresh collects again.
+    await refreshDatabase("ra-hard", { dataDir, getPage: pageWith(id => `${id}-renamed`) });
+    assert.ok(usernames().every(name => name.endsWith("-renamed")));
+  } finally {
+    await rm(dataDir, { recursive: true, force: true });
+  }
+});
